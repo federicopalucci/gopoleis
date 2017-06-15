@@ -1,0 +1,36 @@
+<resources>
+    <string name="facebook_app_id">621653938002925</string>
+    <string name="app_name">GoPoleis</string>
+    //
+    <string name="treasure">TREASURE</string>
+    <string name="portal">PORTAL</string>
+    <string name="cards_list">CARDS LIST</string>
+    <string name="achievement_list">ACHIEVEMENT LIST</string>
+
+    <string name="spin">Choose a structure</string>
+    <string name="textLogin">Login</string>
+    <string name="textCancel">Cancel</string>
+    <string name="register">Register Here</string>
+    <string name="etPassword">Password</string>
+    <string name="etEmail">Email</string>
+    <string name="user_login">User Login</string>
+    <string name="register_account">Register</string>
+    <string name="etConfirmPass">Confirm Password</string>
+    <string name="user_register">Register a new account</string>
+    <string name="cancel_login">Operazione annullata</string>
+    <string name="error_login">Errore nel login!</string>
+    <string name="logout">Logout</string>
+
+
+    <string name="title_travel">Travel Portal</string>
+    <!-- <string name="google_maps_key">AIzaSyCqEkdkjEv2l9kvTV74woCIHzb98EmSD6s</string>-->
+
+    <string name="title_puzzle">Puzzle \n Portal </string>
+    <string name="empty_puzz_list">There are no active puzzles to visualize! </string>
+    <string name="empty_inc_puzz_list">There are no incoming puzzles! </string>
+
+    <!--<string name="server_url">http://10.0.2.2:8000/</string>-->
+    <string name="server_url">http://77.81.226.246:8000/</string>
+    <string name="gopoleis">GoPoleis</string>
+
+</resources>

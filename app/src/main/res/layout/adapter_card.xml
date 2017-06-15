@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/card"
+        android:id="@+id/card_icon"
+        android:layout_marginStart="19dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true"
+        android:background="@android:color/transparent"/>
+
+    <TextView
+        android:id="@+id/card_code"
+        android:layout_width="wrap_content"
+        android:layout_height="10dp"
+        android:text= "code"
+        android:textSize="9sp"
+        android:layout_centerVertical="true"
+        android:layout_alignBottom="@+id/card_icon"
+        android:layout_marginLeft="50dp"
+        android:layout_marginBottom="5dp"
+        android:textColor="@android:color/transparent"
+       />
+
+
+    <RelativeLayout
+        android:layout_width="180dp"
+        android:layout_height="85dp"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/card_icon">
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="10dp"
+            android:id="@+id/valore_costo"
+            android:text= "va"
+            android:textSize="9sp"
+            android:layout_below="@+id/nome"
+            android:layout_toEndOf="@+id/costo"
+            android:layout_marginStart="7dp"
+            android:layout_alignBottom="@+id/costo" />
+
+        <TextView
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/nome"
+            android:text= "nome"
+            android:textSize="15dp"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="10dp"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:id="@+id/costo"
+            android:text= "Cost:"
+            android:textSize="9sp"
+            android:layout_below="@+id/nome"
+            android:layout_alignParentStart="true" />
+
+        <ScrollView
+            android:layout_width="170dp"
+            android:layout_height="40dp"
+            android:id="@+id/ScrollView"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/costo">
+
+            <TextView
+                android:layout_width="160dp"
+                android:layout_height="60dp"
+                android:id="@+id/d"
+                android:textSize="10dp"
+                android:text="textView"
+               />
+        </ScrollView>
+
+    </RelativeLayout>
+
+</RelativeLayout>

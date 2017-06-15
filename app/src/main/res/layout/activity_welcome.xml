@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Welcome!"
+        android:id="@+id/welcome"
+        android:textSize="60sp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="150dp"
+        android:gravity="center_horizontal"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="70dp" />
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/comando"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Effettuare il login per accedere al gioco.."
+        android:textSize="30sp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_centerInParent="false"
+        android:gravity="center"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="278dp"
+        android:layout_height="wrap_content"
+        android:text="Go to login!"
+        android:id="@+id/go_to_login"
+        android:layout_marginTop="62dp"
+        android:layout_alignWithParentIfMissing="false"
+        android:layout_below="@+id/comando"
+        android:layout_centerHorizontal="true" />
+
+
+</RelativeLayout>

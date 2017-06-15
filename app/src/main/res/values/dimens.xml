@@ -1,0 +1,23 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+
+    <!--pagina principale-->
+    <dimen name="title_size">40sp</dimen>
+    <dimen name="title_bottom_margin">20dp</dimen>
+    <dimen name="title_top_margin">5dp</dimen>
+    <dimen name="table_row_margin_size">5dp</dimen>
+    <dimen name="portal_width">135dp</dimen>
+    <dimen name="portals_margin_size">90dp</dimen>
+    <dimen name="logo_width_height_size">90dp</dimen>
+    <dimen name="logo_margin_size">5dp</dimen>
+    <dimen name="face_icon_margin_size">15dp</dimen>
+    <dimen name="login_register_margin_size">10dp</dimen>
+    <dimen name="login_text_size">20dp</dimen>
+    <dimen name="width_height_activity_logo">90dp</dimen>
+    <dimen name="logout_margin_size">10dp</dimen>
+
+    <dimen name="padding_portal">5dp</dimen>
+</resources>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <RelativeLayout xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        tools:context=".activities.TreasurePortalPag1"
+        android:orientation="vertical"
+        android:id="@+id/treasure_portal_page1"
+        android:gravity="center"
+        android:layout_gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/treasure"
+            android:textSize="@dimen/title_size"
+            android:id="@+id/treasure"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+       <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/portal"
+            android:textSize="@dimen/title_size"
+            android:id="@+id/portal"
+            android:layout_below="@+id/treasure"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentTop="false"
+            android:layout_alignWithParentIfMissing="false" />
+
+        <ImageButton
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:id="@+id/achieve"
+            android:src="@android:drawable/btn_star_big_on"
+            android:background="@android:color/transparent"
+            android:scaleType="fitCenter"
+            android:padding="15dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="10dp" />
+
+        <ImageButton
+            android:id="@+id/cards_list_image"
+            android:layout_weight="1"
+            android:src="@drawable/cards_icon"
+            android:background="@android:color/transparent"
+            android:layout_width="85dp"
+            android:layout_height="96dp"
+            android:adjustViewBounds="true"
+            android:padding="15dp"
+            android:scaleType="fitCenter"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="20dp" />
+
+        <ImageButton
+            android:id="@+id/mycards_list_image"
+            android:layout_weight="1"
+            android:src="@drawable/card"
+            android:background="@android:color/transparent"
+            android:layout_width="85dp"
+            android:layout_height="96dp"
+            android:adjustViewBounds="true"
+            android:padding="15dp"
+            android:scaleType="fitCenter"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="122dp"
+
+            />
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/portal"
+            android:layout_marginTop="18dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/lens"
+                android:src="@drawable/lens"
+                android:layout_weight="5"
+                android:background="@android:color/transparent"
+                android:layout_width="match_parent"
+                android:layout_height="280dp"
+                android:layout_centerHorizontal="true" />
+
+            <Spinner
+                android:id="@+id/spinner_menu"
+                android:layout_height="50dp"
+                android:background="@android:drawable/btn_dropdown"
+                android:spinnerMode="dropdown"
+                android:contextClickable="true"
+                android:layout_width="150dp"
+                android:layout_marginLeft="120dp"
+                android:layout_marginTop="80dp"
+                 />
+
+        </RelativeLayout>
+
+
+
+
+    </RelativeLayout>
+
+</ScrollView>
