@@ -1,115 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <RelativeLayout xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/treasure_portal_page1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        tools:context=".activities.TreasurePortalPag1"
-        android:orientation="vertical"
-        android:id="@+id/treasure_portal_page1"
-        android:gravity="center"
-        android:layout_gravity="center">
+        tools:context=".activities.TreasurePortalPag1">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/treasure"
-            android:textSize="@dimen/title_size"
             android:id="@+id/treasure"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
-
-       <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/portal"
-            android:textSize="@dimen/title_size"
-            android:id="@+id/portal"
-            android:layout_below="@+id/treasure"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="false"
-            android:layout_alignWithParentIfMissing="false" />
-
-        <ImageButton
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:id="@+id/achieve"
-            android:src="@android:drawable/btn_star_big_on"
-            android:background="@android:color/transparent"
-            android:scaleType="fitCenter"
-            android:padding="15dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="10dp" />
-
-        <ImageButton
-            android:id="@+id/cards_list_image"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:src="@drawable/cards_icon"
+            android:text="@string/treasure"
+            android:textAlignment="center"
+            android:textSize="@dimen/title_size" />
+
+        <ImageView
+            android:id="@+id/lens"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
             android:background="@android:color/transparent"
-            android:layout_width="85dp"
-            android:layout_height="96dp"
-            android:adjustViewBounds="true"
-            android:padding="15dp"
-            android:scaleType="fitCenter"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="20dp" />
+            android:src="@drawable/lens" />
 
-        <ImageButton
-            android:id="@+id/mycards_list_image"
-            android:layout_weight="1"
-            android:src="@drawable/card"
-            android:background="@android:color/transparent"
-            android:layout_width="85dp"
-            android:layout_height="96dp"
-            android:adjustViewBounds="true"
-            android:padding="15dp"
-            android:scaleType="fitCenter"
-            android:layout_alignParentBottom="true"
-            android:layout_marginLeft="122dp"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-            />
-
-
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/portal"
-            android:layout_marginTop="18dp"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:id="@+id/lens"
-                android:src="@drawable/lens"
-                android:layout_weight="5"
+            <ImageButton
+                android:id="@+id/achieve"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:background="@android:color/transparent"
-                android:layout_width="match_parent"
-                android:layout_height="280dp"
-                android:layout_centerHorizontal="true" />
+                android:padding="14dp"
+                android:scaleType="fitCenter"
+                android:src="@android:drawable/btn_star_big_on" />
 
-            <Spinner
-                android:id="@+id/spinner_menu"
-                android:layout_height="50dp"
-                android:background="@android:drawable/btn_dropdown"
-                android:spinnerMode="dropdown"
-                android:contextClickable="true"
-                android:layout_width="150dp"
-                android:layout_marginLeft="120dp"
-                android:layout_marginTop="80dp"
-                 />
+            <ImageButton
+                android:id="@+id/mycards_list_image"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:padding="15dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/card" />
 
-        </RelativeLayout>
+            <ImageButton
+                android:id="@+id/cards_list_image"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:padding="15dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/cards_icon" />
 
+        </LinearLayout>
 
+    </LinearLayout>
 
+    <Spinner
+        android:id="@+id/spinner_menu"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
+        android:layout_centerInParent="true"
+        android:background="@android:drawable/btn_dropdown"
+        android:contextClickable="true"
+        android:spinnerMode="dropdown" />
 
-    </RelativeLayout>
-
-</ScrollView>
+</RelativeLayout>

@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -22,245 +24,198 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.anna.neptis.R;
+import com.example.anna.neptis.defines.GameManager;
 import com.facebook.CallbackManager;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.TwitterAuthProvider;
+import com.twitter.sdk.android.core.Callback;
+import com.twitter.sdk.android.core.Result;
+import com.twitter.sdk.android.core.TwitterAuthConfig;
+import com.twitter.sdk.android.core.TwitterException;
+import com.twitter.sdk.android.core.TwitterSession;
+import com.twitter.sdk.android.core.identity.TwitterAuthClient;
+import com.twitter.sdk.android.core.identity.TwitterLoginButton;
+import com.twitter.sdk.android.core.internal.TwitterApi;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static android.content.ContentValues.TAG;
 
-public class LoginDialogActivity extends Activity {
-    //utilizziamo queste 2 variabili per individuare gli eventi sul bottone di loginFacebook
-    private LoginButton loginButton;
-    private CallbackManager callbackManager;
-    public static boolean flag_login_session = false;
-    private String url;
-    private String user;
-    private String pass;
-    private String session_result="";
-    private final static String SESSION = "session";
-    private final static String CURRENT_SESSION = "current_session";
 
-    //private User u;//current_user
+public class LoginDialogActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+    private TwitterLoginButton twitterLoginButton;
+
+    private FirebaseAuth mAuth;
+
+    private GoogleApiClient mGoogleApiClient;
+    private static final int RC_SIGN_IN = 9001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_login_socials_only);
 
+        mAuth = FirebaseAuth.getInstance();
 
-        final EditText username = (EditText)findViewById(R.id.regEmail);
-        final EditText password = (EditText)findViewById(R.id.regPassword);
-        final TextView registerLink = (TextView)findViewById(R.id.registerHere);
-
-
-        /*******gestione click bottone Login with facebook********/
-        /*
-        callbackManager = CallbackManager.Factory.create();
-        loginButton = (LoginButton) findViewById(R.id.loginButton);
-
-        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+        // Twitter Login Button -----------------------------------------------------------------
+        twitterLoginButton = (TwitterLoginButton) findViewById(R.id.twitter_login_button);
+        twitterLoginButton.setCallback(new Callback<TwitterSession>() {
             @Override
-            public void onSuccess(LoginResult loginResult) {
-                flag_login_session = true;
+            public void success(Result<TwitterSession> result) {
+                // Do something with result, which provides a TwitterSession for making API calls
+                GameManager.getInstance().getUser().setTwitterSession(result.data);
                 goMainScreen();
+                handleTwitterSession(result.data);
             }
 
             @Override
-            public void onCancel() {
-                Toast.makeText(getApplicationContext(), R.string.cancel_login, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onError(FacebookException error) {
-                Toast.makeText(getApplicationContext(), R.string.error_login, Toast.LENGTH_SHORT).show();
+            public void failure(TwitterException exception) {
+                // Do something on failure
             }
         });
-        */
-        /*******fine gestione click bottone Login with facebook********/
+        // --------------------------------------------------------------------------------------
 
+        // Google Login Button ------------------------------------------------------------------
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
 
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
 
-        /*******gestione click sui bottoni Login e Cancel********/
-        Button bLogin = (Button)findViewById(R.id.bLogin);
-
-        bLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                user = username.getText().toString();
-                pass = password.getText().toString();
-
-               // u= new User(user);
-
-                /***********_______START TEMPLATE JSON REQUEST________**********/
-
-                RequestQueue queue = Volley.newRequestQueue(LoginDialogActivity.this);
-                url = getString(R.string.server_url) + "checkUser/"+user+"/"+pass+"/";
-                // Request a string response from the provided URL.
-
-                Log.d("url= ",url);
-
-                JsonArrayRequest jsObject = new JsonArrayRequest(Request.Method.GET, url,null, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        JSONObject obj_log = null;
-                        int isLog = 0;
-                        try {
-                            obj_log = response.getJSONObject(0);
-                            Log.d("log result: ",obj_log.toString());
-                            isLog = obj_log.getInt("EXISTS (SELECT * from User where email='"+user+"' and password='"+ pass+"')");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        if (isLog==1) {
-                            Toast.makeText(LoginDialogActivity.this, "Autenticazione avvenuta con successo!", Toast.LENGTH_LONG).show();
-
-
-                            // REGISTRA CHIAVE DI SESSIONE
-                            createSessionToken(user,pass);
-
-                            //l'activity si apre dopo un certo tempo (dopo che è terminato l'insert della chiave di sessione)
-                            Handler mHandler = new Handler();
-                            mHandler.postDelayed(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    //start your activity here
-                                    getSessionToken(user);
-                                }
-
-                            }, 1000L);
-
-                        }else {Toast.makeText(LoginDialogActivity.this, "User inesistente! Ricontrollare i dati inseriti.", Toast.LENGTH_LONG).show();}
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("Error: ",error.toString());
-                        Toast.makeText(LoginDialogActivity.this,"Errore di autenticazione",Toast.LENGTH_LONG).show();
-                    }
-                });
-                // Add the request to the RequestQueue.
-                queue.add(jsObject);
-                /***********_______END TEMPLATE JSON REQUEST________**********/
-
-
-            }
-        });
-
-        //bottone Cancel --> utilizzato per resettare i dati inseriti
-        Button bCancel = (Button)findViewById(R.id.bCancel);
-
-        bCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                username.setText("");
-                password.setText("");
-            }
-        });
-        /*******fine gestione click sui bottoni Login e Cancel********/
-
-
-
-
-        /*******gestione click su TextView Register here********/
-        registerLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent openRegisterPage = new Intent(LoginDialogActivity.this,RegisterActivity.class);
-                startActivity(openRegisterPage);
-            }
-        });
-        /*******fine gestione click su TextView Register here********/
-
-
+        findViewById(R.id.google_sign_in_button).setOnClickListener(this);
+        // --------------------------------------------------------------------------------------
     }
 
-    private void goMainScreen() {
-        flag_login_session = true;
-        Intent openPortalPage = new Intent();
-        openPortalPage.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
-        setResult(Activity.RESULT_OK,openPortalPage);
-        finish();
-
-    }
-
-    private void createSessionToken(String e, String p){
-        RequestQueue queue = Volley.newRequestQueue(LoginDialogActivity.this);
-        url = getString(R.string.server_url) +"createSession/"+e+"/"+p+"/";
-        // Request a string response from the provided URL.
-        Log.d("url= ",url);
-        JsonObjectRequest jsObject = new JsonObjectRequest(Request.Method.GET, url,null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("Volley error:", error.toString());
-            }
-        });
-        // Add the request to the RequestQueue.
-        queue.add(jsObject);
-        /***********_______END TEMPLATE JSON REQUEST________**********/
-    }
-
-    private void getSessionToken(String e){
-        RequestQueue queue = Volley.newRequestQueue(LoginDialogActivity.this);
-        url = getString(R.string.server_url) + "getSession/"+e+"/";
-        // Request a string response from the provided URL.
-        Log.d("url= ",url);
-        JsonArrayRequest jsObject = new JsonArrayRequest(Request.Method.GET, url,null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    JSONObject obj_sess = response.getJSONObject(0);
-                    session_result = obj_sess.getString("session");
-                    Log.d("get session token :",session_result);
-
-                    //////////////////
-                    //SALVA CHIAVE SESSIONE IN PREFERENZE
-                    //////////////////
-                    SharedPreferences prefs = getSharedPreferences(SESSION, Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString(CURRENT_SESSION, session_result);
-                    editor.apply();
-
-                    Intent returnMain = new Intent(LoginDialogActivity.this, PortalsMainActivity.class);
-                    //setResult(RESULT_OK,returnMain);
-                    startActivity(returnMain);
-                    //finish();
-
-                    //returnMain.putExtra("user",u.getEmail());
-                    //returnMain.putExtra("password",u.getPassword());
-                    //returnMain.putExtra("accedi",Boolean.toString(true));
-
-                } catch (JSONException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("Volley error:", error.toString());
-            }
-        });
-        // Add the request to the RequestQueue.
-        queue.add(jsObject);
-        /***********_______END TEMPLATE JSON REQUEST________**********/
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null)
+            Log.d("CURRENT USER", currentUser.toString());
     }
 
     @Override
     protected void onActivityResult(int requestCode,int resultCode, Intent data){
         super.onActivityResult(requestCode,resultCode,data);
-        callbackManager.onActivityResult(requestCode,resultCode,data);
+
+        if (requestCode == TwitterAuthConfig.DEFAULT_AUTH_REQUEST_CODE) {
+            twitterLoginButton.onActivityResult(requestCode, resultCode, data);
+        }
+
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
     }
 
-    /*public static boolean getFlagLogin(){
-        return flag_login_session;
-    }*/
+    private void handleSignInResult(GoogleSignInResult result) {
+        if (result.isSuccess()) {
+            GoogleSignInAccount acct = result.getSignInAccount();
+            GameManager.getInstance().getUser().setGoogleSignInAccount(acct);
+            firebaseAuthWithGoogle(acct);
+            goMainScreen();
+        } else {
+            // Signed out, show unauthenticated UI.
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.google_sign_in_button:
+                signIn();
+                break;
+        }
+    }
+
+    private void signIn() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void handleTwitterSession(TwitterSession session) {
+        AuthCredential credential = TwitterAuthProvider.getCredential(
+                session.getAuthToken().token,
+                session.getAuthToken().secret);
+
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInWithCredential:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            if (user != null)
+                                Log.d("CURRENT USER", user.toString());
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            Toast.makeText(LoginDialogActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInWithCredential:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            //updateUI(user);
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            Toast.makeText(LoginDialogActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                            //updateUI(null);
+                        }
+                    }
+                });
+    }
+
+    private void goMainScreen() {
+        Intent openPortalPage = new Intent();
+        openPortalPage.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP| Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        setResult(Activity.RESULT_OK,openPortalPage);
+        finish();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    void OnConnectionFailed(ConnectionResult result){
+        Log.d("GOOGLE API ERR", result.getErrorMessage());
+    }
 
 }

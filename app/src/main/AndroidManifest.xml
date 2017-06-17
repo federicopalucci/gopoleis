@@ -57,7 +57,7 @@
         <activity
             android:name=".activities.LoginDialogActivity"
             android:parentActivityName=".activities.PortalsMainActivity"
-            android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar" />
+            android:theme="@style/LoginDialogTheme" />
         <activity android:name=".activities.PuzzlePortal" />
         <activity android:name=".activities.Achievements" />
         <activity android:name=".activities.ShowPuzzle" />

@@ -21,6 +21,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.anna.neptis.R;
+import com.example.anna.neptis.defines.GameManager;
 import com.example.anna.neptis.defines.User;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -105,7 +106,7 @@ public class PortalsMainActivity extends AppCompatActivity {
 
                 } else {
                     Intent openYellowPortal = new Intent(PortalsMainActivity.this, TreasurePortalPag1.class);
-                    openYellowPortal.putExtra("user",current_user.getEmail());
+                    //openYellowPortal.putExtra("user",current_user.getEmail());
                     openYellowPortal.putExtra("tutorial",flag_tutorial);
                     startActivity(openYellowPortal);
                 }
@@ -129,7 +130,7 @@ public class PortalsMainActivity extends AppCompatActivity {
 
                 } else {
                     Intent openGreenPortal = new Intent(PortalsMainActivity.this, TravelPortalActivity.class);
-                    openGreenPortal.putExtra("user",current_user.getEmail());
+                    //openGreenPortal.putExtra("user",current_user.getEmail());
                     startActivity(openGreenPortal);
                 }
             }
@@ -148,7 +149,7 @@ public class PortalsMainActivity extends AppCompatActivity {
                     startActivityForResult(openRedPortal, RQ_CODE);
                 } else {
                     Intent openRedPortal = new Intent(PortalsMainActivity.this, PuzzlePortal.class);
-                    openRedPortal.putExtra("user",current_user.getEmail());
+                    //openRedPortal.putExtra("user",current_user.getEmail());
                     startActivity(openRedPortal);
                 }
             }
@@ -171,7 +172,7 @@ public class PortalsMainActivity extends AppCompatActivity {
 
     }
 
-
+/*
     public void getUserByToken(String pre){
         RequestQueue queue = Volley.newRequestQueue(PortalsMainActivity.this);
         urlToken = getString(R.string.server_url)+"getUserFromSession/"+pre+"/";
@@ -203,12 +204,11 @@ public class PortalsMainActivity extends AppCompatActivity {
 
         // Add the request to the RequestQueue.
         queue.add(jsArray);
-        /***********_______END TEMPLATE JSON REQUEST________**********/
+        /***********_______END TEMPLATE JSON REQUEST________**********
 
 
     }
-
-
+*/
 
     @Override
     protected void onResume(){
@@ -220,9 +220,15 @@ public class PortalsMainActivity extends AppCompatActivity {
         Log.d("Pref salvat on resume: ",pre);
         //////////////////////////////
 
-        getUserByToken(pre);
-        if(pre.equals("")) {
+        //getUserByToken(pre);
+
+        boolean hasDoneTutorial = prefs.getBoolean("hasDoneTutorial", false);
+
+        if(pre.equals("") && !hasDoneTutorial) {
             tutorial();
+            SharedPreferences.Editor prefsEditor = prefs.edit();
+            prefsEditor.putBoolean("hasDoneTutorial", true);
+            prefsEditor.commit();
         }
 
     }
@@ -298,7 +304,17 @@ public class PortalsMainActivity extends AppCompatActivity {
         if (requestCode == RQ_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 Log.d("Accedi ok: ", "Accedi ok");
-                getUserByToken(pre);
+                //getUserByToken(pre);
+                GameManager gm = GameManager.getInstance();
+                if (gm.getUser().isLoggedWithGoogle()) {
+                    utente_loggato.setText(gm.getUser().getGoogleSignInAccount().getDisplayName());
+                }
+                else if (gm.getUser().isLoggedWithTwitter()){
+                    utente_loggato.setText(gm.getUser().getTwitterSession().getUserName());
+                }
+                else if (gm.getUser().isLoggedWithFacebook()){
+                    utente_loggato.setText("fb");
+                }
             }
         }
     }
