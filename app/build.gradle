@@ -3,7 +3,6 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 24
     buildToolsVersion '25.0.0'
-    useLibrary 'org.apache.http.legacy' //aggiunto
 
     defaultConfig {
         applicationId "com.example.anna.neptis"
@@ -11,7 +10,6 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
-        // Enabling multidex support.
         multiDexEnabled true
     }
     buildTypes {
@@ -24,27 +22,19 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    //aggiunto
-    //aggiunto
-    //per volley
-    compile project(path: ':volley')
-    compile project(path: ':volley')
 
-    // Include all the Twitter APIs
-    // compile 'com.twitter.sdk.android:twitter:3.0.0'
-
+    compile("com.twitter.sdk.android:twitter-core:3.0.0@aar") { transitive = true }
     compile 'com.android.support:appcompat-v7:24.0.0'
-    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
-    compile 'com.google.android.gms:play-services:10.0.1'
-    compile 'com.google.maps.android:android-maps-utils:0.3.+'
+    compile 'com.facebook.android:facebook-android-sdk:4.22.1'
+    compile 'com.google.android.gms:play-services-auth:11.0.1'
+    compile 'com.google.android.gms:play-services-location:11.0.1'
+    compile 'com.google.android.gms:play-services-maps:11.0.1'
+    compile 'com.google.maps.android:android-maps-utils:0.5'
     compile 'com.android.volley:volley:1.0.0'
     compile 'junit:junit:4.12'
     compile 'com.android.support:multidex:1.0.1'
-    compile 'com.twitter.sdk.android:twitter-core:3.0.0'
-    compile 'com.google.firebase:firebase-auth:10.0.1'
-    compile 'com.google.android.gms:play-services-auth:10.0.1'
+    compile 'com.firebaseui:firebase-ui-auth:2.0.1'
     testCompile 'junit:junit:4.12'
 }
-
 
 apply plugin: 'com.google.gms.google-services'

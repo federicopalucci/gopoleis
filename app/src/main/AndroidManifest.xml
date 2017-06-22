@@ -21,15 +21,12 @@
         android:allowBackup="true"
         android:icon="@drawable/logo"
         android:label="@string/app_name"
+        android:screenOrientation="portrait"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:screenOrientation="portrait">
+        android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-        <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id" />
 
         <activity
             android:name=".activities.PortalsMainActivity"
@@ -40,24 +37,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.CardInfoActivity" />
         <activity
             android:name=".activities.TreasurePortalPag1"
             android:parentActivityName=".activities.PortalsMainActivity" />
         <activity
             android:name=".activities.TreasurePortalPag2"
             android:parentActivityName=".activities.TreasurePortalPag1" />
-        <activity android:name=".activities.RegisterActivity" />
         <activity
             android:name=".activities.TravelPortalActivity"
             android:parentActivityName=".activities.PortalsMainActivity" />
         <activity
             android:name=".activities.MedalsActivity"
             android:parentActivityName=".activities.TravelPortalActivity" />
-        <activity
-            android:name=".activities.LoginDialogActivity"
-            android:parentActivityName=".activities.PortalsMainActivity"
-            android:theme="@style/LoginDialogTheme" />
         <activity android:name=".activities.PuzzlePortal" />
         <activity android:name=".activities.Achievements" />
         <activity android:name=".activities.ShowPuzzle" />
@@ -69,6 +60,7 @@
             android:name=".activities.PuzzleAnswerActivity"
             android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar" />
         <activity android:name=".activities.ShowMyPuzzles" />
+        <activity android:name=".activities.CardDetailsActivity" />
     </application>
 
 </manifest>

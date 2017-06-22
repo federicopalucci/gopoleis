@@ -1,14 +1,19 @@
 package com.example.anna.neptis.activities;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -18,7 +23,17 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.anna.neptis.R;
-import com.example.anna.neptis.defines.ObjTesoro;
+import com.example.anna.neptis.defines.GameManager;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -28,358 +43,313 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.maps.android.SphericalUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+public class TreasurePortalPag2 extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
-public class TreasurePortalPag2 extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnMarkerClickListener {
+    private static final String TAG = "TreasurePortalPag2";
 
     private final static int CAMERA_REQUEST_CODE = 1;
+    private static final int LOCATION_SETTINGS_CHECK_REQUEST_CODE = 2;
     private static GoogleMap mMap;
+    // 2km range
+    private static final int RANGE_METERS = 3 * 100;
 
-    String heritage;//= getIntent().getExtras().getString("heritage")
-    String url,url2;
-    String latitudine;
-    String longitudine;
-    String code,lat,lon,info;//attributi di ObjTesoro
-    //int found;//per i tesori
-    List list; //lista dei tesori presenti nell'heritage passato come parametro
+    String heritageName, heritageInfo, heritageLatitude, heritageLongitude;
+    LatLng heritageLatLng;
+    String tempTreasureLat, tempTreasureLon, tempTreasureCode;
 
-    String user;
-    String game;
+    String url, url2, urlCheckFound;
 
-
-
+    String game1SessionCode;
 
     private MarkerOptions options = new MarkerOptions();
-    private ArrayList<LatLng> latlngs = new ArrayList<>();
-    ListView tesori;
+
+    LocationRequest mLocationRequest;
+    Location playerLocation;
+    LatLng playerLatLng;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_treasure_portal_pag2);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
 
-       // getGameCode();
-        String game = getIntent().getExtras().getString("game");
+        game1SessionCode = GameManager.getInstance().getGame1SessionCode();
+
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+        SettingsClient client = LocationServices.getSettingsClient(this);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                Log.d(TAG, "locationSettingsResponse onSuccess called");
+                getPlayerLocation();
+            }
+        });
+
+        task.addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                int statusCode = ((ApiException) e).getStatusCode();
+                switch (statusCode) {
+                    case CommonStatusCodes.RESOLUTION_REQUIRED:
+                        Log.d(TAG, "need resolution");
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            ResolvableApiException resolvable = (ResolvableApiException) e;
+                            resolvable.startResolutionForResult(TreasurePortalPag2.this,
+                                    LOCATION_SETTINGS_CHECK_REQUEST_CODE);
+                        } catch (IntentSender.SendIntentException sendEx) {
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way
+                        // to fix the settings so we won't show the dialog.
+                        break;
+                }
+            }
+        });
     }
 
-
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
 
-       // getGameCode();
-        Log.d("ON RESUME: ","ok");
-        user = getIntent().getExtras().getString("user");
-        game = getIntent().getExtras().getString("game");
-        heritage = getIntent().getExtras().getString("heritage");
-
-        //Log.d("CODICE GAME: ",game);
+        heritageName = getIntent().getExtras().getString("heritageName");
+        getHeritageInfo();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-
-
-        /*___________________________gestione TESORI all'interno della scrollbar______________________*/
-        //tesori = (ListView) findViewById(R.id.list_treasures);
-
-
-
-        list = new LinkedList<ObjTesoro>();
-
-        //***********_______TEMPLATE JSON REQUEST________**********
-        // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
-        String spaces = heritage.replace(" ","%20");
-        url2 = getString(R.string.server_url)+"getTreasureElements/" + spaces + "/";
-
-        Log.d("url= ",url2);
-
-        // Request a string response from the provided URL.
-        JsonArrayRequest jsTreasureElements = new JsonArrayRequest(Request.Method.GET, url2,null, new Response.Listener<JSONArray>() {
+        String spaces = heritageName.replace(" ", "%20");
+        url2 = getString(R.string.server_url) + "getTreasureElements/" + spaces + "/";
+        JsonArrayRequest jsTreasureElements = new JsonArrayRequest(Request.Method.GET, url2, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
                     int contLength = response.length();
-                    for(int i = 0;i< contLength;i++) {
-                        //int j = 1;
+                    for (int i = 0; i < contLength; i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        code = jsObj.getString("code");
-                        lat = jsObj.getString("latitude");
-                        lon = jsObj.getString("longitude");
-                        info = jsObj.getString("info");
-                        //found = jsObj.getInt("found");
-                        Log.d("CODICE TESORO INIZIO: ",code);
-                        //Log.d("TROVATO: ",Integer.toString(found));
-
-
-                        latlngs.add(new LatLng(Double.parseDouble(lat),Double.parseDouble(lon))); //some latitude and logitude value
-
-                        LatLng point = latlngs.get(i);
-
-
-                        options.position(point);
-
-                        options.title(code);
+                        tempTreasureLat = jsObj.getString("latitude");
+                        tempTreasureLon = jsObj.getString("longitude");
+                        tempTreasureCode = jsObj.getString("code");
+                        options.position(new LatLng(Double.parseDouble(tempTreasureLat), Double.parseDouble(tempTreasureLon)));
+                        options.title(tempTreasureCode);
                         options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                         mMap.addMarker(options);
-                        mMap.setOnMarkerClickListener(TreasurePortalPag2.this);//click su marker
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                        /*list.add(new ObjTesoro(code,lat,lon,info,user));//aggiungere found(value)
-                        TreasureAdapter adapter = new TreasureAdapter(TreasurePortalPag2.this, R.layout.adapter_treasure, list);
-                        tesori.setAdapter(adapter);*/
+                        mMap.setOnMarkerClickListener(TreasurePortalPag2.this);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("That didn't work!",error.toString());
+                Log.d("That didn't work!", error.toString());
             }
         });
 
-
-
-        // Add the request to the RequestQueue.
         queue.add(jsTreasureElements);
 
-
-        /***********_______END TEMPLATE JSON REQUEST________**********/
-
-
-            /*__________________________fine gestione gridView all'interno della scrollbar________________________*/
-
-
-        //gestione click su fotocamera
-        ImageButton camera = (ImageButton)findViewById(R.id.camera_image);
+        // Manage camera button
+        ImageButton camera = (ImageButton) findViewById(R.id.camera_image);
         camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Intent openCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(openCamera,CAMERA_REQUEST_CODE);
-                    /*Toast toast = Toast.makeText(view.getContext(),"Camera ImageButton",Toast.LENGTH_SHORT);
-                    toast.show();*/
+                startActivityForResult(openCamera, CAMERA_REQUEST_CODE);
+            }
+        });
 
-
-            }});
-
-        /*__________________gestione bottone SITE INFORMATION____________________*/
-        Button siteInformation = (Button)findViewById(R.id.site_information);
+        // Manage site information button
+        Button siteInformation = (Button) findViewById(R.id.site_information);
         siteInformation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Toast toast = Toast.makeText(view.getContext(),"Site Information Button",Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(view.getContext(), heritageInfo, Toast.LENGTH_LONG);
                 toast.show();
-
-
-            }});
-        /*__________________fine gestione bottone SITE INFORMATION____________________*/
-
-
-
-
-    }
-
-
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-
-    LatLng herit;
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-
-        /***********_______START TEMPLATE JSON REQUEST________**********/
-        mMap = googleMap;
-        RequestQueue queue = Volley.newRequestQueue(TreasurePortalPag2.this);
-        String spaces = heritage.replace(" ","%20");
-        url = getString(R.string.server_url)+ "getCoordinatesHeritage/"+spaces+"/";
-
-        Log.d("url= ",url);
-
-        JsonArrayRequest jsCoordinates = new JsonArrayRequest(Request.Method.GET, url,null, new Response.Listener<JSONArray>() {
-                @Override
-                public void onResponse(JSONArray response) {
-                    try {
-                        int contLength = response.length();
-                        for(int i = 0;i< contLength;i++) {
-                            JSONObject jsObj = (JSONObject) response.get(i);
-                            latitudine = jsObj.getString("latitude");
-                            longitudine = jsObj.getString("longitude");
-                            //Log.d("VERIFICA LATITUDINE ",latitudine);
-                            //Log.d("VERIFICA LONGITUDINE ",longitudine);
-
-                            herit = new LatLng(Double.parseDouble(latitudine),Double.parseDouble(longitudine));
-                            //mMap.addMarker(new MarkerOptions().position(herit).title(heritage).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))); //aggiungere
-
-                            mMap.addMarker(new MarkerOptions().position(herit).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))); //aggiungere
-                            CameraPosition cameraPosition = new CameraPosition.Builder().target(herit).zoom(17).build();
-                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("That didn't work!",error.toString());
             }
         });
-        // Add the request to the RequestQueue.
-        queue.add(jsCoordinates);
-
-        /***********_______END TEMPLATE JSON REQUEST________**********/
     }
 
-    private static final int RANGE_METERS = 3 * 100;//raggio di 2km
-    String urlCheckFound;
-    LatLng pos;
-    Intent openTreasureFound;
+    private void getPlayerLocation() {
+        FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(TreasurePortalPag2.this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        Log.d(TAG, "getLastLocation onSuccess called");
+                        if (location != null) {
+                            Log.d(TAG, "player location acquired");
+                            playerLocation = location;
+                        }
+                    }
+                });
+    }
 
+    private void getHeritageInfo() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String heritageNameNoSpaces = heritageName.replace(" ", "%20");
+        String url3 = getString(R.string.server_url) + "getHeritageInfo/" + heritageNameNoSpaces + "/";
+        JsonArrayRequest heritageInfoRequest = new JsonArrayRequest(Request.Method.GET, url3, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    int contLength = response.length();
+                    for (int i = 0; i < contLength; i++) {
+                        JSONObject jsObj = (JSONObject) response.get(i);
+                        heritageInfo = jsObj.getString("info");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
 
-    //implementazione click sui marker relativi ai tesori (da escludere il marker dell'heritage-renderlo non cliccabile)
+        queue.add(heritageInfoRequest);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        RequestQueue queue = Volley.newRequestQueue(TreasurePortalPag2.this);
+        String spaces = heritageName.replace(" ", "%20");
+        url = getString(R.string.server_url) + "getCoordinatesHeritage/" + spaces + "/";
+        JsonArrayRequest jsCoordinates = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    int contLength = response.length();
+                    for (int i = 0; i < contLength; i++) {
+                        JSONObject jsObj = (JSONObject) response.get(i);
+                        heritageLatitude = jsObj.getString("latitude");
+                        heritageLongitude = jsObj.getString("longitude");
+                        heritageLatLng = new LatLng(Double.parseDouble(heritageLatitude), Double.parseDouble(heritageLongitude));
+                        mMap.addMarker(new MarkerOptions().title("heritageName").position(heritageLatLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+                        CameraPosition cameraPosition = new CameraPosition.Builder().target(heritageLatLng).zoom(17).build();
+                        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
+
+        queue.add(jsCoordinates);
+    }
+
     @Override
     public boolean onMarkerClick(final Marker marker) {
-        pos = marker.getPosition();
+        if (marker.getTitle().equals("heritageName")) return true;
+
+        LatLng treasurePosition = marker.getPosition();
         final String code_treas = marker.getTitle();
 
-        //NOTA:la distanza bisogna calcolarla tra posizione utente e marker cliccato non tra herit e marker cliccato
-        //modificare dopo aver implementato la ricerca della posizione utente
-        boolean inRange = SphericalUtil.computeDistanceBetween(pos, herit) < RANGE_METERS;
-
-        //se il marker rientra nel range e il forziere non è stato ancora trovato, apre il forziere e mostra le carte
-        if (inRange) {
-
-            RequestQueue queue4 = Volley.newRequestQueue(this);
-            urlCheckFound = getString(R.string.server_url)+"checkTreasureFound/" + code_treas + "/" + game + "/";
-
-            Log.d("url= ", urlCheckFound);
-
-            // Request a string response from the provided URL.
-            JsonArrayRequest jsTreasFound = new JsonArrayRequest(Request.Method.GET, urlCheckFound,null, new Response.Listener<JSONArray>() {
-                @Override
-                public void onResponse(JSONArray response) {
-                    JSONObject obj_found = null;
-                    int found = 0;
-                    try {
-                        obj_found = response.getJSONObject(0);
-                        Log.d("found result: ",obj_found.toString());
-                        found = obj_found.getInt("EXISTS(SELECT * from Gt where treasure='"+code_treas+"' AND game1='"+ game +"')");
-                        Log.d("FOUND? ",Integer.toString(found));
-
-                        if(found == 1){//se il tesoro è in GT(trovato-posseduto dallo user)
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                            openTreasureFound = new Intent(TreasurePortalPag2.this, TreasureFound.class);//cambiare activity
-                            openTreasureFound.putExtra("user", user);
-                            openTreasureFound.putExtra("heritage",heritage);
-                            openTreasureFound.putExtra("codice_tesoro",code_treas);
-                            openTreasureFound.putExtra("game",game);
-                            startActivity(openTreasureFound);
-
-                        }else{//se il tesoro non è posseduto dallo user
-
-                            Intent openTreasNotFound = new Intent(TreasurePortalPag2.this,TreasureNotFoundActivity.class);
-                            openTreasNotFound.putExtra("user",user);
-                            openTreasNotFound.putExtra("codice_tesoro",code_treas);
-                            openTreasNotFound.putExtra("game",game);
-                            openTreasNotFound.putExtra("heritage",heritage);
-                            startActivity(openTreasNotFound);
-
+        if (playerLocation != null) {
+            playerLatLng = new LatLng(playerLocation.getLatitude(), playerLocation.getLongitude());
+            // TODO change treasure distance computation parameters
+            boolean inRange = SphericalUtil.computeDistanceBetween(treasurePosition, heritageLatLng) <= RANGE_METERS;
+            //boolean inRange = SphericalUtil.computeDistanceBetween(playerLatLng, treasurePosition) <= RANGE_METERS;
+            if (inRange) {
+                RequestQueue queue4 = Volley.newRequestQueue(this);
+                urlCheckFound = getString(R.string.server_url) + "checkTreasureFound/" + code_treas + "/" + game1SessionCode + "/";
+                JsonArrayRequest jsTreasFound = new JsonArrayRequest(Request.Method.GET, urlCheckFound, null, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        JSONObject obj_found;
+                        try {
+                            obj_found = response.getJSONObject(0);
+                            int found = obj_found.getInt("EXISTS(SELECT * from Gt where treasure='" + code_treas + "' AND game1='" + game1SessionCode + "')");
+                            if (found == 1) {
+                                Intent openTreasureFound = new Intent(TreasurePortalPag2.this, TreasureFound.class);
+                                openTreasureFound.putExtra("heritageName", heritageName);
+                                openTreasureFound.putExtra("codice_tesoro", code_treas);
+                                startActivity(openTreasureFound);
+                            } else {
+                                Intent openTreasureNotFound = new Intent(TreasurePortalPag2.this, TreasureNotFoundActivity.class);
+                                openTreasureNotFound.putExtra("codice_tesoro", code_treas);
+                                openTreasureNotFound.putExtra("heritageName", heritageName);
+                                startActivity(openTreasureNotFound);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.toString());
+                    }
+                });
 
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d("Error: ",error.toString());
-
-                }
-            });
-            // Add the request to the RequestQueue.
-            queue4.add(jsTreasFound);
-            /***********_______END TEMPLATE JSON REQUEST________**********/
-
-        } else {
-            Toast.makeText(TreasurePortalPag2.this, "Sei troppo lontano dal tesoro. Avvicinati!", Toast.LENGTH_LONG).show();
+                queue4.add(jsTreasFound);
+            } else {
+                Toast.makeText(TreasurePortalPag2.this, getString(R.string.too_far), Toast.LENGTH_LONG).show();
+            }
         }
-
+        else{
+            Log.d(TAG, "playerLocation null");
+            Toast.makeText(TreasurePortalPag2.this, getString(R.string.need_location_permission), Toast.LENGTH_LONG).show();
+        }
         return true;
-
     }
 
     @Override
-    public void onBackPressed() {
-        Intent openParentActivity = getParentActivityIntent();
-        openParentActivity.putExtra("user",user);
-        openParentActivity.putExtra("game",game);
-        startActivity(openParentActivity);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
+            Toast.makeText(this, getString(R.string.photo_taken), Toast.LENGTH_LONG).show();
+        }
 
-    }
-
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode,Intent data) {
-
-        if (requestCode == CAMERA_REQUEST_CODE && resultCode== RESULT_OK){
-            Toast.makeText(this,"camera ok!",Toast.LENGTH_LONG).show();
+        if (requestCode == LOCATION_SETTINGS_CHECK_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Log.d(TAG, "location services enabled");
+                getPlayerLocation();
+            }
+            else {
+                Log.d(TAG, "location services not enabled");
+                Toast.makeText(this, getString(R.string.need_location_permission), Toast.LENGTH_LONG).show();
+            }
         }
     }
-
-
-    //stava in onMarkerClick dopo intent ch apre treasureInfo Activity
-    /***********_______START TEMPLATE JSON REQUEST________**********/
-    /*RequestQueue queue = Volley.newRequestQueue(TreasurePortalPag2.this);
-    //Log.d("CODICE MARKER:",code_treas);
-    urlUpdate = "http://10.0.2.2:8000/updateFoundTreas/" + code_treas + "/" + user + "/";
-
-    Log.d("url= ", urlUpdate);
-    JsonObjectRequest jsFoundTreas = new JsonObjectRequest(Request.Method.GET, urlUpdate, null, new Response.Listener<JSONObject>() {
-        @Override
-        public void onResponse(JSONObject response) {
-
-            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-            Toast.makeText(TreasurePortalPag2.this, "Trovato nuovo tesoro!", Toast.LENGTH_SHORT).show();
-
-
-        }
-    }, new Response.ErrorListener() {
-        @Override
-        public void onErrorResponse(VolleyError error) {
-            Log.d("Volley error:", error.toString());
-        }
-    });
-    // Add the request to the RequestQueue.
-    queue.add(jsFoundTreas);*/
-
 
 }

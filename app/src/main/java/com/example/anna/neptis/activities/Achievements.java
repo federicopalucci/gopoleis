@@ -25,6 +25,8 @@ import java.util.List;
 
 public class Achievements extends AppCompatActivity {
 
+    private static final String TAG = "Achievements";
+
     TextView title;
     ListView list_achieve;
 
@@ -37,90 +39,46 @@ public class Achievements extends AppCompatActivity {
     String achiev_name;
     String achiev_description;
 
-
     @Override
-    public void onCreate(Bundle savedInstanceState){
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        id = getIntent().getExtras().getString("game");
         setContentView(R.layout.activity_achievements);
 
+        id = getIntent().getExtras().getString("gameNumber");
         title = (TextView) findViewById(R.id.l_achievements_title);
         list_achieve = (ListView) findViewById(R.id.list_achievements);
 
-        //***********_______TEMPLATE JSON REQUEST________**********
-        // Instantiate the RequestQueue.
+        // Retrieve achievements
         RequestQueue queue = Volley.newRequestQueue(this);
-        switch(id){
+        switch (id) {
             case "game1":
-                url = getString(R.string.server_url) + "getAchievementGame1/"; break;
-
+                url = getString(R.string.server_url) + "getAchievementGame1/";
+                break;
             case "game2":
-                url = getString(R.string.server_url) + "getAchievementGame2/"; break;
-
+                url = getString(R.string.server_url) + "getAchievementGame2/";
+                break;
             case "game3":
-                url = getString(R.string.server_url) + "getAchievementGame1/"; break;
-
+                url = getString(R.string.server_url) + "getAchievementGame1/";
+                break;
             case "game4":
-                url = getString(R.string.server_url) + "getAchievementGame1/"; break;
-
-            default: break;
+                url = getString(R.string.server_url) + "getAchievementGame1/";
+                break;
+            default:
+                break;
         }
 
-        //***********_______START TEMPLATE JSON REQUEST________**********
-        JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url,null, new Response.Listener<JSONArray>() {
+        JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 // Display the first 500 characters of the response string.
                 int contLength = response.length();
-                try{
-                    for(int i = 0;i< contLength;i++){
-                        JSONObject jsObj = (JSONObject)response.get(i);
-
-                        code = jsObj.getString("achievement");
-                        Log.d("Code: ",code);
-                        url2 = getString(R.string.server_url) +"getAchievementElements/" + code + "/";
-                        Log.d("url2: ",url2);
-                        getAchievElements(code,url2);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("That didn't work!",error.toString());
-            }
-        });
-
-        // Add the request to the RequestQueue.
-        queue.add(jsArray);
-        //***********_______END TEMPLATE JSON REQUEST________**********
-
-    }
-
-
-    public void getAchievElements(final String code,String url2){
-        JsonArrayRequest jsAchievElements = new JsonArrayRequest(Request.Method.GET, url2, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                // Display the first 500 characters of the response string.
                 try {
-                    Log.d("code achiev: ",code);
-                    JSONObject jsObj =  response.getJSONObject(0);
-                    achiev_name = jsObj.getString("name");
-                    Log.d("name achiev: ",achiev_name);
-                    achiev_description = jsObj.getString("description");
-                    Log.d("description achiev: ",achiev_description);
-
-                    achiev_code = code;
-
-                    list_active.add(new ObjAchievement(achiev_code, achiev_name, achiev_description));
-
-                    ArrayAdapterAchievement adapter = new ArrayAdapterAchievement(Achievements.this, android.R.layout.simple_list_item_1, list_active);
-                    list_achieve.setAdapter(adapter);
-
+                    for (int i = 0; i < contLength; i++) {
+                        JSONObject jsObj = (JSONObject) response.get(i);
+                        code = jsObj.getString("achievement");
+                        url2 = getString(R.string.server_url) + "getAchievementElements/" + code + "/";
+                        getAchievementElements(code, url2);
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -132,7 +90,33 @@ public class Achievements extends AppCompatActivity {
             }
         });
 
-        // Add the request to the RequestQueue.
+        queue.add(jsArray);
+    }
+
+    public void getAchievementElements(final String code, String url2) {
+        // TODO should implement a column "unlocked" in DB
+        JsonArrayRequest jsAchievElements = new JsonArrayRequest(Request.Method.GET, url2, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    JSONObject jsObj = response.getJSONObject(0);
+                    achiev_name = jsObj.getString("name");
+                    achiev_description = jsObj.getString("description");
+                    achiev_code = code;
+                    list_active.add(new ObjAchievement(achiev_code, achiev_name, achiev_description));
+                    ArrayAdapterAchievement adapter = new ArrayAdapterAchievement(Achievements.this, android.R.layout.simple_list_item_1, list_active);
+                    list_achieve.setAdapter(adapter);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("That didn't work!", error.toString());
+            }
+        });
+
         Volley.newRequestQueue(getApplicationContext()).add(jsAchievElements);
     }
 

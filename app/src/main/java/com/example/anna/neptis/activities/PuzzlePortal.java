@@ -170,7 +170,7 @@ public class PuzzlePortal extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent goto_a = new Intent(PuzzlePortal.this, Achievements.class);
-                goto_a.putExtra("game", "game3");
+                goto_a.putExtra("game1SessionCode", "game3");
                 startActivity(goto_a);
             }
         });

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">GoPoleis</string>
+    <string name="achievement_list">ACHIEVEMENTS LIST</string>
+    <string name="available_puzzles">Available puzzles:</string>
+    <string name="cancel_login">Cancelled</string>
+    <string name="cards_list">CARDS LIST</string>
+    <string name="done_log_out">Logged-out</string>
+    <string name="empty_inc_puzz_list">There are no upcoming puzzles!</string>
+    <string name="empty_puzz_list">There are no available puzzles!</string>
+    <string name="error_login">Log-in error</string>
+    <string name="etConfirmPass">Confirm password</string>
+    <string name="etEmail">Email</string>
+    <string name="logged_in_as">Logged in as: %1$s</string>
+    <string name="or">------------------------ OR --------------------------</string>
+    <string name="please_log_in">Please log-in</string>
+    <string name="portal">PORTAL</string>
+    <string name="register">Register here</string>
+    <string name="register_account">Register</string>
+    <string name="spin">Choose a structure</string>
+    <string name="textCancel">Cancel</string>
+    <string name="title_puzzle">PUZZLE PORTAL</string>
+    <string name="title_travel">TRAVEL PORTAL</string>
+    <string name="treasure">TREASURE PORTAL</string>
+    <string name="upcoming_puzzles">Upcoming puzzles:</string>
+    <string name="user_login">User login</string>
+    <string name="user_register">Register a new account</string>
+    <string name="card_details_cost">Cost: %1$s</string>
+    <string name="site_information">Site information</string>
+    <string name="photo_taken">Photo taken!</string>
+    <string name="too_far">You\'re too far, get closer!</string>
+    <string name="need_location_permission">Accesso to location is necessary</string>
+    <string name="network_error">No network connection</string>
+    <string name="unknown_error">Unknown error</string>
+</resources>
