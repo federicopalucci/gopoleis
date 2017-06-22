@@ -85,20 +85,9 @@
             android:layout_marginTop="8dp"
             />
 
-        <TextView
-            android:id="@+id/nome_user"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:layout_toRightOf="@+id/accesso"
-            android:layout_alignParentBottom="true"
-            android:textSize="12sp"
-        />
-
         <ImageButton
             android:layout_height="23dp"
             android:layout_width="23dp"
-            android:onClick="logout"
             android:id="@+id/logout_icon"
             android:src="@drawable/exit_logout"
             android:scaleType="centerCrop"

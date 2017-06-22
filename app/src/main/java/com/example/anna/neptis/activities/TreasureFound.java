@@ -59,8 +59,8 @@ public class TreasureFound extends AppCompatActivity {
 
         user = getIntent().getExtras().getString("user");
         treasure_code = getIntent().getExtras().getString("codice_tesoro");
-        game = getIntent().getExtras().getString("game");
-        heritage = getIntent().getExtras().getString("heritage");
+        game = getIntent().getExtras().getString("game1SessionCode");
+        heritage = getIntent().getExtras().getString("heritageName");
 
 
         go_to_map = (Button)findViewById(R.id.go_to_map);
@@ -69,8 +69,8 @@ public class TreasureFound extends AppCompatActivity {
             public void onClick(View v) {
                 openTreasPortalPag2 = new Intent(v.getContext(),TreasurePortalPag2.class);
                 openTreasPortalPag2.putExtra("user",user);
-                openTreasPortalPag2.putExtra("heritage",heritage);
-                openTreasPortalPag2.putExtra("game",game);
+                openTreasPortalPag2.putExtra("heritageName",heritage);
+                openTreasPortalPag2.putExtra("game1SessionCode",game);
                 startActivity(openTreasPortalPag2);
             }
 
@@ -101,8 +101,8 @@ public class TreasureFound extends AppCompatActivity {
                     for (int i = 0; i < contLength; i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
                         t_info = jsObj.getString("info");
-                        t_lat = jsObj.getString("latitude");
-                        t_lon = jsObj.getString("longitude");
+                        t_lat = jsObj.getString("heritageLatitude");
+                        t_lon = jsObj.getString("heritageLongitude");
 
                         info.setText(t_info);
                         latitude.setText(t_lat);

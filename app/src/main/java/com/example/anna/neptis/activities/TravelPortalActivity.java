@@ -79,7 +79,7 @@ public class TravelPortalActivity extends FragmentActivity implements OnMapReady
             @Override
             public void onClick(View view) {
                 Intent openAchivement = new Intent(TravelPortalActivity.this, Achievements.class);
-                openAchivement.putExtra("game","game2");
+                openAchivement.putExtra("game1SessionCode","game2");
                 startActivity(openAchivement);
             }
         });

@@ -1,5 +1,4 @@
 <resources xmlns:android="http://schemas.android.com/tools">
-    <string name="facebook_app_id">621653938002925</string>
     <string name="app_name">GoPoleis</string>
     //
     <string name="treasure">PORTALE DEI TESORI</string>
@@ -8,10 +7,10 @@
     <string name="achievement_list">LISTA DEGLI ACHIEVEMENT</string>
 
     <string name="spin">Scegli una struttura</string>
-    <string name="textLogin">Login</string>
+    <string name="textLogin" translatable="false">Login</string>
     <string name="textCancel">Annulla</string>
     <string name="register">Registrati qui</string>
-    <string name="etPassword">Password</string>
+    <string name="etPassword" translatable="false">Password</string>
     <string name="etEmail">Email</string>
     <string name="user_login">Login utente</string>
     <string name="register_account">Registrati</string>
@@ -19,9 +18,14 @@
     <string name="user_register">Registra un nuovo account</string>
     <string name="cancel_login">Operazione annullata</string>
     <string name="error_login">Errore nel login!</string>
-    <string name="logout">Logout</string>
-    <string name="or">------------------------ OR --------------------------</string>
-
+    <string name="logout" translatable="false">Log-out</string>
+    <string name="or">------------------------ O --------------------------</string>
+    <string name="logged_in_as">Accesso eseguito come: %1$s</string>
+    <string name="please_log_in">Eseguire l\'accesso</string>
+    <string name="done_log_out">Log-out effettuato</string>
+    <string name="card_details_cost">Costo: %1$s</string>
+    <string name="photo_taken">Foto scattata!</string>
+    <string name="too_far">Sei troppo lontano, avvicinati!</string>
 
     <string name="title_travel">PORTALE DEI VIAGGI</string>
     <!-- <string name="google_maps_key">AIzaSyCqEkdkjEv2l9kvTV74woCIHzb98EmSD6s</string>-->
@@ -31,14 +35,23 @@
     <string name="empty_inc_puzz_list">Non ci sono puzzle in programmazione!</string>
 
     <!--<string name="server_url">http://10.0.2.2:8000/</string>-->
-    <string name="server_url">http://77.81.226.246:8000/</string>
-    <string name="gopoleis">GoPoleis</string>
+    <string name="server_url" translatable="false">http://77.81.226.246:8000/</string>
+    <string name="gopoleis" translatable="false">GoPoleis</string>
 
     <string name="available_puzzles">Enigmi disponibili:</string>
     <string name="upcoming_puzzles">Enigmi in preparazione:</string>
 
     <!-- Twitter API -->
-    <string name="com.twitter.sdk.android.CONSUMER_KEY">Cj86YafdhuMfED5OJANW5ArnO</string>
-    <string name="com.twitter.sdk.android.CONSUMER_SECRET">0dMjDVBVpNOjOCxVHwhstHQhRA2tSd111Dj4D080HEFrDTrERp</string>
+    <string name="com.twitter.sdk.android.CONSUMER_KEY" translatable="false">Cj86YafdhuMfED5OJANW5ArnO</string>
+    <string name="com.twitter.sdk.android.CONSUMER_SECRET" translatable="false">0dMjDVBVpNOjOCxVHwhstHQhRA2tSd111Dj4D080HEFrDTrERp</string>
+
+    <!-- Facebook API -->
+    <string name="facebook_application_id" translatable="false">231506257356189</string>
+    <!-- Facebook Application ID, prefixed by 'fb'.  Enables Chrome Custom tabs. -->
+    <string name="facebook_login_protocol_scheme" translatable="false">fb231506257356189</string>
+    <string name="site_information">Informazioni sul sito</string>
+    <string name="need_location_permission">L\'accesso alla posizione è necessario</string>
+    <string name="network_error">Nessuna connessione internet</string>
+    <string name="unknown_error">Errore sconosciuto</string>
 
 </resources>

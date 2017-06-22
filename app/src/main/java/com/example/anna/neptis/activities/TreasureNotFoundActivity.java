@@ -14,9 +14,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.anna.neptis.R;
-import com.example.anna.neptis.activities.TreasureInfoActivity;
+import com.example.anna.neptis.defines.GameManager;
 import com.example.anna.neptis.defines.ObjTesoro;
 
 import org.json.JSONArray;
@@ -32,19 +33,17 @@ import java.util.List;
 
 public class TreasureNotFoundActivity extends AppCompatActivity {
 
-    String url,url2;
-    String t_lat, t_lon, t_info;//attributi di Tesoro
+    private static final String TAG = "TreasureNotFoundAct";
 
-    String user;
+    String url, url2;
+    //attributi di Tesoro
+    String t_lat, t_lon, t_info;
     String treasure_code;
-    String game;
-    String heritage;
+    String game1SessionCode;
+    String heritageName;
 
-    TextView info;
-    TextView latitude;
-    TextView longitude;
-    Button open_treas;
-    List treasure_list;
+    TextView info, latitude, longitude;
+    Button open_treasure;
 
     Intent openTreasInfoActivity;
 
@@ -53,82 +52,63 @@ public class TreasureNotFoundActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.treasure_not_found);
 
-        user = getIntent().getExtras().getString("user");
+        game1SessionCode = GameManager.getInstance().getGame1SessionCode();
+
         treasure_code = getIntent().getExtras().getString("codice_tesoro");
-        game = getIntent().getExtras().getString("game");
-        heritage = getIntent().getExtras().getString("heritage");
+
+        heritageName = getIntent().getExtras().getString("heritageName");
 
         info = (TextView) findViewById(R.id.t_info_not_found);
         latitude = (TextView) findViewById(R.id.t_lat_val_not_found);
         longitude = (TextView) findViewById(R.id.t_lon_val_not_found);
 
-
-
         //bottone openTreasure
-        open_treas = (Button)findViewById(R.id.open_treas);
-        open_treas.setOnClickListener(new View.OnClickListener() {
+        open_treasure = (Button) findViewById(R.id.open_treas);
+        open_treasure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                //una volta cliccato sul bottone open_treas
-                //aggiungo il tesoro a GT e apro di nuovo TreasureInfoActivity passandogli game e user
+                //una volta cliccato sul bottone open_treasure
+                //aggiungo il tesoro a GT e apro di nuovo TreasureInfoActivity passandogli game1SessionCode
                 RequestQueue queue = Volley.newRequestQueue(v.getContext());
-                url2 = getString(R.string.server_url)+"addTreasToGame1/" + treasure_code + "/"+ game+"/";
-
-                Log.d("url= ", url2);
+                url2 = getString(R.string.server_url) + "addTreasToGame1/" + treasure_code + "/" + game1SessionCode + "/";
 
                 // Request a string response from the provided URL.
-                JsonArrayRequest jsAddTreasToGame = new JsonArrayRequest(Request.Method.GET, url2, null, new Response.Listener<JSONArray>() {
+                JsonObjectRequest jsAddTreasToGame = new JsonObjectRequest(Request.Method.GET, url2, null, new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(JSONArray response) {
+                    public void onResponse(JSONObject response) {
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d("That didn't work!", error.toString());
+                        Log.d(TAG, error.toString());
                     }
                 });
+
                 queue.add(jsAddTreasToGame);
 
-
-
-
-                openTreasInfoActivity = new Intent(v.getContext(),TreasureInfoActivity.class);
+                openTreasInfoActivity = new Intent(v.getContext(), TreasureInfoActivity.class);
 
                 Handler mHandler = new Handler();
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        openTreasInfoActivity.putExtra("user",user);
-                        openTreasInfoActivity.putExtra("game",game);
-                        openTreasInfoActivity.putExtra("codice_tesoro",treasure_code);
-                        openTreasInfoActivity.putExtra("heritage",heritage);
+                        openTreasInfoActivity.putExtra("codice_tesoro", treasure_code);
+                        openTreasInfoActivity.putExtra("heritageName", heritageName);
+                        openTreasInfoActivity.putExtra("info", t_info);
+                        openTreasInfoActivity.putExtra("latitude", t_lat);
+                        openTreasInfoActivity.putExtra("longitude", t_lon);
                         startActivity(openTreasInfoActivity);
                     }
                 }, 1000L);
-
-
             }
 
 
         });
 
-
-
-        treasure_list = new LinkedList<ObjTesoro>();
-        //***********_______TEMPLATE JSON REQUEST________**********
-        // Instantiate the RequestQueue.
-
-        //set_trovato = Integer.parseInt(getIntent().getExtras().getString("trovato"));
-
+        // Get treasure info
         RequestQueue queue = Volley.newRequestQueue(this);
-        url = getString(R.string.server_url)+"getInfoTreasure/" + treasure_code + "/";
+        url = getString(R.string.server_url) + "getInfoTreasure/" + treasure_code + "/";
 
-        //Log.d("codice tesoro: ", treasure_code);
-
-        Log.d("url= ", url);
-
-        // Request a string response from the provided URL.
         JsonArrayRequest jsInfoTreasure = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
@@ -139,12 +119,9 @@ public class TreasureNotFoundActivity extends AppCompatActivity {
                         t_info = jsObj.getString("info");
                         t_lat = jsObj.getString("latitude");
                         t_lon = jsObj.getString("longitude");
-
                         info.setText(t_info);
                         latitude.setText(t_lat);
                         longitude.setText(t_lon);
-
-                        treasure_list.add(new ObjTesoro(treasure_code, t_lat, t_lon, t_info, user));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -153,13 +130,11 @@ public class TreasureNotFoundActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("That didn't work!", error.toString());
+                Log.d(TAG, error.toString());
             }
         });
+
         queue.add(jsInfoTreasure);
-
-        /***********_______END TEMPLATE JSON REQUEST________**********/
-
-
     }
+
 }
