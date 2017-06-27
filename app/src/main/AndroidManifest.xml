@@ -17,7 +17,7 @@
         android:required="true" />
 
     <application
-        android:name="it.neptis.gopoleis.GopoleisApp"
+        android:name=".GopoleisApp"
         android:allowBackup="true"
         android:icon="@drawable/logo"
         android:label="@string/app_name"
@@ -29,7 +29,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name="it.neptis.gopoleis.activities.PortalsMainActivity"
+            android:name=".activities.PortalsMainActivity"
             android:label="GoPoleis">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,29 +38,27 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="it.neptis.gopoleis.activities.TreasurePortalPag1Activity"
-            android:parentActivityName="it.neptis.gopoleis.activities.PortalsMainActivity" />
+            android:name=".activities.TreasurePortalPag1Activity"
+            android:parentActivityName=".activities.PortalsMainActivity" />
         <activity
-            android:name="it.neptis.gopoleis.activities.TreasurePortalPag2Activity"
-            android:parentActivityName="it.neptis.gopoleis.activities.TreasurePortalPag1Activity" />
+            android:name=".activities.TreasurePortalPag2Activity"
+            android:parentActivityName=".activities.TreasurePortalPag1Activity" />
         <activity
-            android:name="it.neptis.gopoleis.activities.TravelPortalActivity"
-            android:parentActivityName="it.neptis.gopoleis.activities.PortalsMainActivity" />
+            android:name=".activities.TravelPortalActivity"
+            android:parentActivityName=".activities.PortalsMainActivity" />
         <activity
-            android:name="it.neptis.gopoleis.activities.MedalsActivity"
-            android:parentActivityName="it.neptis.gopoleis.activities.TravelPortalActivity" />
-        <activity android:name="it.neptis.gopoleis.activities.PuzzlePortalActivity" />
-        <activity android:name="it.neptis.gopoleis.activities.AchievementsActivity" />
-        <activity android:name="it.neptis.gopoleis.activities.ShowPuzzleActivity" />
-        <activity android:name="it.neptis.gopoleis.activities.ManageCardsActivity" />
-        <activity android:name="it.neptis.gopoleis.activities.TreasureInfoActivity" />
-        <activity android:name="it.neptis.gopoleis.activities.TreasureNotFoundActivity" />
-        <activity android:name="it.neptis.gopoleis.activities.TreasureFoundActivity" />
+            android:name=".activities.MedalsActivity"
+            android:parentActivityName=".activities.TravelPortalActivity" />
+        <activity android:name=".activities.PuzzlePortalActivity" />
+        <activity android:name=".activities.AchievementsActivity" />
+        <activity android:name=".activities.ShowPuzzleActivity" />
+        <activity android:name=".activities.ManageCardsActivity" />
         <activity
-            android:name="it.neptis.gopoleis.activities.PuzzleAnswerActivity"
+            android:name=".activities.PuzzleAnswerActivity"
             android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar" />
-        <activity android:name="it.neptis.gopoleis.activities.ShowMyPuzzlesActivity" />
-        <activity android:name="it.neptis.gopoleis.activities.CardDetailsActivity" />
+        <activity android:name=".activities.ShowMyPuzzlesActivity" />
+        <activity android:name=".activities.CardDetailsActivity" />
+        <activity android:name=".activities.TreasureActivity"></activity>
     </application>
 
 </manifest>
