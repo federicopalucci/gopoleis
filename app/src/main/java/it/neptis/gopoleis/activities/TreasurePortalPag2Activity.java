@@ -269,15 +269,17 @@ public class TreasurePortalPag2Activity extends FragmentActivity implements OnMa
                                 Iterator<String> iterator = jsObj.keys();
                                 while (iterator.hasNext()) {
                                     String tempKey = iterator.next();
-                                    Intent toTreasureActivity = new Intent(TreasurePortalPag2Activity.this, TreasureActivity.class);
-                                    toTreasureActivity.putExtra("codice_tesoro", code_treas);
-                                    toTreasureActivity.putExtra("heritageName", heritageName);
                                     if (jsObj.getInt(tempKey) == 0) {
-                                        toTreasureActivity.putExtra("found", false);
+                                        Intent openTreasureNotFound = new Intent(TreasurePortalPag2Activity.this, TreasureNotFoundActivity.class);
+                                        openTreasureNotFound.putExtra("codice_tesoro", code_treas);
+                                        openTreasureNotFound.putExtra("heritageName", heritageName);
+                                        startActivity(openTreasureNotFound);
                                     } else {
-                                        toTreasureActivity.putExtra("found", true);
+                                        Intent openTreasureFound = new Intent(TreasurePortalPag2Activity.this, TreasureFoundActivity.class);
+                                        openTreasureFound.putExtra("heritageName", heritageName);
+                                        openTreasureFound.putExtra("codice_tesoro", code_treas);
+                                        startActivity(openTreasureFound);
                                     }
-                                    startActivity(toTreasureActivity);
                                 }
                             }
                         } catch (JSONException e) {
