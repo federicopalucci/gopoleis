@@ -14,16 +14,6 @@
         android:layout_below="@+id/t_lon_val_found"
         android:layout_marginTop="70dp" />
 
-    <Button
-        android:id="@+id/go_to_map"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/avviso"
-        android:layout_marginTop="15dp"
-        android:text="Torna alla mappa" />
-
-
     <TextView
         android:id="@+id/t_lat_found"
         android:layout_width="wrap_content"
@@ -80,8 +70,5 @@
         android:layout_alignStart="@+id/t_lat_val_found"
         android:layout_marginStart="27dp"
         android:layout_marginTop="23dp" />
-
-
-
 
 </RelativeLayout>

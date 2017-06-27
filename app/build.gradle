@@ -5,7 +5,7 @@ android {
     buildToolsVersion '25.0.0'
 
     defaultConfig {
-        applicationId "com.example.anna.neptis"
+        applicationId "it.neptis.gopoleis"
         minSdkVersion 19
         targetSdkVersion 24
         versionCode 1

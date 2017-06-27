@@ -13,7 +13,7 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        tools:context=".activities.TreasurePortalPag1">
+        tools:context="it.neptis.gopoleis.activities.TreasurePortalPag1Activity">
 
         <TextView
             android:id="@+id/treasure"

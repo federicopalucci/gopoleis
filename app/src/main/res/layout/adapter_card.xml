@@ -58,7 +58,7 @@
             android:layout_alignParentStart="true"
             android:layout_below="@+id/nome"
             android:scrollbarAlwaysDrawVerticalTrack="true"
-            android:text="Cost:"
+            android:text="@string/card_cost_adapter"
             android:textSize="9sp" />
 
         <TextView

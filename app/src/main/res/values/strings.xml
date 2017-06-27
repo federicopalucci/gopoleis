@@ -53,5 +53,6 @@
     <string name="need_location_permission">L\'accesso alla posizione è necessario</string>
     <string name="network_error">Nessuna connessione internet</string>
     <string name="unknown_error">Errore sconosciuto</string>
+    <string name="card_cost_adapter">Costo:</string>
 
 </resources>

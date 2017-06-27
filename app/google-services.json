@@ -8,17 +8,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:17491503324:android:fd7245a549a8543d",
+        "mobilesdk_app_id": "1:17491503324:android:d0629a963f149fc4",
         "android_client_info": {
-          "package_name": "com.example.anna.neptis"
+          "package_name": "it.neptis.gopoleis"
         }
       },
       "oauth_client": [
         {
-          "client_id": "17491503324-k8c1nmqe0b0rlas6vukue9656bcqngkb.apps.googleusercontent.com",
+          "client_id": "17491503324-tul97db3j16j9v76apes2q1ol0e70505.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.anna.neptis",
+            "package_name": "it.neptis.gopoleis",
             "certificate_hash": "82cf5bdfc3d368cc8257d2781a8eccb450fb7b0c"
           }
         },
