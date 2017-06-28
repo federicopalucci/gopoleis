@@ -54,5 +54,9 @@
     <string name="network_error">Nessuna connessione internet</string>
     <string name="unknown_error">Errore sconosciuto</string>
     <string name="card_cost_adapter">Costo:</string>
+    <string name="treasure_latitude">Latitudine: %1$s</string>
+    <string name="treasure_longitude">Longitudine: %1$s</string>
+    <string name="open_treasure">Apri il forziere!</string>
+    <string name="treasure_found">Hai già trovato questo tesoro.\nCercane altri!</string>
 
 </resources>

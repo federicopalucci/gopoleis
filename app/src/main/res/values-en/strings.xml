@@ -33,4 +33,8 @@
     <string name="network_error">No network connection</string>
     <string name="unknown_error">Unknown error</string>
     <string name="card_cost_adapter">Cost:</string>
+    <string name="treasure_latitude">Latitude: %1$s</string>
+    <string name="treasure_longitude">Longitude: %1$s</string>
+    <string name="open_treasure">Open the coffer!</string>
+    <string name="treasure_found">You have already found this treasure.\\nLook for the others!</string>
 </resources>
