@@ -1,105 +1,130 @@
 package it.neptis.gopoleis.activities;
 
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.Toast;
-import it.neptis.gopoleis.R;
 
-import it.neptis.gopoleis.adapters.ImageAdapterHistoricalPeriod;
-import it.neptis.gopoleis.adapters.ImageAdapterRegions;
-import it.neptis.gopoleis.adapters.ImageAdapterTypology;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.firebase.auth.FirebaseAuth;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import it.neptis.gopoleis.R;
+import it.neptis.gopoleis.adapters.ClickListener;
+import it.neptis.gopoleis.adapters.MedalAdapter;
+import it.neptis.gopoleis.adapters.RecyclerTouchListener;
+import it.neptis.gopoleis.defines.Medal;
 
 public class MedalsActivity extends AppCompatActivity {
+
+    private static final String TAG = "MedalsActivity";
+
+    private FirebaseAuth mAuth;
+    private List<Medal> regionMedals, structuretypeMedals, historicalperiodMedals;
+    private MedalAdapter regionsMedalAdapter;
+    private MedalAdapter historicalPeriodMedalAdapter;
+    private MedalAdapter structuretypeMedalAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_medals);
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.hide();
+        mAuth = FirebaseAuth.getInstance();
 
+        regionMedals = new ArrayList<>();
+        structuretypeMedals = new ArrayList<>();
+        historicalperiodMedals = new ArrayList<>();
+        getPlayerMedals();
 
-         /*__________________________gestione gridRegions________________________*/
-        final GridView gridRegions = (GridView) findViewById(R.id.grid_regions);
-        gridRegions.setAdapter(new ImageAdapterRegions(this));
-        /*__________________________fine gestione gridRegions________________________*/
-
-        /*___________________________On Click event for Single Gridview Item___________________________*/
-        gridRegions.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        RecyclerView regionsRecyclerView = (RecyclerView) findViewById(R.id.regionsRecyclerView);
+        // TODO Get regionMedals list from server and pass it to adapter constructor, then implement onItemTouch
+        regionsMedalAdapter = new MedalAdapter(this, regionMedals);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MedalsActivity.this, LinearLayoutManager.HORIZONTAL, false);
+        regionsRecyclerView.setLayoutManager(layoutManager);
+        regionsRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        regionsRecyclerView.setAdapter(regionsMedalAdapter);
+        regionsRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), regionsRecyclerView, new ClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                if(position == 0)
-                    Toast.makeText(getApplicationContext(),"Lazio",Toast.LENGTH_SHORT).show();
-
-                if(position == 1)
-                    Toast.makeText(getApplicationContext(),"Trentino" ,Toast.LENGTH_SHORT).show();
-
-                if(position == 2)
-                    Toast.makeText(getApplicationContext(),"Sicilia" ,Toast.LENGTH_SHORT).show();
-
-                if(position == 3)
-                    Toast.makeText(getApplicationContext(),"Marche" ,Toast.LENGTH_SHORT).show();
+            public void onClick(View view, int position) {
+                Toast.makeText(MedalsActivity.this, regionMedals.get(position).getName(), Toast.LENGTH_SHORT).show();
             }
-        });
-        /*___________________fine gestione click sugli item all'interno di Regions____________________*/
+        }));
 
-
-        /*__________________________gestione gridHistoricalPeriod________________________*/
-        final  GridView gridHistoricalPeriod = (GridView)findViewById(R.id.grid_historical_periods);
-        gridHistoricalPeriod.setAdapter(new ImageAdapterHistoricalPeriod(this));
-        /*__________________________fine gestione gridHistoricalPeriod________________________*/
-
-
-        /*___________________________On Click event for Single GridHistoricalPeriod Item___________________________*/
-        gridHistoricalPeriod.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        RecyclerView historicalPeriodRecyclerView = (RecyclerView) findViewById(R.id.historicalPeriodRecyclerView);
+        historicalPeriodMedalAdapter = new MedalAdapter(this, historicalperiodMedals);
+        RecyclerView.LayoutManager layoutManager2 = new LinearLayoutManager(MedalsActivity.this, LinearLayoutManager.HORIZONTAL, false);
+        historicalPeriodRecyclerView.setLayoutManager(layoutManager2);
+        historicalPeriodRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        historicalPeriodRecyclerView.setAdapter(historicalPeriodMedalAdapter);
+        historicalPeriodRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), historicalPeriodRecyclerView, new ClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                if(position == 0)
-                    Toast.makeText(getApplicationContext(),"Barocco",Toast.LENGTH_SHORT).show();
-
-                if(position == 1)
-                    Toast.makeText(getApplicationContext(),"Grecia",Toast.LENGTH_SHORT).show();
-
-                if(position == 2)
-                    Toast.makeText(getApplicationContext(),"Romani" ,Toast.LENGTH_SHORT).show();
-
-                if(position == 3)
-                    Toast.makeText(getApplicationContext(),"Medioevo" ,Toast.LENGTH_SHORT).show();
+            public void onClick(View view, int position) {
+                Toast.makeText(MedalsActivity.this, historicalperiodMedals.get(position).getName(), Toast.LENGTH_SHORT).show();
             }
-        });
-        /*___________________________fine On Click event for Single GridHistoricalPeriod Item___________________________*/
+        }));
 
-
-        /*__________________________gestione gridTypology________________________*/
-        final  GridView gridTypology = (GridView)findViewById(R.id.grid_typology);
-        gridTypology.setAdapter(new ImageAdapterTypology(this));
-        /*__________________________fine gestione gridTypology________________________*/
-
-
-        /*___________________________On Click event for Single GridTypology Item___________________________*/
-        gridTypology.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        RecyclerView structuretypeRecyclerView = (RecyclerView) findViewById(R.id.typologyRecyclerView);
+        structuretypeMedalAdapter = new MedalAdapter(this, structuretypeMedals);
+        RecyclerView.LayoutManager layoutManager3 = new LinearLayoutManager(MedalsActivity.this, LinearLayoutManager.HORIZONTAL, false);
+        structuretypeRecyclerView.setLayoutManager(layoutManager3);
+        structuretypeRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        structuretypeRecyclerView.setAdapter(structuretypeMedalAdapter);
+        structuretypeRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), structuretypeRecyclerView, new ClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                if(position == 0)
-                    Toast.makeText(getApplicationContext(),"Basilica",Toast.LENGTH_SHORT).show();
-
-                if(position == 1)
-                    Toast.makeText(getApplicationContext(),"Chiesa",Toast.LENGTH_SHORT).show();
-
-                if(position == 2)
-                    Toast.makeText(getApplicationContext(),"Museo" ,Toast.LENGTH_SHORT).show();
-
-                if(position == 3)
-                    Toast.makeText(getApplicationContext(),"Castello" ,Toast.LENGTH_SHORT).show();
+            public void onClick(View view, int position) {
+                Toast.makeText(MedalsActivity.this, structuretypeMedals.get(position).getName(), Toast.LENGTH_SHORT).show();
             }
-        });
-        /*___________________________fine On Click event for Single GridTypology Item___________________________*/
-
-
+        }));
     }
+
+    private void getPlayerMedals() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = getString(R.string.server_url) + "getPlayerMedals/" + mAuth.getCurrentUser().getEmail() + "/";
+        JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    for (int i = 0; i < response.length(); i++) {
+                        JSONObject jsObj = (JSONObject) response.get(i);
+                        Medal tempMedal = new Medal(jsObj.getInt("code"), jsObj.getString("name"), getString(R.string.server_url) + "images/medals/" + jsObj.getString("filename"), jsObj.getInt("category"));
+                        if (tempMedal.getCategory() == 1)
+                            regionMedals.add(tempMedal);
+                        else if (tempMedal.getCategory() == 2)
+                            historicalperiodMedals.add(tempMedal);
+                        else if (tempMedal.getCategory() == 3)
+                            structuretypeMedals.add(tempMedal);
+                    }
+                    regionsMedalAdapter.notifyDataSetChanged();
+                    historicalPeriodMedalAdapter.notifyDataSetChanged();
+                    structuretypeMedalAdapter.notifyDataSetChanged();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
+
+        queue.add(jsHeritageInfo);
+    }
+
 }

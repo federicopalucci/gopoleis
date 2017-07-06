@@ -42,14 +42,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="@string/treasure_latitude" />
+                android:text="@string/latitude" />
 
             <TextView
                 android:id="@+id/treasure_longitude"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="@string/treasure_longitude" />
+                android:text="@string/longitude" />
         </LinearLayout>
     </LinearLayout>
 

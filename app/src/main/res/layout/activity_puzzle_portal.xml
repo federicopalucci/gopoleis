@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -17,7 +16,7 @@
         android:textAlignment="center"
         android:text="@string/title_puzzle"
         android:textIsSelectable="false"
-        android:textSize="40sp" />
+        android:textSize="@dimen/title_size" />
 
     <TextView
         android:id="@+id/l_puzzle_active"
@@ -25,6 +24,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:text="@string/available_puzzles"
+        android:gravity="center_vertical"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
 
     <ListView
@@ -40,6 +40,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:text="@string/upcoming_puzzles"
+        android:gravity="center_vertical"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
 
     <ListView

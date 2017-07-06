@@ -1,8 +1,9 @@
 package it.neptis.gopoleis.activities;
 
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.media.Image;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -56,6 +57,8 @@ public class TreasureActivity extends AppCompatActivity {
 
     private CardAdapter cardAdapter;
 
+    boolean opened;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +68,9 @@ public class TreasureActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
 
-        treasure_code = extras.getString("codice_tesoro");
+        opened = false;
+
+        treasure_code = extras.getString("code");
 
         info = (TextView) findViewById(R.id.treasure_description);
         latitude = (TextView) findViewById(R.id.treasure_latitude);
@@ -102,10 +107,10 @@ public class TreasureActivity extends AppCompatActivity {
                 //una volta cliccato sul bottone open_treasure
                 //aggiungo il tesoro a GT e apro di nuovo TreasureInfoActivity passandogli game1SessionCode
                 RequestQueue queue = Volley.newRequestQueue(v.getContext());
-                String url2 = getString(R.string.server_url) + "addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasure_code + "/";
+                String url = getString(R.string.server_url) + "addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasure_code + "/";
 
                 // Request a string response from the provided URL.
-                JsonObjectRequest jsAddTreasToGame = new JsonObjectRequest(Request.Method.GET, url2, null, new Response.Listener<JSONObject>() {
+                JsonObjectRequest jsAddTreasToGame = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         treasureOpened();
@@ -119,12 +124,12 @@ public class TreasureActivity extends AppCompatActivity {
 
                 queue.add(jsAddTreasToGame);
             }
-
-
         });
     }
 
     private void treasureOpened() {
+        // TODO Card rarity, also in layout.xml
+        opened = true;
         coffer.setImageResource(R.drawable.forziere_aperto);
         View dynamicTreasureView = findViewById(R.id.dynamicTreasureView);
         ViewGroup parent = (ViewGroup) dynamicTreasureView.getParent();
@@ -160,57 +165,25 @@ public class TreasureActivity extends AppCompatActivity {
         }));
         // ------------------------------------------------------------------------
 
-        for (String aRandom_card_code : random_card_codes) {
-            RequestQueue queue2 = Volley.newRequestQueue(this);
-            String url = getString(R.string.server_url) + "getTreasureCardInfo/" + aRandom_card_code + "/";
 
-            JsonArrayRequest jsInfoCardTreasure = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-                @Override
-                public void onResponse(JSONArray response) {
-                    try {
-                        for (int i = 0; i < response.length(); i++) {
-                            JSONObject jsObj = (JSONObject) response.get(i);
-                            c_code = jsObj.getString("code");
-                            c_name = jsObj.getString("name");
-                            c_cost = jsObj.getString("cost");
-                            c_description = jsObj.getString("description");
-                            treas_card_list.add(new Card(c_code, c_cost, c_name, c_description));
-                        }
-                        cardAdapter.notifyDataSetChanged();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG, error.toString());
-                }
-            });
-
-            queue2.add(jsInfoCardTreasure);
-        }
-
-        addCardToCollection(random_card_codes);
-    }
-
-    private void getSetTreasureInfo() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = getString(R.string.server_url) + "getInfoTreasure/" + treasure_code + "/";
-        JsonArrayRequest jsInfoTreasure = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        String url = getString(R.string.server_url) + "getFiveTreasureCardsInfo/";
+        for (String tempString : random_card_codes)
+            url += tempString + "/";
+
+        JsonArrayRequest jsInfoCardTreasure = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
-                    int contLength = response.length();
-                    for (int i = 0; i < contLength; i++) {
+                    for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        t_info = jsObj.getString("description");
-                        t_lat = jsObj.getString("latitude");
-                        t_lon = jsObj.getString("longitude");
-                        info.setText(t_info);
-                        latitude.setText(String.format(getString(R.string.treasure_latitude),t_lat));
-                        longitude.setText(String.format(getString(R.string.treasure_longitude),t_lon));
+                        c_code = jsObj.getString("code");
+                        c_name = jsObj.getString("name");
+                        c_cost = jsObj.getString("cost");
+                        c_description = jsObj.getString("description");
+                        treas_card_list.add(new Card(c_code, c_cost, c_name, c_description));
                     }
+                    cardAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -222,7 +195,29 @@ public class TreasureActivity extends AppCompatActivity {
             }
         });
 
-        queue.add(jsInfoTreasure);
+        queue.add(jsInfoCardTreasure);
+
+        addCardsToCollection(random_card_codes);
+
+        AlertDialog.Builder builder;
+        builder = new AlertDialog.Builder(TreasureActivity.this);
+        builder.setTitle(R.string.congratulations)
+                .setMessage(R.string.congratulations_treasure)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .setIcon(android.R.drawable.star_off)
+                .show();
+    }
+
+    private void getSetTreasureInfo() {
+        t_info = getIntent().getStringExtra("description");
+        t_lat = getIntent().getStringExtra("latitude");
+        t_lon = getIntent().getStringExtra("longitude");
+        info.setText(t_info);
+        latitude.setText(String.format(getString(R.string.latitude), t_lat));
+        longitude.setText(String.format(getString(R.string.longitude), t_lon));
     }
 
     public void generateCards() {
@@ -237,28 +232,35 @@ public class TreasureActivity extends AppCompatActivity {
         }
     }
 
-    public void addCardToCollection(String[] card_codes) {
-        for (String aCard_code : card_codes) {
-            RequestQueue queue3 = Volley.newRequestQueue(this);
-            String url = getString(R.string.server_url) + "addCardToUserCollection/" + mAuth.getCurrentUser().getEmail() + "/" + aCard_code + "/";
+    public void addCardsToCollection(String[] card_codes) {
+        RequestQueue queue3 = Volley.newRequestQueue(this);
+        String url = getString(R.string.server_url) + "addFiveCardsToUserCollection/" + mAuth.getCurrentUser().getEmail() + "/";
+        for (String tempString : random_card_codes)
+            url += tempString + "/";
 
-            JsonObjectRequest jsAddCardToCollection = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG, error.toString());
-                }
-            });
+        JsonObjectRequest jsAddCardToCollection = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
 
-            queue3.add(jsAddCardToCollection);
-        }
+        queue3.add(jsAddCardToCollection);
     }
 
     @Override
     public void onBackPressed() {
+        if (opened) {
+            Intent backToTreasurePortal = new Intent();
+            backToTreasurePortal.putExtra("code", treasure_code);
+            setResult(Activity.RESULT_OK, backToTreasurePortal);
+        }
+        else
+            setResult(Activity.RESULT_CANCELED);
         finish();
     }
 

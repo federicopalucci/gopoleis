@@ -9,7 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.Toast;
+
 import it.neptis.gopoleis.R;
 
 import com.android.volley.Request;
@@ -18,53 +18,88 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PuzzlePortalActivity extends AppCompatActivity {
 
-    ListView list_attivi;
-    ListView list_incoming;
-    ImageButton ib_achievements;
-    ImageButton ib_partecipa;
-    ImageButton ib_cerca;
-    String[] list_item;
-    String[] list_item2;
-    private String user;
-    private String game;
+    private static final String TAG = "PuzzlePortalAct";
 
+    private ListView activePuzzlesListView, upcomingPuzzlesListView;
+    private String[] activePuzzlesTitles, upcomingPuzzlesTitles;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_puzzle_portal);
 
-        list_attivi = (ListView) findViewById(R.id.list_active);
+        mAuth = FirebaseAuth.getInstance();
 
-        user = getIntent().getExtras().getString("user");
+        getActivePaths();
 
+        getUpcomingPaths();
 
+        activePuzzlesListView = (ListView) findViewById(R.id.list_active);
+        activePuzzlesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent toPathActivity = new Intent(PuzzlePortalActivity.this, PathActivity.class);
+                toPathActivity.putExtra("title", activePuzzlesTitles[position]);
+                startActivity(toPathActivity);
+            }
+        });
+
+        upcomingPuzzlesListView = (ListView) findViewById(R.id.list_incoming);
+        upcomingPuzzlesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // TODO remove
+                Intent toPathActivity = new Intent(PuzzlePortalActivity.this, PathActivity.class);
+                toPathActivity.putExtra("title", upcomingPuzzlesTitles[position]);
+                startActivity(toPathActivity);
+            }
+        });
+
+        ImageButton achievementsButton = (ImageButton) findViewById(R.id.ib_obiettivi);
+        achievementsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent toAchievements = new Intent(PuzzlePortalActivity.this, AchievementsActivity.class);
+                toAchievements.putExtra("game", "game3");
+                startActivity(toAchievements);
+            }
+        });
+
+        ImageButton participateButton = (ImageButton) findViewById(R.id.ib_partecipazioni);
+        participateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent toMyPuzzles = new Intent(PuzzlePortalActivity.this,ShowMyPuzzlesActivity.class);
+                startActivity(toMyPuzzles);
+            }
+        });
+    }
+
+    private void getActivePaths() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = getString(R.string.server_url)+"getEnabledPuzzle/";
-        // Request a string response from the provided URL.
-
+        String url = getString(R.string.server_url)+"getActivePaths/";
         JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                // Display the first 500 characters of the response string.
-                //Log.d("Response is: ", response.toString());
                 try {
-                    int contLength = response.length();
-                    list_item = new String[contLength];
-                    for (int i = 0; i < contLength; i++) {
+                    activePuzzlesTitles = new String[response.length()];
+                    for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        String value = jsObj.getString("name");
-                        list_item[i] = value;
-
-                        ArrayAdapter<?> adapter = new ArrayAdapter<Object>(PuzzlePortalActivity.this, android.R.layout.simple_selectable_list_item, list_item);
-                        list_attivi.setAdapter(adapter);
+                        activePuzzlesTitles[i] = jsObj.getString("title");
+                        ArrayAdapter<?> adapter = new ArrayAdapter<Object>(PuzzlePortalActivity.this, android.R.layout.simple_selectable_list_item, activePuzzlesTitles);
+                        activePuzzlesListView.setAdapter(adapter);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -73,32 +108,26 @@ public class PuzzlePortalActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("That didn't work!", error.toString());
+                Log.d(TAG, error.toString());
             }
         });
 
-        // Add the request to the RequestQueue.
         queue.add(jsArray);
-        //***********_______END TEMPLATE JSON REQUEST________**********
+    }
 
-        list_incoming = (ListView) findViewById(R.id.list_incoming);
-
-        RequestQueue queue2 = Volley.newRequestQueue(this);
-        String url2 = getString(R.string.server_url)+"getSoonPuzzle/";
-        // Request a string response from the provided URL.
-
-        JsonArrayRequest jsArray2 = new JsonArrayRequest(Request.Method.GET, url2, null, new Response.Listener<JSONArray>() {
+    private void getUpcomingPaths() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = getString(R.string.server_url)+"getUpcomingPaths/";
+        JsonArrayRequest jsArray2 = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
-                    int contLength = response.length();
-                    list_item2 = new String[contLength];
-                    for (int i = 0; i < contLength; i++) {
+                    upcomingPuzzlesTitles = new String[response.length()];
+                    for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        String value = jsObj.getString("name") + "  - coming soon!";
-                        list_item2[i] = value;
-                        ArrayAdapter<?> adapter = new ArrayAdapter<Object>(PuzzlePortalActivity.this, android.R.layout.simple_selectable_list_item, list_item2);
-                        list_incoming.setAdapter(adapter);
+                        upcomingPuzzlesTitles[i] = jsObj.getString("title") + "  - coming soon!";
+                        ArrayAdapter<?> adapter = new ArrayAdapter<Object>(PuzzlePortalActivity.this, android.R.layout.simple_selectable_list_item, upcomingPuzzlesTitles);
+                        upcomingPuzzlesListView.setAdapter(adapter);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -107,92 +136,11 @@ public class PuzzlePortalActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("That didn't work!", error.toString());
+                Log.d(TAG, error.toString());
             }
         });
 
-        // Add the request to the RequestQueue.
-        queue2.add(jsArray2);
-        //***********_______END TEMPLATE JSON REQUEST________**********
-
-        RequestQueue queue3 = Volley.newRequestQueue(PuzzlePortalActivity.this);
-        String url3 = getString(R.string.server_url)+"getGame3FromUser/"+user+"/";
-        // Request a string response from the provided URL.
-        Log.d("url= ",url3);
-        JsonArrayRequest jsArray3 = new JsonArrayRequest(Request.Method.GET, url3,null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try{
-                    int contLength = response.length();
-                    for(int i = 0;i< contLength;i++){
-                        JSONObject jsObj = (JSONObject)response.get(i);
-                        game = jsObj.getString("game3");
-                        Log.d("Game puzzle: ",game);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("That didn't work!",error.toString());
-            }
-        });
-
-        // Add the request to the RequestQueue.
-        queue3.add(jsArray3);
-        /***********_______END TEMPLATE JSON REQUEST________**********/
-
-        list_attivi.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent goto_show_puzzle = new Intent(PuzzlePortalActivity.this, ShowPuzzleActivity.class);
-                Object selected_puzzle = list_attivi.getItemAtPosition(position);
-                String extra_nome = selected_puzzle.toString();
-                goto_show_puzzle.putExtra("name", extra_nome);
-                goto_show_puzzle.putExtra("game_code", game);
-                startActivity(goto_show_puzzle);
-            }
-        });
-
-        list_incoming.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(view.getContext(), "This puzzle will be available soon!", Toast.LENGTH_SHORT).show();
-                ;
-            }
-        });
-
-
-        ib_achievements = (ImageButton) findViewById(R.id.ib_obiettivi);
-        ib_achievements.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent goto_a = new Intent(PuzzlePortalActivity.this, AchievementsActivity.class);
-                goto_a.putExtra("game1SessionCode", "game3");
-                startActivity(goto_a);
-            }
-        });
-
-        ib_partecipa = (ImageButton) findViewById(R.id.ib_partecipazioni);
-        ib_partecipa.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent goto_mypuzzle = new Intent(PuzzlePortalActivity.this,ShowMyPuzzlesActivity.class);
-                goto_mypuzzle.putExtra("game_code", game);
-                startActivity(goto_mypuzzle);
-            }
-        });
-
-        /*
-        ib_cerca = (ImageButton) findViewById(R.id.ib_cerca_enigmi);
-        ib_cerca.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-        */
+        queue.add(jsArray2);
     }
+
 }

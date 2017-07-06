@@ -146,6 +146,12 @@ public class TreasurePortalPag1Activity extends AppCompatActivity implements OnI
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        gopoleisApp.setHeritages(null);
+    }
+
     // Handle spinner items clicks
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

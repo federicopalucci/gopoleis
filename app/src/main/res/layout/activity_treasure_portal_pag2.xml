@@ -27,14 +27,4 @@
         android:layout_marginBottom="8dp"
         android:text="@string/site_information" />
 
-    <ImageButton
-        android:id="@+id/camera_image"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:adjustViewBounds="true"
-        android:background="@android:color/transparent"
-        android:scaleType="fitCenter"
-        android:src="@drawable/camera" />
-
 </LinearLayout>

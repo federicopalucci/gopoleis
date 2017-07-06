@@ -1,115 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <TextView
+        android:id="@+id/medals_title"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        tools:context="com.example.anna.travelportal.MedalsActivity"
-        android:gravity="center"
-        android:layout_gravity="center">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="@string/medals_title"
+        android:textAlignment="center"
+        android:textSize="@dimen/title_size" />
 
-        <ScrollView android:id="@+id/ItalianRegions"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:layout_below="@+id/region"
-            android:layout_alignParentStart="true"
-            android:layout_marginBottom="20dp">
+    <TextView
+        android:id="@+id/region"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="@string/region_text"
+        android:textSize="30sp" />
 
-            <GridView
-                android:layout_width="wrap_content"
-                android:id="@+id/grid_regions"
-                android:columnWidth="90dp"
-                android:numColumns="3"
-                android:gravity="top"
-                android:layout_height="200dp" />
-        </ScrollView>
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/regionsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clickable="true" />
 
+    <TextView
+        android:id="@+id/historical_period"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="@string/historical_period_text"
+        android:textSize="30sp" />
 
-        <ScrollView android:id="@+id/HistoricalPeriods"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:layout_below="@+id/historical_period"
-            android:layout_alignParentEnd="true"
-            android:layout_marginBottom="20dp">
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/historicalPeriodRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clickable="true" />
 
-            <GridView
-                android:layout_width="wrap_content"
-                android:layout_height="100dp"
-                android:id="@+id/grid_historical_periods"
-                android:columnWidth="90dp"
-                android:numColumns="3"
-                android:gravity="top" />
-        </ScrollView>
+    <TextView
+        android:id="@+id/tipology"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="@string/typology_text"
+        android:textSize="30sp" />
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/typologyRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clickable="true" />
 
-
-        <ScrollView android:id="@+id/StructureType"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            android:layout_below="@+id/tipology"
-            android:layout_alignParentStart="true"
-            android:layout_marginBottom="20dp">
-            <GridView
-                android:layout_width="wrap_content"
-                android:layout_height="100dp"
-                android:id="@+id/grid_typology"
-                android:columnWidth="90dp"
-                android:numColumns="3"
-                android:gravity="top" />
-        </ScrollView>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Region"
-            android:id="@+id/region"
-            android:layout_below="@+id/medals"
-            android:layout_alignParentStart="true"
-            android:textSize="30sp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="5dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Historical Period"
-            android:id="@+id/historical_period"
-            android:layout_below="@+id/ItalianRegions"
-            android:layout_alignParentStart="true"
-            android:textSize="30sp"
-            android:layout_marginBottom="5dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Typology"
-            android:id="@+id/tipology"
-            android:layout_below="@+id/HistoricalPeriods"
-            android:layout_alignParentEnd="true"
-            android:textSize="30sp"
-            android:layout_marginBottom="5dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Medals"
-            android:textSize="@dimen/title_size"
-            android:id="@+id/medals"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="20dp" />
-
-
-    </RelativeLayout>
-</ScrollView>
+</LinearLayout>

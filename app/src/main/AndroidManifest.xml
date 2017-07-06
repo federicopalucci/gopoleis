@@ -39,26 +39,51 @@
         </activity>
         <activity
             android:name=".activities.TreasurePortalPag1Activity"
-            android:parentActivityName=".activities.PortalsMainActivity" />
+            android:parentActivityName=".activities.PortalsMainActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.TreasurePortalPag2Activity"
-            android:parentActivityName=".activities.TreasurePortalPag1Activity" />
+            android:parentActivityName=".activities.TreasurePortalPag1Activity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.TravelPortalActivity"
-            android:parentActivityName=".activities.PortalsMainActivity" />
+            android:parentActivityName=".activities.PortalsMainActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MedalsActivity"
-            android:parentActivityName=".activities.TravelPortalActivity" />
-        <activity android:name=".activities.PuzzlePortalActivity" />
-        <activity android:name=".activities.AchievementsActivity" />
-        <activity android:name=".activities.ShowPuzzleActivity" />
-        <activity android:name=".activities.ManageCardsActivity" />
+            android:parentActivityName=".activities.TravelPortalActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.PuzzlePortalActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.AchievementsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.ShowPuzzleActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.ManageCardsActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activities.PuzzleAnswerActivity"
-            android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar" />
-        <activity android:name=".activities.ShowMyPuzzlesActivity" />
-        <activity android:name=".activities.CardDetailsActivity" />
-        <activity android:name=".activities.TreasureActivity"></activity>
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.ShowMyPuzzlesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.CardDetailsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.TreasureActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.HeritageActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.PathActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".activities.StageActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

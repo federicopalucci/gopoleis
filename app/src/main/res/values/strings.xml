@@ -54,9 +54,23 @@
     <string name="network_error">Nessuna connessione internet</string>
     <string name="unknown_error">Errore sconosciuto</string>
     <string name="card_cost_adapter">Costo:</string>
-    <string name="treasure_latitude">Latitudine: %1$s</string>
-    <string name="treasure_longitude">Longitudine: %1$s</string>
+    <string name="latitude">Latitudine: %1$s</string>
+    <string name="longitude">Longitudine: %1$s</string>
     <string name="open_treasure">Apri il forziere!</string>
     <string name="treasure_found">Hai già trovato questo tesoro.\nCercane altri!</string>
+    <string name="medals_title">Medaglie</string>
+    <string name="region_text">Regioni</string>
+    <string name="historical_period_text">Periodo storico</string>
+    <string name="typology_text">Tipologia</string>
+    <string name="cards_title">Carte</string>
+    <string name="path_coming_soon">Questo percorso sarà presto disponibile!</string>
+    <string name="congratulations_treasure">Hai trovato un nuovo tesoro e collezionato 5 carte!</string>
+    <string name="congratulations">Congratulazioni!</string>
+    <string name="congratulations_heritage">Hai visitato un nuovo bene culturale!</string>
+    <string name="structuretype">Tipo di struttura: %1$s</string>
+    <string name="province">Provincia: %1$s</string>
+    <string name="region">Regione: %1$s</string>
+    <string name="historicalperiod">Periodo storico: %1$s</string>
+    <string name="congratulations_medal">Hai sbloccato la %1$s!</string>
 
 </resources>

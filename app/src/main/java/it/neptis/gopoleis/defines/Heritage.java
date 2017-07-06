@@ -11,9 +11,12 @@ public class Heritage {
     private String latitude;
     private String longitude;
     private String province;
+    private String region;
     private String historicalPeriod;
     private String structureType;
     private String operator;
+
+    private boolean visited;
 
     private List<Treasure> treasures;
 
@@ -37,6 +40,27 @@ public class Heritage {
         this.latitude = latitude;
         this.longitude = longitude;
         this.treasures = treasures;
+    }
+
+    public Heritage(int code, String name, String description, String latitude, String longitude) {
+        this.code = code;
+        this.name = name;
+        this.description = description;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public Heritage(int code, String name, String description, String latitude, String longitude, String province, String region, String historicalPeriod, String structureType, boolean visited) {
+        this.code = code;
+        this.name = name;
+        this.description = description;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.province = province;
+        this.region = region;
+        this.historicalPeriod = historicalPeriod;
+        this.structureType = structureType;
+        this.visited = visited;
     }
 
     public Heritage() {
@@ -91,6 +115,14 @@ public class Heritage {
         this.province = province;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
     public String getHistoricalPeriod() {
         return historicalPeriod;
     }
@@ -113,6 +145,14 @@ public class Heritage {
 
     public void setOperator(String operator) {
         this.operator = operator;
+    }
+
+    public boolean isVisited() {
+        return visited;
+    }
+
+    public void setVisited(boolean visited) {
+        this.visited = visited;
     }
 
 }

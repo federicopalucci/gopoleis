@@ -1,6 +1,7 @@
 package it.neptis.gopoleis.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -56,23 +57,26 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class TreasurePortalPag2Activity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private static final String TAG = "TreasurePortalPag2";
 
-    private final static int CAMERA_REQUEST_CODE = 1;
     private static final int LOCATION_SETTINGS_CHECK_REQUEST_CODE = 2;
+    private static final int TREASURE_REQUEST_CODE = 3;
     private static GoogleMap mMap;
+    private List<Marker> markers;
     // 2km range
     private static final int RANGE_METERS = 3 * 100;
 
     String heritageName, heritageInfo, heritageLatitude, heritageLongitude;
     LatLng heritageLatLng;
-    String tempTreasureLat, tempTreasureLon, tempTreasureCode;
+    String tempTreasureLat, tempTreasureLon, tempTreasureCode, tempTreasureDescription;
 
-    String url, url2, urlCheckFound;
+    String url, url2;
 
     private MarkerOptions options = new MarkerOptions();
 
@@ -91,6 +95,7 @@ public class TreasurePortalPag2Activity extends FragmentActivity implements OnMa
 
         mAuth = FirebaseAuth.getInstance();
         gopoleisApp = (GopoleisApp) getApplicationContext();
+        markers = new ArrayList<>();
 
         heritageName = getIntent().getExtras().getString("heritageName");
 
@@ -150,16 +155,6 @@ public class TreasurePortalPag2Activity extends FragmentActivity implements OnMa
 
         getTreasureElements();
 
-        // Manage camera button
-        ImageButton camera = (ImageButton) findViewById(R.id.camera_image);
-        camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent openCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(openCamera, CAMERA_REQUEST_CODE);
-            }
-        });
-
         // Manage site information button
         Button siteInformation = (Button) findViewById(R.id.site_information);
         siteInformation.setOnClickListener(new View.OnClickListener() {
@@ -174,7 +169,7 @@ public class TreasurePortalPag2Activity extends FragmentActivity implements OnMa
     private void getTreasureElements() {
         RequestQueue queue = Volley.newRequestQueue(this);
         String spaces = heritageName.replace(" ", "%20");
-        url2 = getString(R.string.server_url) + "getTreasureElements/" + spaces + "/";
+        url2 = getString(R.string.server_url) + "getTreasureElements/" + spaces + "/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsTreasureElements = new JsonArrayRequest(Request.Method.GET, url2, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
@@ -185,10 +180,19 @@ public class TreasurePortalPag2Activity extends FragmentActivity implements OnMa
                         tempTreasureLat = jsObj.getString("latitude");
                         tempTreasureLon = jsObj.getString("longitude");
                         tempTreasureCode = jsObj.getString("code");
+                        tempTreasureDescription = jsObj.getString("description");
                         options.position(new LatLng(Double.parseDouble(tempTreasureLat), Double.parseDouble(tempTreasureLon)));
                         options.title(tempTreasureCode);
-                        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                        mMap.addMarker(options);
+                        if (jsObj.getString("found").equals("0")) {
+                            options.snippet("0");
+                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                        } else {
+                            options.snippet("1");
+                            options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        }
+                        Marker tempMarker = mMap.addMarker(options);
+                        tempMarker.setTag(new String[]{tempTreasureDescription, tempTreasureLat, tempTreasureLon});
+                        markers.add(tempMarker);
                         mMap.setOnMarkerClickListener(TreasurePortalPag2Activity.this);
                     }
                 } catch (JSONException e) {
@@ -249,7 +253,7 @@ public class TreasurePortalPag2Activity extends FragmentActivity implements OnMa
         if (marker.getTitle().equals("heritageName")) return true;
 
         LatLng treasurePosition = marker.getPosition();
-        final String code_treas = marker.getTitle();
+        String code_treas = marker.getTitle();
 
         if (playerLocation != null) {
             playerLatLng = new LatLng(playerLocation.getLatitude(), playerLocation.getLongitude());
@@ -257,40 +261,17 @@ public class TreasurePortalPag2Activity extends FragmentActivity implements OnMa
             boolean inRange = SphericalUtil.computeDistanceBetween(treasurePosition, heritageLatLng) <= RANGE_METERS;
             //boolean inRange = SphericalUtil.computeDistanceBetween(playerLatLng, treasurePosition) <= RANGE_METERS;
             if (inRange) {
-                RequestQueue queue4 = Volley.newRequestQueue(this);
-                urlCheckFound = getString(R.string.server_url) + "checkTreasureFound/" + mAuth.getCurrentUser().getEmail() + "/" + code_treas + "/";
-                JsonArrayRequest jsTreasFound = new JsonArrayRequest(Request.Method.GET, urlCheckFound, null, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        try {
-                            int contLength = response.length();
-                            for (int i = 0; i < contLength; i++) {
-                                JSONObject jsObj = (JSONObject) response.get(i);
-                                Iterator<String> iterator = jsObj.keys();
-                                while (iterator.hasNext()) {
-                                    String tempKey = iterator.next();
-                                    Intent toTreasureActivity = new Intent(TreasurePortalPag2Activity.this, TreasureActivity.class);
-                                    toTreasureActivity.putExtra("codice_tesoro", code_treas);
-                                    if (jsObj.getInt(tempKey) == 0) {
-                                        toTreasureActivity.putExtra("found", false);
-                                    } else {
-                                        toTreasureActivity.putExtra("found", true);
-                                    }
-                                    startActivity(toTreasureActivity);
-                                }
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, error.toString());
-                    }
-                });
-
-                queue4.add(jsTreasFound);
+                Intent toTreasureActivity = new Intent(TreasurePortalPag2Activity.this, TreasureActivity.class);
+                toTreasureActivity.putExtra("code", code_treas);
+                String[] tag = (String[]) marker.getTag();
+                toTreasureActivity.putExtra("description", tag[0]);
+                toTreasureActivity.putExtra("latitude", tag[1]);
+                toTreasureActivity.putExtra("longitude", tag[2]);
+                if (marker.getSnippet().equals("1"))
+                    toTreasureActivity.putExtra("found", true);
+                else
+                    toTreasureActivity.putExtra("found", false);
+                startActivityForResult(toTreasureActivity, TREASURE_REQUEST_CODE);
             } else {
                 Toast.makeText(TreasurePortalPag2Activity.this, getString(R.string.too_far), Toast.LENGTH_LONG).show();
             }
@@ -303,10 +284,6 @@ public class TreasurePortalPag2Activity extends FragmentActivity implements OnMa
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
-            Toast.makeText(this, getString(R.string.photo_taken), Toast.LENGTH_LONG).show();
-        }
-
         if (requestCode == LOCATION_SETTINGS_CHECK_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Log.d(TAG, "location services enabled");
@@ -316,12 +293,26 @@ public class TreasurePortalPag2Activity extends FragmentActivity implements OnMa
                 Toast.makeText(this, getString(R.string.need_location_permission), Toast.LENGTH_LONG).show();
             }
         }
+
+        if (requestCode == TREASURE_REQUEST_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                String tempCode = data.getStringExtra("code");
+                for (Marker tempMarker : markers) {
+                    if (tempMarker.getTitle().equals(tempCode)) {
+                        tempMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        tempMarker.setSnippet("1");
+                        break;
+                    }
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+            }
+        }
     }
 
-    private void getHeritage(){
+    private void getHeritage() {
         heritage = new Heritage();
 
-        for (Heritage tempHeritage : gopoleisApp.getHeritages()){
+        for (Heritage tempHeritage : gopoleisApp.getHeritages()) {
             if (tempHeritage.getName().equals(heritageName))
                 heritage = tempHeritage;
         }

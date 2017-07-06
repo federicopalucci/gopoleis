@@ -24,7 +24,7 @@ public class ArrayAdapterAchievement extends ArrayAdapter<Achievement> {
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) getContext()
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        convertView = inflater.inflate(R.layout.adapter_achievements, null);
+        convertView = inflater.inflate(R.layout.adapter_achievement, null);
         TextView nome = (TextView) convertView.findViewById(R.id.l_achievement_title);
         TextView descrizione = (TextView) convertView.findViewById(R.id.l_achievement_descr);
         ImageView stellina = (ImageView) convertView.findViewById(R.id.img_empty_star);

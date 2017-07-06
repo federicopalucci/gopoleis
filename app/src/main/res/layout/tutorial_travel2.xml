@@ -158,15 +158,15 @@ tools:context="com.example.anna.neptis.it.example.anna.neptis.activities.TravelP
                     android:layout_alignWithParentIfMissing="false"
                     android:gravity="center"
                     android:layout_marginLeft="30dp"
-                    android:layout_alignBaseline="@+id/Cont2"
-                    android:layout_alignBottom="@+id/Cont2"
+                    android:layout_alignBaseline="@+id/visited_heritages_counter"
+                    android:layout_alignBottom="@+id/visited_heritages_counter"
                     android:layout_centerHorizontal="true" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
                     android:text="13"
-                    android:id="@+id/Cont1"
+                    android:id="@+id/total_heritages_counter"
                     android:textSize="35sp"
                     android:gravity="center"
                     android:layout_marginLeft="10dp"
@@ -177,7 +177,7 @@ tools:context="com.example.anna.neptis.it.example.anna.neptis.activities.TravelP
                     android:layout_width="wrap_content"
                     android:layout_height="40dp"
                     android:text="86"
-                    android:id="@+id/Cont2"
+                    android:id="@+id/visited_heritages_counter"
                     android:textSize="35sp"
                     android:layout_alignWithParentIfMissing="false"
                     android:gravity="center"

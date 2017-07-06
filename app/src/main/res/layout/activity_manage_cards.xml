@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.anna.neptis.it.example.anna.neptis.activities.ManageCardsActivity">
+    tools:context=".activities.ManageCardsActivity">
 
     <TextView
         android:layout_width="wrap_content"
@@ -20,14 +20,13 @@
         android:textIsSelectable="false"
         android:textSize="40sp"
         android:layout_marginTop="8dp"
-        android:text="Cards" />
+        android:text="@string/cards_title" />
 
     <android.support.v7.widget.RecyclerView
         android:layout_marginTop="16dp"
         android:id="@+id/recyclerView"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/title"
-        android:numColumns="3"
         android:clickable="true"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
