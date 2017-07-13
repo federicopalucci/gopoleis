@@ -9,14 +9,16 @@ public class Stage {
     private LatLng coordinates;
     private Question question;
     private Path path;
+    private boolean isFinal;
 
-    public Stage(int code, String title, String curiosity, LatLng coordinates, Question question, Path path) {
+    public Stage(int code, String title, String curiosity, LatLng coordinates, Question question, Path path, boolean isFinal) {
         this.code = code;
         this.title = title;
         this.curiosity = curiosity;
         this.coordinates = coordinates;
         this.question = question;
         this.path = path;
+        this.isFinal = isFinal;
     }
 
     public int getCode() {
@@ -66,4 +68,13 @@ public class Stage {
     public void setPath(Path path) {
         this.path = path;
     }
+
+    public boolean isFinal() {
+        return isFinal;
+    }
+
+    public void setFinal(boolean aFinal) {
+        isFinal = aFinal;
+    }
+
 }

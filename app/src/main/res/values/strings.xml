@@ -72,5 +72,13 @@
     <string name="region">Regione: %1$s</string>
     <string name="historicalperiod">Periodo storico: %1$s</string>
     <string name="congratulations_medal">Hai sbloccato la %1$s!</string>
+    <string name="stage_curiosity">Curiosità: %1$s</string>
+    <string name="input_answer">Inserisci la risposta</string>
+    <string name="wrong_stage_answer">La risposta è sbagliata!</string>
+    <string name="stage_completed">Hai completato uno stage!</string>
+    <string name="path_completed">Hai completato un percorso!</string>
+    <string name="stage_already_completed">Hai già completato questo stage!</string>
+    <string name="my_paths">I miei percorsi</string>
+    <string name="path_already_completed">Percorso completato!</string>
 
 </resources>

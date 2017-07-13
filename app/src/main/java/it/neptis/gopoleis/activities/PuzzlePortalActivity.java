@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import it.neptis.gopoleis.R;
 
@@ -32,7 +33,7 @@ public class PuzzlePortalActivity extends AppCompatActivity {
     private static final String TAG = "PuzzlePortalAct";
 
     private ListView activePuzzlesListView, upcomingPuzzlesListView;
-    private String[] activePuzzlesTitles, upcomingPuzzlesTitles;
+    private List<String> activePuzzlesTitles, upcomingPuzzlesTitles;
     private FirebaseAuth mAuth;
 
     @Override
@@ -42,16 +43,14 @@ public class PuzzlePortalActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        getActivePaths();
-
-        getUpcomingPaths();
+        getAllPaths();
 
         activePuzzlesListView = (ListView) findViewById(R.id.list_active);
         activePuzzlesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent toPathActivity = new Intent(PuzzlePortalActivity.this, PathActivity.class);
-                toPathActivity.putExtra("title", activePuzzlesTitles[position]);
+                toPathActivity.putExtra("title", activePuzzlesTitles.get(position));
                 startActivity(toPathActivity);
             }
         });
@@ -60,10 +59,7 @@ public class PuzzlePortalActivity extends AppCompatActivity {
         upcomingPuzzlesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // TODO remove
-                Intent toPathActivity = new Intent(PuzzlePortalActivity.this, PathActivity.class);
-                toPathActivity.putExtra("title", upcomingPuzzlesTitles[position]);
-                startActivity(toPathActivity);
+                Toast.makeText(PuzzlePortalActivity.this, R.string.path_coming_soon, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -81,26 +77,32 @@ public class PuzzlePortalActivity extends AppCompatActivity {
         participateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent toMyPuzzles = new Intent(PuzzlePortalActivity.this,ShowMyPuzzlesActivity.class);
+                Intent toMyPuzzles = new Intent(PuzzlePortalActivity.this, MyPathsActivity.class);
                 startActivity(toMyPuzzles);
             }
         });
     }
 
-    private void getActivePaths() {
+    private void getAllPaths() {
         RequestQueue queue = Volley.newRequestQueue(this);
-        String url = getString(R.string.server_url)+"getActivePaths/";
+        String url = getString(R.string.server_url) + "getAllPaths/";
         JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
-                    activePuzzlesTitles = new String[response.length()];
+                    activePuzzlesTitles = new ArrayList<>();
+                    upcomingPuzzlesTitles = new ArrayList<>();
                     for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        activePuzzlesTitles[i] = jsObj.getString("title");
-                        ArrayAdapter<?> adapter = new ArrayAdapter<Object>(PuzzlePortalActivity.this, android.R.layout.simple_selectable_list_item, activePuzzlesTitles);
-                        activePuzzlesListView.setAdapter(adapter);
+                        if (jsObj.getString("enabled").equals("true"))
+                            activePuzzlesTitles.add(jsObj.getString("title"));
+                        else
+                            upcomingPuzzlesTitles.add(jsObj.getString("title"));
                     }
+                    ArrayAdapter<?> adapter = new ArrayAdapter<Object>(PuzzlePortalActivity.this, android.R.layout.simple_selectable_list_item, activePuzzlesTitles.toArray());
+                    activePuzzlesListView.setAdapter(adapter);
+                    ArrayAdapter<?> adapter2 = new ArrayAdapter<Object>(PuzzlePortalActivity.this, android.R.layout.simple_selectable_list_item, upcomingPuzzlesTitles.toArray());
+                    upcomingPuzzlesListView.setAdapter(adapter2);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -113,34 +115,6 @@ public class PuzzlePortalActivity extends AppCompatActivity {
         });
 
         queue.add(jsArray);
-    }
-
-    private void getUpcomingPaths() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = getString(R.string.server_url)+"getUpcomingPaths/";
-        JsonArrayRequest jsArray2 = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    upcomingPuzzlesTitles = new String[response.length()];
-                    for (int i = 0; i < response.length(); i++) {
-                        JSONObject jsObj = (JSONObject) response.get(i);
-                        upcomingPuzzlesTitles[i] = jsObj.getString("title") + "  - coming soon!";
-                        ArrayAdapter<?> adapter = new ArrayAdapter<Object>(PuzzlePortalActivity.this, android.R.layout.simple_selectable_list_item, upcomingPuzzlesTitles);
-                        upcomingPuzzlesListView.setAdapter(adapter);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
-
-        queue.add(jsArray2);
     }
 
 }

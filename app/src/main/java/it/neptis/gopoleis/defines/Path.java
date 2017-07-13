@@ -6,16 +6,16 @@ public class Path {
 
     private int code;
     private String title;
-    private Question question;
     private Heritage heritage;
     private List<Stage> stages;
+    private boolean completed;
 
-    public Path(int code, String title, Question question, Heritage heritage, List<Stage> stages) {
+    public Path(int code, String title, Heritage heritage, List<Stage> stages, boolean completed) {
         this.code = code;
         this.title = title;
-        this.question = question;
         this.heritage = heritage;
         this.stages = stages;
+        this.completed = completed;
     }
 
     public int getCode() {
@@ -34,14 +34,6 @@ public class Path {
         this.title = title;
     }
 
-    public Question getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(Question question) {
-        this.question = question;
-    }
-
     public Heritage getHeritage() {
         return heritage;
     }
@@ -58,4 +50,11 @@ public class Path {
         this.stages = stages;
     }
 
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
 }
