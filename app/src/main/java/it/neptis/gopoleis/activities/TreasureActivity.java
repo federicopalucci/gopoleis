@@ -42,8 +42,7 @@ public class TreasureActivity extends AppCompatActivity {
 
     private static final String TAG = "TreasureaActivity";
 
-    private String t_lat, t_lon, t_info;
-    private String treasure_code;
+    private String treasureCode;
 
     private TextView info, latitude, longitude;
     private ImageView coffer;
@@ -66,11 +65,9 @@ public class TreasureActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        Bundle extras = getIntent().getExtras();
-
         opened = false;
 
-        treasure_code = extras.getString("code");
+        treasureCode = getIntent().getStringExtra("code");
 
         info = (TextView) findViewById(R.id.treasure_description);
         latitude = (TextView) findViewById(R.id.treasure_latitude);
@@ -78,15 +75,6 @@ public class TreasureActivity extends AppCompatActivity {
         coffer = (ImageView) findViewById(R.id.treasure_image);
 
         getSetTreasureInfo();
-
-        boolean found = extras.getBoolean("found");
-
-        if (found) {
-            treasureFound();
-        } else {
-            treasureNotFound();
-        }
-
     }
 
     private void treasureFound() {
@@ -107,7 +95,7 @@ public class TreasureActivity extends AppCompatActivity {
                 //una volta cliccato sul bottone open_treasure
                 //aggiungo il tesoro a GT e apro di nuovo TreasureInfoActivity passandogli game1SessionCode
                 RequestQueue queue = Volley.newRequestQueue(v.getContext());
-                String url = getString(R.string.server_url) + "addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasure_code + "/";
+                String url = getString(R.string.server_url) + "addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasureCode + "/";
 
                 // Request a string response from the provided URL.
                 JsonObjectRequest jsAddTreasToGame = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -212,12 +200,35 @@ public class TreasureActivity extends AppCompatActivity {
     }
 
     private void getSetTreasureInfo() {
-        t_info = getIntent().getStringExtra("description");
-        t_lat = getIntent().getStringExtra("latitude");
-        t_lon = getIntent().getStringExtra("longitude");
-        info.setText(t_info);
-        latitude.setText(String.format(getString(R.string.latitude), t_lat));
-        longitude.setText(String.format(getString(R.string.longitude), t_lon));
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = getString(R.string.server_url) + "getInfoTreasure/" + treasureCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
+        JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    for (int i = 0; i < response.length(); i++) {
+                        JSONObject jsObj = (JSONObject) response.get(i);
+                        info.setText(jsObj.getString("description"));
+                        latitude.setText(String.format(getString(R.string.latitude),jsObj.getString("latitude")));
+                        longitude.setText(String.format(getString(R.string.longitude),jsObj.getString("longitude")));
+                        if (jsObj.getInt("found") == 1) {
+                            treasureFound();
+                        } else {
+                            treasureNotFound();
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
+
+        queue.add(jsHeritageInfo);
     }
 
     public void generateCards() {
@@ -256,7 +267,7 @@ public class TreasureActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (opened) {
             Intent backToTreasurePortal = new Intent();
-            backToTreasurePortal.putExtra("code", treasure_code);
+            backToTreasurePortal.putExtra("code", treasureCode);
             setResult(Activity.RESULT_OK, backToTreasurePortal);
         }
         else

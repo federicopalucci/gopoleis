@@ -118,8 +118,8 @@ public class PortalsMainActivity extends AppCompatActivity {
         bluePortalButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast toast = Toast.makeText(view.getContext(), "Blue portal", Toast.LENGTH_SHORT);
-                toast.show();
+                //Toast.makeText(view.getContext(), "Blue portal", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(PortalsMainActivity.this, MainActivity.class));
             }
         });
     }

@@ -38,7 +38,6 @@ public class PathActivity extends AppCompatActivity {
     private String[] stagesTitles;
     private String title;
     private Path path;
-    private GopoleisApp gopoleisApp;
     private TextView pathAlreadyCompleted;
     private FirebaseAuth mAuth;
 
@@ -47,7 +46,6 @@ public class PathActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_path);
 
-        gopoleisApp = (GopoleisApp) getApplicationContext();
         mAuth = FirebaseAuth.getInstance();
 
         TextView titleTextView = (TextView) findViewById(R.id.path_title);
@@ -61,7 +59,7 @@ public class PathActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent toStageActivity = new Intent(PathActivity.this, StageActivity.class);
-                gopoleisApp.setStage(path.getStages().get(position));
+                toStageActivity.putExtra("code", String.valueOf(path.getStages().get(position).getCode()));
                 startActivity(toStageActivity);
             }
         });

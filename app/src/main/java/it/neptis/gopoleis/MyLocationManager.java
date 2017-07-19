@@ -1,10 +1,13 @@
 package it.neptis.gopoleis;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -29,8 +32,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import it.neptis.gopoleis.activities.TravelPortalActivity;
+import it.neptis.gopoleis.activities.TreasurePortalPag2Activity;
 
-class MyLocationManager {
+public class MyLocationManager {
 
     private static String TAG = "MyLocationManager";
     private static final int LOCATION_SETTINGS_CHECK_REQUEST_CODE = 2;
@@ -89,13 +93,52 @@ class MyLocationManager {
         Log.d(TAG, "requesting location updates");
     }
 
-    private LatLng getCurrentLatLng(){
+    public LatLng getCurrentLatLng(){
         return playerLatLng;
     }
 
-    private void stopLocationUpdates() {
+    public void stopLocationUpdates() {
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
         Log.d(TAG, "stopping location updates");
+    }
+
+    public void checkLocationSettings(final Activity activity) {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+        SettingsClient client = LocationServices.getSettingsClient(activity);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+        task.addOnSuccessListener(activity, new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                Log.d(TAG, "locationSettingsResponse onSuccess called");
+            }
+        });
+
+        task.addOnFailureListener(activity, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                int statusCode = ((ApiException) e).getStatusCode();
+                switch (statusCode) {
+                    case CommonStatusCodes.RESOLUTION_REQUIRED:
+                        Log.d(TAG, "Need resolution");
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            ResolvableApiException resolvable = (ResolvableApiException) e;
+                            resolvable.startResolutionForResult(activity,
+                                    LOCATION_SETTINGS_CHECK_REQUEST_CODE);
+                        } catch (IntentSender.SendIntentException sendEx) {
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way
+                        // to fix the settings so we won't show the dialog.
+                        break;
+                }
+            }
+        });
     }
 
 }

@@ -16,25 +16,6 @@ public class GopoleisApp extends MultiDexApplication {
 
     private static String TAG = "GopoleisApp";
 
-    private List<Heritage> heritages;
-    private Stage stage;
-
-    public List<Heritage> getHeritages() {
-        return heritages;
-    }
-
-    public void setHeritages(List<Heritage> heritages) {
-        this.heritages = heritages;
-    }
-
-    public Stage getStage() {
-        return stage;
-    }
-
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();

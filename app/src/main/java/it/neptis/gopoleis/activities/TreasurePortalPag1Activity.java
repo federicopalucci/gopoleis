@@ -46,15 +46,10 @@ public class TreasurePortalPag1Activity extends AppCompatActivity implements OnI
     ImageView lente = null;
     String item;
 
-    private GopoleisApp gopoleisApp;
-    private List<Heritage> heritages = new ArrayList<>();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_treasure_portal_pag1);
-
-        gopoleisApp = (GopoleisApp) getApplicationContext();
 
         lente = (ImageView) findViewById(R.id.lens);
 
@@ -81,20 +76,11 @@ public class TreasurePortalPag1Activity extends AppCompatActivity implements OnI
                     spinner_options[0] = "";
                     for (int i = 0; i < contLength; i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        int code = jsObj.getInt("code");
-                        String name = jsObj.getString("name");
-                        String description = jsObj.getString("description");
-                        String latitude = jsObj.getString("latitude");
-                        String longitude = jsObj.getString("longitude");
-                        Heritage tempHeritage = new Heritage(code,name,description,latitude,longitude,new ArrayList<Treasure>());
-                        heritages.add(tempHeritage);
-
-                        spinner_options[i + 1] = name;
-                        ArrayAdapter<?> adapter = new ArrayAdapter<Object>(TreasurePortalPag1Activity.this, android.R.layout.simple_spinner_dropdown_item, spinner_options);
-                        dropdown.setAdapter(adapter);
-                        dropdown.setOnItemSelectedListener(TreasurePortalPag1Activity.this);
+                        spinner_options[i + 1] = jsObj.getString("name");
                     }
-                    gopoleisApp.setHeritages(heritages);
+                    ArrayAdapter<?> adapter = new ArrayAdapter<Object>(TreasurePortalPag1Activity.this, android.R.layout.simple_spinner_dropdown_item, spinner_options);
+                    dropdown.setAdapter(adapter);
+                    dropdown.setOnItemSelectedListener(TreasurePortalPag1Activity.this);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -144,12 +130,6 @@ public class TreasurePortalPag1Activity extends AppCompatActivity implements OnI
                 startActivity(openAchievements);
             }
         });
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        gopoleisApp.setHeritages(null);
     }
 
     // Handle spinner items clicks

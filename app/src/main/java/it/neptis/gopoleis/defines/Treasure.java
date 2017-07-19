@@ -7,11 +7,11 @@ public class Treasure {
     private String description;
     private String latitude;
     private String longitude;
-    private String heritage;
+    private int heritage;
 
     private boolean found;
 
-    public Treasure(int code, String title, String description, String latitude, String longitude, String heritage, boolean found) {
+    public Treasure(int code, String title, String description, String latitude, String longitude, int heritage, boolean found) {
         this.code = code;
         this.title = title;
         this.description = description;
@@ -61,11 +61,11 @@ public class Treasure {
         this.longitude = longitude;
     }
 
-    public String getHeritage() {
+    public int getHeritage() {
         return heritage;
     }
 
-    public void setHeritage(String heritage) {
+    public void setHeritage(int heritage) {
         this.heritage = heritage;
     }
 

@@ -2,10 +2,7 @@ package it.neptis.gopoleis.activities;
 
 import android.Manifest;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -15,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import it.neptis.gopoleis.MyLocationManager;
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.defines.ClusterMarker;
 import it.neptis.gopoleis.defines.CustomClusterRenderer;
@@ -26,18 +24,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResponse;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -47,9 +33,6 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
@@ -73,15 +56,11 @@ public class TravelPortalActivity extends FragmentActivity implements OnMapReady
     private FirebaseAuth mAuth;
     private List<Heritage> heritages;
     private GoogleMap mMap;
-    private LocationRequest mLocationRequest;
-    private LocationCallback mLocationCallback;
-    private FusedLocationProviderClient mFusedLocationClient;
-    private boolean mRequestingLocationUpdates = false;
-    private LatLng playerLatLng;
     private boolean firstTimeZoom = true;
     private ClusterManager<ClusterMarker> mClusterManager;
     // 2km range
     private static final int RANGE_METERS = 3 * 100;
+    private MyLocationManager myLocationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,66 +78,8 @@ public class TravelPortalActivity extends FragmentActivity implements OnMapReady
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(TravelPortalActivity.this);
-
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                Location lastLocation = locationResult.getLastLocation();
-                playerLatLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                Log.d(TAG, "player location has changed!");
-                if (firstTimeZoom) {
-                    CameraPosition cameraPosition = new CameraPosition.Builder().target(playerLatLng).zoom(15).build();
-                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                    firstTimeZoom = false;
-                }
-            }
-        };
-
-        // Location request
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(1000 * 20);
-        mLocationRequest.setFastestInterval(1000 * 10);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
-        SettingsClient client = LocationServices.getSettingsClient(this);
-        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
-
-        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                Log.d(TAG, "locationSettingsResponse onSuccess called");
-                mRequestingLocationUpdates = true;
-                startLocationUpdates();
-            }
-        });
-
-        task.addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                int statusCode = ((ApiException) e).getStatusCode();
-                switch (statusCode) {
-                    case CommonStatusCodes.RESOLUTION_REQUIRED:
-                        Log.d(TAG, "need resolution");
-                        try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            ResolvableApiException resolvable = (ResolvableApiException) e;
-                            resolvable.startResolutionForResult(TravelPortalActivity.this,
-                                    LOCATION_SETTINGS_CHECK_REQUEST_CODE);
-                        } catch (IntentSender.SendIntentException sendEx) {
-                            // Ignore the error.
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        // Location settings are not satisfied. However, we have no way
-                        // to fix the settings so we won't show the dialog.
-                        break;
-                }
-            }
-        });
+        myLocationManager = MyLocationManager.getInstance(this);
+        myLocationManager.checkLocationSettings(this);
 
         // Achievements button
         ImageButton achievement = (ImageButton) findViewById(R.id.achievement);
@@ -179,42 +100,6 @@ public class TravelPortalActivity extends FragmentActivity implements OnMapReady
                 startActivity(openMedalsActivity);
             }
         });
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopLocationUpdates();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mRequestingLocationUpdates) {
-            startLocationUpdates();
-        }
-    }
-
-    private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                mLocationCallback,
-                null /* Looper */);
-        Log.d(TAG, "requesting location updates");
-    }
-
-    private void stopLocationUpdates() {
-        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-        Log.d(TAG, "stopping location updates");
     }
 
     public void getHeritagesGame2() {
@@ -261,7 +146,6 @@ public class TravelPortalActivity extends FragmentActivity implements OnMapReady
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        //mMap.setOnMarkerClickListener(this);
         mClusterManager = new ClusterManager<ClusterMarker>(this, mMap);
         mClusterManager.setRenderer(new CustomClusterRenderer(this, mMap, mClusterManager));
         mMap.setOnMarkerClickListener(mClusterManager);
@@ -284,13 +168,7 @@ public class TravelPortalActivity extends FragmentActivity implements OnMapReady
 
     private void placeMarkers() {
         for (Heritage tempHeritage : heritages) {
-            /*
-            mMap.addMarker(new MarkerOptions()
-                    .position(tempLatLng)
-                    .title(String.valueOf(tempHeritage.getCode()))
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-                    */
-            ClusterMarker tempClusterMarker = new ClusterMarker(Double.parseDouble(tempHeritage.getLatitude()), Double.parseDouble(tempHeritage.getLongitude()), String.valueOf(tempHeritage.getCode()), null, tempHeritage);
+            ClusterMarker tempClusterMarker = new ClusterMarker(Double.parseDouble(tempHeritage.getLatitude()), Double.parseDouble(tempHeritage.getLongitude()), String.valueOf(tempHeritage.getCode()), null, tempHeritage.isVisited());
             mClusterManager.addItem(tempClusterMarker);
         }
     }
@@ -300,11 +178,12 @@ public class TravelPortalActivity extends FragmentActivity implements OnMapReady
         if (requestCode == LOCATION_SETTINGS_CHECK_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Log.d(TAG, "location services enabled");
-                mRequestingLocationUpdates = true;
-                startLocationUpdates();
+                CameraPosition cameraPosition = new CameraPosition.Builder().target(myLocationManager.getCurrentLatLng()).zoom(15).build();
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             } else {
                 Log.d(TAG, "location services not enabled");
                 Toast.makeText(this, getString(R.string.need_location_permission), Toast.LENGTH_LONG).show();
+                finish();
             }
         }
     }
@@ -331,28 +210,20 @@ public class TravelPortalActivity extends FragmentActivity implements OnMapReady
 
     @Override
     public boolean onClusterItemClick(ClusterMarker clusterMarker) {
-        if (playerLatLng != null) {
+        if (myLocationManager.getCurrentLatLng() != null) {
             // TODO Implement validity areas
             //boolean inRange = SphericalUtil.computeDistanceBetween(playerLatLng, getLatLngByHeritageCode(Integer.parseInt(marker.getTitle()))) <= RANGE_METERS;
             boolean inRange = true;
             if (inRange) {
                 Intent toHeritageActivity = new Intent(TravelPortalActivity.this, HeritageActivity.class);
-                if (!clusterMarker.getHeritage().isVisited()) {
+                if (!clusterMarker.isObtained()) {
                     toHeritageActivity.putExtra("firstTime", true);
                     visitedHeritagesCount++;
-                    clusterMarker.getHeritage().setVisited(true);
+                    clusterMarker.setObtained(true);
                     visitedHeritagesCounter.setText(String.valueOf(visitedHeritagesCount));
                     repaintMarkerGreen(clusterMarker.getTitle());
                 }
-                toHeritageActivity.putExtra("code", clusterMarker.getHeritage().getCode());
-                toHeritageActivity.putExtra("name", clusterMarker.getHeritage().getName());
-                toHeritageActivity.putExtra("description", clusterMarker.getHeritage().getDescription());
-                toHeritageActivity.putExtra("latitude", clusterMarker.getHeritage().getLatitude());
-                toHeritageActivity.putExtra("longitude", clusterMarker.getHeritage().getLongitude());
-                toHeritageActivity.putExtra("historicalperiod", clusterMarker.getHeritage().getHistoricalPeriod());
-                toHeritageActivity.putExtra("structuretype", clusterMarker.getHeritage().getStructureType());
-                toHeritageActivity.putExtra("province", clusterMarker.getHeritage().getProvince());
-                toHeritageActivity.putExtra("region", clusterMarker.getHeritage().getProvince());
+                toHeritageActivity.putExtra("code", clusterMarker.getTitle());
                 startActivity(toHeritageActivity);
             } else {
                 Toast.makeText(TravelPortalActivity.this, getString(R.string.too_far), Toast.LENGTH_LONG).show();
@@ -366,7 +237,7 @@ public class TravelPortalActivity extends FragmentActivity implements OnMapReady
 
     private void repaintMarkerGreen(String title) {
         Collection<Marker> markerCollection = mClusterManager.getMarkerCollection().getMarkers();
-        for (Marker tempMarker : markerCollection){
+        for (Marker tempMarker : markerCollection) {
             if (tempMarker.getTitle().equals(title))
                 tempMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         }

@@ -28,9 +28,8 @@ public class HeritageActivity extends AppCompatActivity {
     private static final String TAG = "HeritageActivity";
 
     private TextView name, structureType, latitude, longitude, province, region, historicalPeriod, description;
-    private int heritageCode;
+    private String heritageCode;
     private FirebaseAuth mAuth;
-    boolean firstTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +38,7 @@ public class HeritageActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        heritageCode = getIntent().getIntExtra("code", 0);
-        firstTime = getIntent().getBooleanExtra("firstTime", false);
+        heritageCode = getIntent().getStringExtra("code");
 
         name = (TextView) findViewById(R.id.heritage_name);
         structureType = (TextView) findViewById(R.id.heritage_structuretype);
@@ -53,12 +51,7 @@ public class HeritageActivity extends AppCompatActivity {
 
         // TODO Check for medals unlocking
 
-        setHeritageInfo();
-
-        if (firstTime) {
-            addVisitedHeritage();
-            showDialog(getString(R.string.congratulations), getString(R.string.congratulations_heritage));
-        }
+        getHeritage();
     }
 
     private void showDialog(String title, String message) {
@@ -74,16 +67,41 @@ public class HeritageActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void setHeritageInfo() {
-        Bundle bundle = getIntent().getExtras();
-        name.setText(bundle.getString("name"));
-        structureType.setText(String.format(getString(R.string.structuretype), bundle.getString("structuretype")));
-        latitude.setText((String.format(getString(R.string.latitude), bundle.getString("latitude"))));
-        longitude.setText((String.format(getString(R.string.longitude), bundle.getString("longitude"))));
-        province.setText((String.format(getString(R.string.province), bundle.getString("province"))));
-        region.setText((String.format(getString(R.string.region), bundle.getString("region"))));
-        historicalPeriod.setText((String.format(getString(R.string.historicalperiod), bundle.getString("historicalperiod"))));
-        description.setText(bundle.getString("description"));
+    private void getHeritage() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = getString(R.string.server_url) + "getHeritageInfo/" + heritageCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
+        JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    for (int i = 0; i < response.length(); i++) {
+                        JSONObject jsObj = (JSONObject) response.get(i);
+                        name.setText(jsObj.getString("name"));
+                        structureType.setText(String.format(getString(R.string.structuretype), jsObj.getString("structuretype")));
+                        latitude.setText((String.format(getString(R.string.latitude), jsObj.getString("latitude"))));
+                        longitude.setText((String.format(getString(R.string.longitude), jsObj.getString("longitude"))));
+                        province.setText((String.format(getString(R.string.province), jsObj.getString("province"))));
+                        region.setText((String.format(getString(R.string.region), jsObj.getString("region"))));
+                        historicalPeriod.setText((String.format(getString(R.string.historicalperiod), jsObj.getString("historicalperiod"))));
+                        description.setText(jsObj.getString("description"));
+
+                        if (jsObj.getInt("visited") == 0){
+                            addVisitedHeritage();
+                            showDialog(getString(R.string.congratulations), getString(R.string.congratulations_heritage));
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
+
+        queue.add(jsHeritageInfo);
     }
 
     private void addVisitedHeritage() {

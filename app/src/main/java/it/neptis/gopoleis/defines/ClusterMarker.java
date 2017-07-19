@@ -5,22 +5,16 @@ import com.google.maps.android.clustering.ClusterItem;
 
 public class ClusterMarker implements ClusterItem {
 
-    private final LatLng mPosition;
-    private final String mTitle;
-    private final String mSnippet;
-    private Heritage heritage;
+    private LatLng mPosition;
+    private String mTitle;
+    private String mSnippet;
+    private boolean mObtained;
 
-    public ClusterMarker(double lat, double lng) {
-        mPosition = new LatLng(lat, lng);
-        mTitle = "";
-        mSnippet = "";
-    }
-
-    public ClusterMarker(double lat, double lng, String title, String snippet, Heritage heritage) {
+    public ClusterMarker(double lat, double lng, String title, String snippet, boolean obtained) {
         mPosition = new LatLng(lat, lng);
         mTitle = title;
         mSnippet = snippet;
-        this.heritage = heritage;
+        mObtained = obtained;
     }
 
     @Override
@@ -38,11 +32,11 @@ public class ClusterMarker implements ClusterItem {
         return mSnippet;
     }
 
-    public Heritage getHeritage() {
-        return heritage;
+    public boolean isObtained() {
+        return mObtained;
     }
 
-    public void setHeritage(Heritage heritage) {
-        this.heritage = heritage;
+    public void setObtained(boolean mObtained) {
+        this.mObtained = mObtained;
     }
 }
