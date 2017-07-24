@@ -2,13 +2,16 @@ package it.neptis.gopoleis.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -63,6 +66,13 @@ public class StageActivity extends AppCompatActivity {
         answerButton = (ImageButton) findViewById(R.id.answerButton);
 
         mAuth = FirebaseAuth.getInstance();
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setTitle(R.string.stage);
 
         getStage();
     }
@@ -138,11 +148,17 @@ public class StageActivity extends AppCompatActivity {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(StageActivity.this);
                                     builder.setTitle(R.string.input_answer);
                                     final EditText answerEditText = new EditText(StageActivity.this);
+                                    answerEditText.requestFocus();
+                                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,InputMethodManager.HIDE_IMPLICIT_ONLY);
+                                    answerEditText.requestFocus();
                                     answerEditText.setInputType(InputType.TYPE_CLASS_TEXT);
                                     builder.setView(answerEditText);
                                     builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
+                                            InputMethodManager imm = (InputMethodManager) getSystemService(StageActivity.INPUT_METHOD_SERVICE);
+                                            imm.hideSoftInputFromWindow(answerEditText.getWindowToken(), 0);
                                             userAnswer = answerEditText.getText().toString();
                                             submitStageAnswer();
                                         }
@@ -150,6 +166,8 @@ public class StageActivity extends AppCompatActivity {
                                     builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
+                                            InputMethodManager imm = (InputMethodManager) getSystemService(StageActivity.INPUT_METHOD_SERVICE);
+                                            imm.hideSoftInputFromWindow(answerEditText.getWindowToken(), 0);
                                             dialog.cancel();
                                         }
                                     });

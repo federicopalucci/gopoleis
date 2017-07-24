@@ -2,15 +2,12 @@ package it.neptis.gopoleis;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
@@ -24,15 +21,10 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-
-import it.neptis.gopoleis.activities.TravelPortalActivity;
-import it.neptis.gopoleis.activities.TreasurePortalPag2Activity;
 
 public class MyLocationManager {
 
@@ -46,15 +38,18 @@ public class MyLocationManager {
     private FusedLocationProviderClient mFusedLocationClient;
     private Context mContext;
     private LatLng playerLatLng;
+    private boolean requestingLocationUpdates;
 
-    public static MyLocationManager getInstance(Context context){
+    public static MyLocationManager getInstance(Context context) {
         if (instance == null)
             instance = new MyLocationManager(context.getApplicationContext());
         return instance;
     }
 
-    private MyLocationManager(Context context){
+    private MyLocationManager(Context context) {
         this.mContext = context;
+
+        requestingLocationUpdates = false;
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext);
 
@@ -76,7 +71,7 @@ public class MyLocationManager {
         startLocationUpdates();
     }
 
-    private void startLocationUpdates() {
+    public void startLocationUpdates() {
         if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
@@ -87,18 +82,22 @@ public class MyLocationManager {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+        if (requestingLocationUpdates)
+            return;
         mFusedLocationClient.requestLocationUpdates(mLocationRequest,
                 mLocationCallback,
                 null /* Looper */);
+        requestingLocationUpdates = true;
         Log.d(TAG, "requesting location updates");
     }
 
-    public LatLng getCurrentLatLng(){
+    public LatLng getCurrentLatLng() {
         return playerLatLng;
     }
 
     public void stopLocationUpdates() {
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        requestingLocationUpdates = false;
         Log.d(TAG, "stopping location updates");
     }
 

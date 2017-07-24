@@ -44,7 +44,7 @@ public class CustomClusterRenderer extends DefaultClusterRenderer<ClusterMarker>
             case "treasure":
                 Drawable treasureDrawable;
                 if (!item.isObtained())
-                    treasureDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.chest_closed, null);
+                    treasureDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.cards_icon, null);
                 else
                     treasureDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.chest_opened, null);
                 markerOptions.icon(getMarkerIconFromDrawable(treasureDrawable));

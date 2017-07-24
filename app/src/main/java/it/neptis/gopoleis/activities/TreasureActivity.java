@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -74,6 +75,13 @@ public class TreasureActivity extends AppCompatActivity {
         longitude = (TextView) findViewById(R.id.treasure_longitude);
         coffer = (ImageView) findViewById(R.id.treasure_image);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setTitle(R.string.booster_pack);
+
         getSetTreasureInfo();
     }
 
@@ -92,8 +100,6 @@ public class TreasureActivity extends AppCompatActivity {
         open_treasure.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //una volta cliccato sul bottone open_treasure
-                //aggiungo il tesoro a GT e apro di nuovo TreasureInfoActivity passandogli game1SessionCode
                 RequestQueue queue = Volley.newRequestQueue(v.getContext());
                 String url = getString(R.string.server_url) + "addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasureCode + "/";
 
@@ -118,7 +124,7 @@ public class TreasureActivity extends AppCompatActivity {
     private void treasureOpened() {
         // TODO Card rarity, also in layout.xml
         opened = true;
-        coffer.setImageResource(R.drawable.forziere_aperto);
+        //coffer.setImageResource(0);
         View dynamicTreasureView = findViewById(R.id.dynamicTreasureView);
         ViewGroup parent = (ViewGroup) dynamicTreasureView.getParent();
         int index = parent.indexOfChild(dynamicTreasureView);

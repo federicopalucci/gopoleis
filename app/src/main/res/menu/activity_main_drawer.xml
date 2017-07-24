@@ -40,11 +40,11 @@
     <item android:title="Enigmi">
         <menu>
             <item
-                android:id="@+id/nav_fds"
+                android:id="@+id/nav_active_paths"
                 android:icon="@drawable/ic_menu_share"
                 android:title="Percorsi attivi" />
             <item
-                android:id="@+id/vre"
+                android:id="@+id/nav_my_paths"
                 android:icon="@drawable/ic_menu_send"
                 android:title="I miei percorsi" />
         </menu>
@@ -54,5 +54,15 @@
         android:id="@+id/nav_medals"
         android:icon="@drawable/medal_image"
         android:title="Medaglie" />
+
+    <item
+        android:id="@+id/nav_rankings"
+        android:icon="@drawable/ic_ranking"
+        android:title="Classifiche" />
+
+    <item
+        android:id="@+id/nav_logout"
+        android:icon="@drawable/exit_logout"
+        android:title="Logout" />
 
 </menu>

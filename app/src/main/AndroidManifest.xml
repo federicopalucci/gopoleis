@@ -27,10 +27,46 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+        <meta-data
+            android:name="android.app.default_searchable"
+            android:value="SearchResultsActivity" />
 
         <activity
-            android:name=".activities.PortalsMainActivity"
-            android:label="GoPoleis"
+            android:name=".activities.MedalsActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.ManageCardsActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.CardDetailsActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.TreasureActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.HeritageActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.PathActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.StageActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.MyPathsActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.MainActivity"
+            android:label="@string/title_activity_main"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,50 +75,23 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.TreasurePortalPag1Activity"
-            android:parentActivityName=".activities.PortalsMainActivity"
-            android:screenOrientation="portrait" />
+            android:name=".activities.SearchResultsActivity"
+            android:label="@string/title_activity_search_results"
+            android:launchMode="singleTop"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
         <activity
-            android:name=".activities.TreasurePortalPag2Activity"
-            android:parentActivityName=".activities.TreasurePortalPag1Activity"
+            android:name=".activities.RankingActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.TravelPortalActivity"
-            android:parentActivityName=".activities.PortalsMainActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.MedalsActivity"
-            android:parentActivityName=".activities.TravelPortalActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.PuzzlePortalActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.AchievementsActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.ManageCardsActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.CardDetailsActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.TreasureActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.HeritageActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.PathActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.StageActivity"
-            android:screenOrientation="portrait" />
-        <activity android:name=".activities.MyPathsActivity" />
-        <activity
-            android:name=".activities.MainActivity"
-            android:label="@string/title_activity_main"
-            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>
