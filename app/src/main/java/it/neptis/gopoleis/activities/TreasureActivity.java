@@ -30,6 +30,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -37,7 +39,7 @@ import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.adapters.CardAdapter;
 import it.neptis.gopoleis.adapters.ClickListener;
 import it.neptis.gopoleis.adapters.RecyclerTouchListener;
-import it.neptis.gopoleis.defines.Card;
+import it.neptis.gopoleis.model.Card;
 
 public class TreasureActivity extends AppCompatActivity {
 
@@ -139,7 +141,7 @@ public class TreasureActivity extends AppCompatActivity {
         // ------------------------------------------------------------------------
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.carte_forziere);
 
-        cardAdapter = new CardAdapter(treas_card_list);
+        cardAdapter = new CardAdapter(TreasureActivity.this, treas_card_list);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -175,7 +177,8 @@ public class TreasureActivity extends AppCompatActivity {
                         c_name = jsObj.getString("name");
                         c_cost = jsObj.getString("cost");
                         c_description = jsObj.getString("description");
-                        treas_card_list.add(new Card(c_code, c_cost, c_name, c_description));
+                        String filename = jsObj.getString("filename");
+                        treas_card_list.add(new Card(c_code, c_cost, c_name, c_description, getString(R.string.server_url) + "images/cards/" + filename));
                     }
                     cardAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
@@ -215,8 +218,8 @@ public class TreasureActivity extends AppCompatActivity {
                     for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
                         info.setText(jsObj.getString("description"));
-                        latitude.setText(String.format(getString(R.string.latitude),jsObj.getString("latitude")));
-                        longitude.setText(String.format(getString(R.string.longitude),jsObj.getString("longitude")));
+                        latitude.setText(String.format(getString(R.string.latitude), jsObj.getString("latitude")));
+                        longitude.setText(String.format(getString(R.string.longitude), jsObj.getString("longitude")));
                         if (jsObj.getInt("found") == 1) {
                             treasureFound();
                         } else {
@@ -238,14 +241,14 @@ public class TreasureActivity extends AppCompatActivity {
     }
 
     public void generateCards() {
-        // TODO duplicate random numbers can occur
-        for (int i = 0; i < 5; i++) {
-            int j = 1;
-            int n = 20 - j;
-            int RESULT = (int) (Math.random() * n + j);
-
-            String card_code = String.valueOf(RESULT);
-            random_card_codes[i] = card_code;
+        // TODO hardcoded card number
+        ArrayList<Integer> list = new ArrayList<Integer>();
+        for (int i = 1; i <= 20; i++) {
+            list.add(i);
+        }
+        Collections.shuffle(list);
+        for (int i = 0; i < random_card_codes.length; i++) {
+            random_card_codes[i] = String.valueOf(list.get(i));
         }
     }
 
@@ -270,13 +273,18 @@ public class TreasureActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
+    }
+
+    @Override
     public void onBackPressed() {
         if (opened) {
             Intent backToTreasurePortal = new Intent();
             backToTreasurePortal.putExtra("code", treasureCode);
             setResult(Activity.RESULT_OK, backToTreasurePortal);
-        }
-        else
+        } else
             setResult(Activity.RESULT_CANCELED);
         finish();
     }

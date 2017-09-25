@@ -9,12 +9,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.List;
-
 import it.neptis.gopoleis.R;
-import it.neptis.gopoleis.defines.Achievement;
-import it.neptis.gopoleis.defines.Path;
-import it.neptis.gopoleis.defines.SearchResult;
+import it.neptis.gopoleis.model.SearchResult;
 
 public class SearchResultAdapter extends ArrayAdapter<SearchResult> {
 

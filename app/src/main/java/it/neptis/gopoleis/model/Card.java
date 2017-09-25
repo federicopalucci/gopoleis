@@ -1,18 +1,15 @@
-package it.neptis.gopoleis.defines;
-
-import android.util.Log;
-
-import it.neptis.gopoleis.R;
+package it.neptis.gopoleis.model;
 
 public class Card {
 
-    private String code, cost, name, description;
+    private String code, cost, name, description, filepath;
 
-    public Card(String cod, String cost, String n, String d) {
+    public Card(String cod, String cost, String n, String d, String filepath) {
         this.code = cod;
         this.cost = cost;
         this.name = n;
         this.description = d;
+        this.filepath = filepath;
     }
 
     public Card(String cost, String n, String d) {
@@ -35,6 +32,10 @@ public class Card {
 
     public String getDescription() {
         return this.description;
+    }
+
+    public String getFilepath() {
+        return this.filepath;
     }
 
 }

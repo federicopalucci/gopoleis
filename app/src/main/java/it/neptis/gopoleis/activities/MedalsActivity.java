@@ -29,7 +29,7 @@ import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.adapters.ClickListener;
 import it.neptis.gopoleis.adapters.MedalAdapter;
 import it.neptis.gopoleis.adapters.RecyclerTouchListener;
-import it.neptis.gopoleis.defines.Medal;
+import it.neptis.gopoleis.model.Medal;
 
 public class MedalsActivity extends AppCompatActivity {
 

@@ -27,7 +27,7 @@ import java.util.List;
 
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.adapters.SearchResultAdapter;
-import it.neptis.gopoleis.defines.SearchResult;
+import it.neptis.gopoleis.model.SearchResult;
 
 public class SearchResultsActivity extends AppCompatActivity {
 

@@ -2,10 +2,12 @@ package it.neptis.gopoleis.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -13,16 +15,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,6 +38,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
@@ -49,9 +52,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.CustomCap;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -67,6 +68,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.TwitterAuthProvider;
+import com.google.maps.android.SphericalUtil;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
@@ -83,9 +85,8 @@ import java.util.List;
 
 import it.neptis.gopoleis.MyLocationManager;
 import it.neptis.gopoleis.R;
-import it.neptis.gopoleis.defines.ClusterMarker;
-import it.neptis.gopoleis.defines.CustomClusterRenderer;
-import it.neptis.gopoleis.defines.Path;
+import it.neptis.gopoleis.model.ClusterMarker;
+import it.neptis.gopoleis.model.CustomClusterRenderer;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, GoogleMap.OnPolylineClickListener {
@@ -95,19 +96,19 @@ public class MainActivity extends AppCompatActivity
     private static final int RC_TREASURE = 3;
     private static final int RC_STAGE = 4;
     private static final int RC_SIGN_IN = 9001;
+    private static final int RC_HERITAGE = 5;
 
     private FirebaseAuth mAuth;
     private GoogleMap mMap;
     private ClusterManager<ClusterMarker> mClusterManager;
     private CustomClusterRenderer customClusterRenderer;
-    // 2km range
-    private static final int RANGE_METERS = 3 * 100;
     private MyLocationManager myLocationManager;
     private List<ClusterMarker> heritageClusterMarkers;
     private List<ClusterMarker> treasureClusterMarkers;
     private List<ClusterMarker> stageClusterMarkers;
     private ClusterMarker tempClusterMarker;
     private ActionBarDrawerToggle mDrawerToggle;
+    private List<Polyline> pathsPolylines;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +127,7 @@ public class MainActivity extends AppCompatActivity
         heritageClusterMarkers = new ArrayList<>();
         treasureClusterMarkers = new ArrayList<>();
         stageClusterMarkers = new ArrayList<>();
+        pathsPolylines = new ArrayList<>();
 
         // TODO ProgressDialog while loading
 
@@ -225,6 +227,20 @@ public class MainActivity extends AppCompatActivity
             }
             if (position != null)
                 mMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder().target(position).zoom(20).build()));
+        } else if (intent.hasExtra("path")) {
+            for (Polyline polyline : pathsPolylines) {
+                //noinspection ConstantConditions
+                if (polyline.getTag().equals(intent.getStringExtra("path"))) {
+                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                    Log.d(TAG, polyline.getPoints().toString());
+                    for (LatLng point : polyline.getPoints()) {
+                        Log.d(TAG, "point added");
+                        builder.include(point);
+                    }
+                    LatLngBounds bounds = builder.build();
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 50));
+                }
+            }
         }
     }
 
@@ -288,7 +304,6 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-
     private void firebaseLogin() {
         startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
                 .setAvailableProviders(
@@ -334,14 +349,18 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(this, ManageCardsActivity.class).putExtra("codice", 200));
         } else if (id == R.id.nav_all_cards) {
             startActivity(new Intent(this, ManageCardsActivity.class).putExtra("codice", 100));
-        } else if (id == R.id.nav_active_paths) {
+        }
+        /* else if (id == R.id.nav_active_paths) {
             Toast.makeText(this, "Active paths activity", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.nav_my_paths) {
             startActivity(new Intent(this, MyPathsActivity.class));
-        } else if (id == R.id.nav_medals) {
+        } */
+        else if (id == R.id.nav_medals) {
             startActivity(new Intent(this, MedalsActivity.class));
         } else if (id == R.id.nav_rankings) {
             startActivity(new Intent(this, RankingActivity.class));
+        } else if (id == R.id.nav_info) {
+            showDialog("info");
         } else if (id == R.id.nav_logout) {
             signOutUser();
         }
@@ -426,6 +445,7 @@ public class MainActivity extends AppCompatActivity
                         String longitude = jsObj.getString("longitude");
                         boolean found = jsObj.getInt("found") == 1;
                         if (!found) {
+                            //noinspection ConstantConditions
                             ClusterMarker tempClusterMarker = new ClusterMarker(Double.parseDouble(latitude), Double.parseDouble(longitude), String.valueOf(code), "treasure", found);
                             mClusterManager.addItem(tempClusterMarker);
                             treasureClusterMarkers.add(tempClusterMarker);
@@ -461,7 +481,7 @@ public class MainActivity extends AppCompatActivity
                         int code = jsObj.getInt("stagecode");
 
                         int pathCode = jsObj.getInt("pathcode");
-                        if (pathCode != prevPathCode) {
+                        if (pathCode != prevPathCode && prevPathCode != 0) {
                             Polyline polyline = mMap.addPolyline(new PolylineOptions()
                                     .clickable(true)
                                     .endCap(new RoundCap())
@@ -470,7 +490,9 @@ public class MainActivity extends AppCompatActivity
                                     .jointType(JointType.ROUND)
                                     .addAll(latLngs));
                             polyline.setTag(jsObj.getString("pathtitle"));
+                            Log.d(TAG, polyline.getPoints().toString());
                             latLngs.clear();
+                            pathsPolylines.add(polyline);
                         }
 
                         prevPathCode = pathCode;
@@ -489,7 +511,9 @@ public class MainActivity extends AppCompatActivity
                                     .jointType(JointType.ROUND)
                                     .addAll(latLngs));
                             polyline.setTag(jsObj.getString("pathtitle"));
+                            Log.d(TAG, polyline.getPoints().toString());
                             latLngs.clear();
+                            pathsPolylines.add(polyline);
                         }
 
                         boolean completed = jsObj.getInt("completed") == 1;
@@ -528,15 +552,23 @@ public class MainActivity extends AppCompatActivity
             if (resultCode == Activity.RESULT_OK) {
                 mClusterManager.removeItem(tempClusterMarker);
                 mClusterManager.cluster();
+                checkIfCanAdvanceInRankingAndShowDialog();
                 //setObtainedMarkerIcon(tempClusterMarker);
             }
         } else if (requestCode == RC_STAGE) {
             if (resultCode == Activity.RESULT_OK) {
                 for (int i = 0; i < stageClusterMarkers.size(); i++) {
-                    if (i != stageClusterMarkers.size() - 1 && stageClusterMarkers.get(i).getTitle().equals(tempClusterMarker.getTitle()))
+                    if (i != stageClusterMarkers.size() - 1 && stageClusterMarkers.get(i).getTitle().equals(tempClusterMarker.getTitle())) {
+                        Log.d(TAG, "found stage to be made clickable");
                         stageClusterMarkers.get(i + 1).setStageClickable(true);
+                    }
                 }
                 setObtainedMarkerIcon(tempClusterMarker);
+            }
+        } else if (requestCode == RC_HERITAGE) {
+            if (resultCode == Activity.RESULT_OK) {
+                Log.d(TAG, "onActivityResult Heritage");
+                checkIfCanAdvanceInRankingAndShowDialog();
             }
         } else if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
@@ -687,7 +719,8 @@ public class MainActivity extends AppCompatActivity
                             setObtainedMarkerIcon(clusterMarker);
                         }
                         toHeritageActivity.putExtra("code", clusterMarker.getTitle());
-                        startActivity(toHeritageActivity);
+                        tempClusterMarker = clusterMarker;
+                        startActivityForResult(toHeritageActivity, RC_HERITAGE);
                         break;
                     case "treasure":
                         Intent toTreasureActivity = new Intent(MainActivity.this, TreasureActivity.class);
@@ -726,6 +759,144 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onPolylineClick(Polyline polyline) {
         startActivity(new Intent(MainActivity.this, PathActivity.class).putExtra("title", (String) polyline.getTag()));
+    }
+
+    private ClusterMarker getClosestTreasureClusterMarker() {
+        LatLng playerLatLng = myLocationManager.getCurrentLatLng();
+        ClusterMarker result = null;
+        double minDistance = Double.MAX_VALUE;
+        for (ClusterMarker marker : treasureClusterMarkers) {
+            double tempDistance = SphericalUtil.computeDistanceBetween(playerLatLng, marker.getPosition());
+            if (tempDistance < minDistance) {
+                minDistance = tempDistance;
+                result = marker;
+            }
+        }
+        return result;
+    }
+
+    private ClusterMarker getClosestHeritageClusterMarker() {
+        LatLng playerLatLng = myLocationManager.getCurrentLatLng();
+        ClusterMarker result = null;
+        double minDistance = Double.MAX_VALUE;
+        for (ClusterMarker marker : heritageClusterMarkers) {
+            double tempDistance = SphericalUtil.computeDistanceBetween(playerLatLng, marker.getPosition());
+            if (tempDistance < minDistance && marker != tempClusterMarker && !marker.isObtained()) {
+                minDistance = tempDistance;
+                result = marker;
+            }
+        }
+        return result;
+    }
+
+    private void checkIfCanAdvanceInRankingAndShowDialog() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        //noinspection ConstantConditions
+        String url = getString(R.string.server_url) + "canAdvanceInRankingWithNextHeritage/" + mAuth.getCurrentUser().getEmail() + "/";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if (response.getBoolean("answer"))
+                        showDialog("newHeritage");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
+
+        queue.add(request);
+    }
+
+    /*
+    private void checkIfCanAdvanceInRankingWithNextHeritageAndShowDialog() {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        //noinspection ConstantConditions
+        String url = getString(R.string.server_url) + "canAdvanceInRankingWithNextHeritage/" + mAuth.getCurrentUser().getEmail() + "/";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    if (response.getBoolean("answer"))
+                        showDialog("newHeritage");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
+
+        queue.add(request);
+    }
+    */
+
+    private void showDialog(String parameter) {
+        final AlertDialog.Builder builder;
+        builder = new AlertDialog.Builder(MainActivity.this);
+        switch (parameter) {
+            /*
+            case "newTreasure":
+                builder.setMessage(R.string.can_advance_in_treasure_ranking)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ClusterMarker closestTreasureMarker = getClosestTreasureClusterMarker();
+                                CameraPosition cameraPosition = new CameraPosition.Builder().target(closestTreasureMarker.getPosition()).zoom(15).build();
+                                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                            }
+                        })
+                        .setNegativeButton(R.string.no_thanks, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            }
+                        })
+                        .setIcon(android.R.drawable.star_off)
+                        .show();
+                break;
+            */
+            case "newHeritage":
+                builder.setMessage(R.string.almost_advance_in_ranking)
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ClusterMarker closestHeritageMarker = getClosestHeritageClusterMarker();
+                                if (closestHeritageMarker == null) {
+                                    Toast.makeText(MainActivity.this, "Hai già visitato tutti i beni culturali disponibili", Toast.LENGTH_LONG).show();
+                                    return;
+                                }
+                                CameraPosition cameraPosition = new CameraPosition.Builder().target(closestHeritageMarker.getPosition()).zoom(20).build();
+                                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                            }
+                        })
+                        .setNegativeButton(R.string.no_thanks, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                            }
+                        })
+                        .setIcon(android.R.drawable.star_off)
+                        .show();
+                break;
+            case "info":
+                builder.setTitle(R.string.about_gopoleis)
+                        .setMessage(R.string.gopoleis_info)
+                        .setPositiveButton(R.string.close, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .setIcon(R.drawable.ic_info)
+                        .show();
+                break;
+        }
     }
 
     private class SelectMarkers extends AsyncTask<String, Integer, Void> {

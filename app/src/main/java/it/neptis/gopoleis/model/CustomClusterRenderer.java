@@ -1,7 +1,6 @@
-package it.neptis.gopoleis.defines;
+package it.neptis.gopoleis.model;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
@@ -15,8 +14,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
-
-import java.util.List;
 
 import it.neptis.gopoleis.R;
 

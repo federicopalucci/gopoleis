@@ -9,7 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import it.neptis.gopoleis.R;
-import it.neptis.gopoleis.defines.RankingRow;
+import it.neptis.gopoleis.model.RankingRow;
 
 public class RankingAdapter extends ArrayAdapter<RankingRow> {
 

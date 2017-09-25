@@ -1,4 +1,4 @@
-package it.neptis.gopoleis.defines;
+package it.neptis.gopoleis.model;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;

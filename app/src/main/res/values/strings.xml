@@ -64,7 +64,7 @@
     <string name="typology_text">Tipologia</string>
     <string name="cards_title">Carte</string>
     <string name="path_coming_soon">Questo percorso sarà presto disponibile!</string>
-    <string name="congratulations_treasure">Hai collezionato 5 nuove carte!</string>
+    <string name="congratulations_treasure">Hai collezionato 5 nuove carte! Guarda la tua collezione dal menu principale!</string>
     <string name="congratulations">Congratulazioni!</string>
     <string name="congratulations_heritage">Hai visitato un nuovo bene culturale!</string>
     <string name="structuretype">Tipo di struttura: %1$s</string>
@@ -99,5 +99,26 @@
     <string name="medals">Medaglie</string>
     <string name="title_activity_ranking">RankingActivity</string>
     <string name="rankings">Classifiche</string>
+    <string name="no_thanks">No, grazie</string>
+    <string name="can_advance_in_treasure_ranking">Puoi avanzare di una posizione in classifica aprendo il pacchetto di figurine più vicino, vuoi che te lo mostri?</string>
+    <string name="can_advance_in_heritage_ranking">Puoi avanzare nella classifica se visiti il bene culturale più vicino a te, vuoi che te lo mostri?</string>
+    <string name="almost_advance_in_ranking">Sei ad un passo dal guadagnare una posizione in classifica, vuoi che ti mostri il bene culturale più vicino a te?</string>
+    <string name="view_in_map">Guarda sulla mappa</string>
+    <string name="heritage">Bene culturale</string>
+    <string name="navigation">Navigazione</string>
+    <string name="all">Tutto</string>
+    <string name="cultural_heritages">Beni culturali</string>
+    <string name="treasures">Figurine</string>
+    <string name="paths">Percorsi</string>
+    <string name="my_cards">Le mie carte</string>
+    <string name="all_cards">Tutte le carte</string>
+    <string name="puzzles">Enigmi</string>
+    <string name="active_paths">Percorsi attivi</string>
+    <string name="info">Informazioni</string>
+    <string name="gopoleis_info">Lasciati guidare alla scoperta del nostro patrimonio artistico e culturale.\n\nCon quest\'applicazione potrai collezionare figurine, risolvere enigmi e collezionare medaglie visitando quanti più beni culturali possibile.\n\nGoPoleis è stata sviluppata presso l\'Università degli Studi di Roma "La Sapienza" nell\'ambito del progetto Neptis.</string>
+    <string name="about_gopoleis">Informazioni su GoPoleis</string>
+    <string name="close">Chiudi</string>
+    <string name="input_review">Scrivi la tua recensione</string>
+    <string name="reviews">Recensioni</string>
 
 </resources>

@@ -32,8 +32,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import it.neptis.gopoleis.R;
-import it.neptis.gopoleis.defines.Question;
-import it.neptis.gopoleis.defines.Stage;
+import it.neptis.gopoleis.model.Question;
+import it.neptis.gopoleis.model.Stage;
 
 public class StageActivity extends AppCompatActivity {
 

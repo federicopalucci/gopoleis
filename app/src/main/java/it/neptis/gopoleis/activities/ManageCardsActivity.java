@@ -19,7 +19,7 @@ import com.android.volley.toolbox.Volley;
 import it.neptis.gopoleis.adapters.CardAdapter;
 import it.neptis.gopoleis.adapters.ClickListener;
 import it.neptis.gopoleis.adapters.RecyclerTouchListener;
-import it.neptis.gopoleis.defines.Card;
+import it.neptis.gopoleis.model.Card;
 import it.neptis.gopoleis.R;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -62,7 +62,7 @@ public class ManageCardsActivity extends AppCompatActivity {
         all_cards = new ArrayList<>();
 
         // ------------------------------------------------------------------------
-        cardAdapter = new CardAdapter(all_cards);
+        cardAdapter = new CardAdapter(ManageCardsActivity.this, all_cards);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -76,6 +76,7 @@ public class ManageCardsActivity extends AppCompatActivity {
                 openCardDetails.putExtra("cardName", card.getName());
                 openCardDetails.putExtra("cardCost", card.getCost());
                 openCardDetails.putExtra("cardDescription", card.getDescription());
+                openCardDetails.putExtra("cardCode", card.getCode());
                 // TODO add card image
                 startActivity(openCardDetails);
             }
@@ -96,7 +97,7 @@ public class ManageCardsActivity extends AppCompatActivity {
             default:
                 break;
         }
-        JsonArrayRequest jsCardCodes = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        final JsonArrayRequest jsCardCodes = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
@@ -107,7 +108,8 @@ public class ManageCardsActivity extends AppCompatActivity {
                         cost = jsObj.getString("cost");
                         name = jsObj.getString("name");
                         description = jsObj.getString("description");
-                        all_cards.add(new Card(code, cost, name, description));
+                        String filename = jsObj.getString("filename");
+                        all_cards.add(new Card(code, cost, name, description, getString(R.string.server_url) + "images/cards/" + filename));
                     }
                     cardAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {

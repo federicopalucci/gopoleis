@@ -7,11 +7,6 @@ import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.twitter.sdk.android.core.Twitter;
 
-import java.util.List;
-
-import it.neptis.gopoleis.defines.Heritage;
-import it.neptis.gopoleis.defines.Stage;
-
 public class GopoleisApp extends MultiDexApplication {
 
     private static String TAG = "GopoleisApp";

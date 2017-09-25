@@ -6,9 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.android.volley.Request;
@@ -23,11 +21,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.adapters.PathAdapter;
-import it.neptis.gopoleis.defines.Path;
+import it.neptis.gopoleis.model.Path;
 
 public class MyPathsActivity extends AppCompatActivity {
 

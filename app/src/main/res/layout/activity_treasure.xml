@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_weight="1"
-                app:srcCompat="@drawable/booster_pack" />
+                app:srcCompat="@drawable/cards_icon" />
 
             <LinearLayout
                 android:layout_width="0dp"

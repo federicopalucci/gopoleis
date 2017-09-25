@@ -1,4 +1,4 @@
-package it.neptis.gopoleis.defines;
+package it.neptis.gopoleis.model;
 
 import com.bumptech.glide.annotation.GlideModule;
 import com.bumptech.glide.module.AppGlideModule;

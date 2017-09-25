@@ -1,24 +1,27 @@
 package it.neptis.gopoleis.adapters;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import it.neptis.gopoleis.R;
 
-import it.neptis.gopoleis.defines.Card;
+import it.neptis.gopoleis.model.Card;
+import it.neptis.gopoleis.model.GlideApp;
 
 import java.util.List;
 
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.MyViewHolder> {
 
     private List<Card> cardsList;
+    private Context context;
 
     class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView code, cost, name, description;
-
-        // TODO add card image
+        public ImageView image;
 
         MyViewHolder(View view) {
             super (view);
@@ -26,11 +29,13 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.MyViewHolder> 
             cost = (TextView) view.findViewById(R.id.valore_costo);
             name = (TextView) view.findViewById(R.id.nome);
             description = (TextView) view.findViewById(R.id.d);
+            image = (ImageView) view.findViewById(R.id.card_icon);
         }
     }
 
-    public CardAdapter(List<Card> cardsList) {
+    public CardAdapter(Context context, List<Card> cardsList) {
         this.cardsList = cardsList;
+        this.context = context;
     }
 
     @Override
@@ -47,6 +52,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.MyViewHolder> 
         holder.cost.setText(card.getCost());
         holder.name.setText(card.getName());
         holder.description.setText(card.getDescription());
+        GlideApp.with(context).load(cardsList.get(position).getFilepath()).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(holder.image);
     }
 
     @Override

@@ -10,8 +10,8 @@ import android.widget.ImageView;
 import java.util.List;
 
 import it.neptis.gopoleis.R;
-import it.neptis.gopoleis.defines.GlideApp;
-import it.neptis.gopoleis.defines.Medal;
+import it.neptis.gopoleis.model.GlideApp;
+import it.neptis.gopoleis.model.Medal;
 
 public class MedalAdapter extends RecyclerView.Adapter<MedalAdapter.MyViewHolder> {
 

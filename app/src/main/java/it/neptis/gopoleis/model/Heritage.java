@@ -1,4 +1,4 @@
-package it.neptis.gopoleis.defines;
+package it.neptis.gopoleis.model;
 
 import java.util.List;
 

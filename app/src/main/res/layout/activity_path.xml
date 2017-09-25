@@ -40,6 +40,12 @@
             android:gravity="center"
             android:textSize="30sp" />
 
+        <Button
+            android:id="@+id/viewPathInMapButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/view_in_map" />
+
     </LinearLayout>
 
 </LinearLayout>

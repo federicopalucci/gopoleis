@@ -1,68 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="Navigazione">
+    <item android:title="@string/navigation">
         <menu>
             <group android:checkableBehavior="single">
                 <item
                     android:id="@+id/nav_all"
                     android:icon="@drawable/ic_all"
-                    android:title="Tutto" />
+                    android:title="@string/all" />
                 <item
                     android:id="@+id/nav_heritages"
                     android:icon="@drawable/ic_heritage"
-                    android:title="Beni culturali" />
+                    android:title="@string/cultural_heritages" />
                 <item
                     android:id="@+id/nav_treasures"
                     android:icon="@drawable/ic_treasure"
-                    android:title="Tesori" />
+                    android:title="@string/treasures" />
                 <item
                     android:id="@+id/nav_paths"
                     android:icon="@drawable/ic_puzzle"
-                    android:title="Percorsi" />
+                    android:title="@string/paths" />
             </group>
         </menu>
     </item>
 
-    <item android:title="Carte">
+    <item android:title="@string/cards">
         <menu>
             <item
                 android:id="@+id/nav_my_cards"
                 android:icon="@drawable/ic_my_cards"
-                android:title="Le mie carte" />
+                android:title="@string/my_cards" />
             <item
                 android:id="@+id/nav_all_cards"
                 android:icon="@drawable/ic_all_cards"
-                android:title="Tutte le carte" />
+                android:title="@string/all_cards" />
         </menu>
     </item>
 
-    <item android:title="Enigmi">
+    <!--
+
+    <item android:title="@string/puzzles">
         <menu>
             <item
                 android:id="@+id/nav_active_paths"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Percorsi attivi" />
+                android:title="@string/active_paths" />
             <item
                 android:id="@+id/nav_my_paths"
                 android:icon="@drawable/ic_menu_send"
-                android:title="I miei percorsi" />
+                android:title="@string/my_paths" />
         </menu>
     </item>
+
+    -->
 
     <item
         android:id="@+id/nav_medals"
         android:icon="@drawable/medal_image"
-        android:title="Medaglie" />
+        android:title="@string/medals" />
 
     <item
         android:id="@+id/nav_rankings"
         android:icon="@drawable/ic_ranking"
-        android:title="Classifiche" />
+        android:title="@string/rankings" />
+
+    <item
+        android:id="@+id/nav_info"
+        android:icon="@drawable/ic_info"
+        android:title="@string/info" />
 
     <item
         android:id="@+id/nav_logout"
         android:icon="@drawable/exit_logout"
-        android:title="Logout" />
+        android:title="@string/logout" />
 
 </menu>
