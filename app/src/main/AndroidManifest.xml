@@ -65,7 +65,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".activities.MainActivity"
-            android:label="@string/title_activity_main"
+            android:label="@string/gopoleis"
             android:launchMode="singleTop"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -92,7 +92,14 @@
             android:name=".activities.RankingActivity"
             android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".activities.ReviewsActivity"></activity>
+        <activity
+            android:name=".activities.ReviewsActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.MissionsActivity"
+            android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

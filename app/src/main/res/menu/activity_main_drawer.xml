@@ -55,6 +55,11 @@
     -->
 
     <item
+        android:id="@+id/nav_missions"
+        android:icon="@drawable/ic_missions_black_24dp"
+        android:title="@string/missions" />
+
+    <item
         android:id="@+id/nav_medals"
         android:icon="@drawable/medal_image"
         android:title="@string/medals" />

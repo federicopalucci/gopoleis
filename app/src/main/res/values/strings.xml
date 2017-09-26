@@ -120,5 +120,8 @@
     <string name="close">Chiudi</string>
     <string name="input_review">Scrivi la tua recensione</string>
     <string name="reviews">Recensioni</string>
+    <string name="missions">Missioni</string>
+    <string name="congratulations_mission">Hai completato una missione!</string>
+    <string name="congratulations_medal2">Hai sbloccato una medaglia!</string>
 
 </resources>

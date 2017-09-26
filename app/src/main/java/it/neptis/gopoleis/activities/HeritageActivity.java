@@ -138,6 +138,7 @@ public class HeritageActivity extends AppCompatActivity {
         JsonObjectRequest jsonArrayRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                hasReviewed = true;
             }
         }, new Response.ErrorListener() {
             @Override
@@ -208,10 +209,15 @@ public class HeritageActivity extends AppCompatActivity {
             @Override
             public void onResponse(JSONArray response) {
                 if (response.length() != 0) {
-                    // Some medal(s) unlocked
+                    // Some medal(s)/missions unlocked
                     try {
-                        for (int i = 0; i < response.length(); i++) {
-                            showDialog(getString(R.string.congratulations), String.format(getString(R.string.congratulations_medal), response.getString(i)));
+                        JSONArray jsArray = (JSONArray) response.get(0);
+                        for (int j = 0; j < jsArray.length(); j++) {
+                            showDialog(getString(R.string.congratulations), getString(R.string.congratulations_medal2));
+                        }
+                        jsArray = (JSONArray) response.get(1);
+                        for (int j = 0; j < jsArray.length(); j++) {
+                            showDialog(getString(R.string.congratulations), getString(R.string.congratulations_mission));
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

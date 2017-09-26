@@ -349,6 +349,8 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(this, ManageCardsActivity.class).putExtra("codice", 200));
         } else if (id == R.id.nav_all_cards) {
             startActivity(new Intent(this, ManageCardsActivity.class).putExtra("codice", 100));
+        } else if (id == R.id.nav_missions) {
+            startActivity(new Intent(this, MissionsActivity.class));
         }
         /* else if (id == R.id.nav_active_paths) {
             Toast.makeText(this, "Active paths activity", Toast.LENGTH_SHORT).show();

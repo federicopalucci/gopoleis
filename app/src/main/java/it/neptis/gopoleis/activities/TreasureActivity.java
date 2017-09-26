@@ -104,12 +104,22 @@ public class TreasureActivity extends AppCompatActivity {
             public void onClick(View v) {
                 RequestQueue queue = Volley.newRequestQueue(v.getContext());
                 String url = getString(R.string.server_url) + "addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasureCode + "/";
-
-                // Request a string response from the provided URL.
-                JsonObjectRequest jsAddTreasToGame = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                JsonArrayRequest jsAddTreasToGame = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(JSONArray response) {
                         treasureOpened();
+                        for (int i = 0; i < response.length(); i++) {
+                            AlertDialog.Builder builder;
+                            builder = new AlertDialog.Builder(TreasureActivity.this);
+                            builder.setTitle(R.string.congratulations)
+                                    .setMessage(R.string.congratulations_mission)
+                                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                        }
+                                    })
+                                    .setIcon(android.R.drawable.star_off)
+                                    .show();
+                        }
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -155,7 +165,7 @@ public class TreasureActivity extends AppCompatActivity {
                 openCardDetails.putExtra("cardName", card.getName());
                 openCardDetails.putExtra("cardCost", card.getCost());
                 openCardDetails.putExtra("cardDescription", card.getDescription());
-                // TODO add card image
+                openCardDetails.putExtra("cardCode", card.getCode());
                 startActivity(openCardDetails);
             }
         }));
@@ -258,9 +268,21 @@ public class TreasureActivity extends AppCompatActivity {
         for (String tempString : random_card_codes)
             url += tempString + "/";
 
-        JsonObjectRequest jsAddCardToCollection = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+        JsonArrayRequest jsAddCardToCollection = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
-            public void onResponse(JSONObject response) {
+            public void onResponse(JSONArray response) {
+                for (int i = 0; i < response.length(); i++) {
+                    AlertDialog.Builder builder;
+                    builder = new AlertDialog.Builder(TreasureActivity.this);
+                    builder.setTitle(R.string.congratulations)
+                            .setMessage(R.string.congratulations_mission)
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                            .setIcon(android.R.drawable.star_off)
+                            .show();
+                }
             }
         }, new Response.ErrorListener() {
             @Override

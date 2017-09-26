@@ -81,22 +81,25 @@ public class StageActivity extends AppCompatActivity {
         RequestQueue queue = Volley.newRequestQueue(this);
         String formattedUserAnswer = userAnswer.trim().replaceAll("\\s+", " ").replace(" ", "%20").toUpperCase();
         String url = getString(R.string.server_url) + "submitStageAnswer/" + stage.getCode() + "/" + mAuth.getCurrentUser().getEmail() + "/" + formattedUserAnswer + "/";
-        JsonObjectRequest jsArray = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+        JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
-            public void onResponse(JSONObject response) {
+            public void onResponse(JSONArray response) {
                 try {
                     if (response.length() == 0)
                         Toast.makeText(StageActivity.this, R.string.wrong_stage_answer, Toast.LENGTH_SHORT).show();
                     else {
-                        boolean stageCompleted = response.getBoolean("stagecompleted");
-                        boolean pathCompleted = response.getBoolean("pathcompleted");
+                        // stage completed
+                        showDialog(getString(R.string.stage_completed));
+                        solved = true;
+
+                        boolean pathCompleted = response.getBoolean(0);
                         if (pathCompleted)
                             showDialog(getString(R.string.path_completed));
-                        if (stageCompleted) {
-                            showDialog(getString(R.string.stage_completed));
-                            solved = true;
-                        }
                         isCompleted = true;
+
+                        for (int i = 0; i < ((JSONArray) response.get(1)).length(); i++) {
+                            showDialog(getString(R.string.congratulations_mission));
+                        }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -150,7 +153,7 @@ public class StageActivity extends AppCompatActivity {
                                     final EditText answerEditText = new EditText(StageActivity.this);
                                     answerEditText.requestFocus();
                                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,InputMethodManager.HIDE_IMPLICIT_ONLY);
+                                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
                                     answerEditText.requestFocus();
                                     answerEditText.setInputType(InputType.TYPE_CLASS_TEXT);
                                     builder.setView(answerEditText);
@@ -219,8 +222,7 @@ public class StageActivity extends AppCompatActivity {
             Intent backToMainActivity = new Intent();
             backToMainActivity.putExtra("code", stageCode);
             setResult(Activity.RESULT_OK, backToMainActivity);
-        }
-        else
+        } else
             setResult(Activity.RESULT_CANCELED);
         finish();
     }
