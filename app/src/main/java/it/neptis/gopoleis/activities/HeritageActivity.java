@@ -135,10 +135,22 @@ public class HeritageActivity extends AppCompatActivity {
         userReview = userReview.replaceAll(" ", "%20");
         String url = getString(R.string.server_url) + "submitReview/" + mAuth.getCurrentUser().getEmail() + "/" + heritageCode + "/" + userReview + "/";
         Log.d(TAG, url);
-        JsonObjectRequest jsonArrayRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
-            public void onResponse(JSONObject response) {
+            public void onResponse(JSONArray response) {
                 hasReviewed = true;
+                for (int i = 0; i < response.length(); i++) {
+                    AlertDialog.Builder builder;
+                    builder = new AlertDialog.Builder(HeritageActivity.this);
+                    builder.setTitle(R.string.congratulations)
+                            .setMessage(R.string.congratulations_mission)
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                            .setIcon(android.R.drawable.star_off)
+                            .show();
+                }
             }
         }, new Response.ErrorListener() {
             @Override

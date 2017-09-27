@@ -110,7 +110,7 @@ public class ReviewsActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("That didn't work!", error.toString());
+                Log.d(TAG, error.toString());
             }
         });
 
