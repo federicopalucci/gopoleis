@@ -25,7 +25,7 @@ import it.neptis.gopoleis.model.GlideApp;
 public class CardDetailsActivity extends AppCompatActivity {
 
     private static final String TAG = "CardDetailsActivity";
-    TextView name, cost, description;
+    TextView name, rarity, description;
     ImageView image;
     String code;
 
@@ -35,14 +35,14 @@ public class CardDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_card_details);
 
         name = (TextView) findViewById(R.id.card_details_name);
-        cost = (TextView) findViewById(R.id.card_details_cost);
+        rarity = (TextView) findViewById(R.id.card_details_rarity);
         description = (TextView) findViewById(R.id.card_details_description);
         image = (ImageView) findViewById(R.id.imageView3);
 
         Intent launchingIntent = getIntent();
         code = launchingIntent.getStringExtra("cardCode");
         name.setText(launchingIntent.getStringExtra("cardName"));
-        cost.setText(String.format(getString(R.string.card_details_cost), launchingIntent.getStringExtra("cardCost")));
+        rarity.setText(String.format(getString(R.string.card_details_rarity), launchingIntent.getStringExtra("cardRarity")));
         description.setText(launchingIntent.getStringExtra("cardDescription"));
 
         getSetCardImage();

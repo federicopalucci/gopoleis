@@ -23,7 +23,7 @@
     <string name="logged_in_as">Accesso eseguito come: %1$s</string>
     <string name="please_log_in">Eseguire l\'accesso</string>
     <string name="done_log_out">Log-out effettuato</string>
-    <string name="card_details_cost">Costo: %1$s</string>
+    <string name="card_details_rarity">Rarità: %1$s</string>
     <string name="photo_taken">Foto scattata!</string>
     <string name="too_far">Sei troppo lontano, avvicinati!</string>
 
@@ -53,7 +53,7 @@
     <string name="need_location_permission">L\'accesso alla posizione è necessario</string>
     <string name="network_error">Nessuna connessione internet</string>
     <string name="unknown_error">Errore sconosciuto</string>
-    <string name="card_cost_adapter">Costo:</string>
+    <string name="card_rarity_adapter">Rarità:</string>
     <string name="latitude">Latitudine: %1$s</string>
     <string name="longitude">Longitudine: %1$s</string>
     <string name="open_treasure">Apri il pacchetto!</string>

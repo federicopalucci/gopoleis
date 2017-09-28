@@ -32,12 +32,14 @@ import java.util.List;
 
 public class ManageCardsActivity extends AppCompatActivity {
 
+    private static final String TAG = "ManageCards";
+
     public static final int ALL_CARDS_REQUEST_CODE = 100;
     public static final int MY_CARDS_REQUEST_CODE = 200;
     List<Card> all_cards;
     String url;
     RecyclerView recyclerView;
-    String code, cost, name, description;
+    String code, rarity, name, description;
 
     CardAdapter cardAdapter;
 
@@ -74,10 +76,9 @@ public class ManageCardsActivity extends AppCompatActivity {
                 Card card = all_cards.get(position);
                 Intent openCardDetails = new Intent(ManageCardsActivity.this, CardDetailsActivity.class);
                 openCardDetails.putExtra("cardName", card.getName());
-                openCardDetails.putExtra("cardCost", card.getCost());
+                openCardDetails.putExtra("cardRarity", card.getRarity());
                 openCardDetails.putExtra("cardDescription", card.getDescription());
                 openCardDetails.putExtra("cardCode", card.getCode());
-                // TODO add card image
                 startActivity(openCardDetails);
             }
         }));
@@ -105,11 +106,11 @@ public class ManageCardsActivity extends AppCompatActivity {
                     for (int i = 0; i < contLength; i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
                         code = jsObj.getString("code");
-                        cost = jsObj.getString("cost");
+                        rarity = jsObj.getString("rName");
                         name = jsObj.getString("name");
                         description = jsObj.getString("description");
                         String filename = jsObj.getString("filename");
-                        all_cards.add(new Card(code, cost, name, description, getString(R.string.server_url) + "images/cards/" + filename));
+                        all_cards.add(new Card(code, rarity, name, description, getString(R.string.server_url) + "images/cards/" + filename));
                     }
                     cardAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
@@ -119,7 +120,7 @@ public class ManageCardsActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d("That didn't work!", error.toString());
+                Log.d(TAG, error.toString());
             }
         });
 

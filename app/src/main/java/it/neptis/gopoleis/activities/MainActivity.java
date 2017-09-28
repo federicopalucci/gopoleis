@@ -9,8 +9,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,7 +40,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
@@ -48,6 +49,18 @@ import com.firebase.ui.auth.ResultCodes;
 import com.firebase.ui.auth.provider.FacebookProvider;
 import com.firebase.ui.auth.provider.GoogleProvider;
 import com.firebase.ui.auth.provider.TwitterProvider;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -61,6 +74,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -68,7 +83,6 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.TwitterAuthProvider;
-import com.google.maps.android.SphericalUtil;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
@@ -83,13 +97,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import it.neptis.gopoleis.MyLocationManager;
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.model.ClusterMarker;
 import it.neptis.gopoleis.model.CustomClusterRenderer;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, GoogleMap.OnPolylineClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker> {
 
     private static final String TAG = "MainActivity";
     private static final int RC_LOCATION_SETTINGS = 2;
@@ -102,13 +115,19 @@ public class MainActivity extends AppCompatActivity
     private GoogleMap mMap;
     private ClusterManager<ClusterMarker> mClusterManager;
     private CustomClusterRenderer customClusterRenderer;
-    private MyLocationManager myLocationManager;
     private List<ClusterMarker> heritageClusterMarkers;
     private List<ClusterMarker> treasureClusterMarkers;
     private List<ClusterMarker> stageClusterMarkers;
     private ClusterMarker tempClusterMarker;
     private ActionBarDrawerToggle mDrawerToggle;
     private List<Polyline> pathsPolylines;
+
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
+    private FusedLocationProviderClient mFusedLocationClient;
+    private LatLng playerLatLng;
+    private boolean requestingLocationUpdates;
+    private boolean hasZoomedAtStart = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,15 +140,39 @@ public class MainActivity extends AppCompatActivity
             firebaseLogin();
         }
 
-        myLocationManager = MyLocationManager.getInstance(this);
-        myLocationManager.checkLocationSettings(this);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        final ProgressDialog progressDialog = ProgressDialog.show(this, "", getString(R.string.loading), true);
+        progressDialog.setContentView(R.layout.loading_logo);
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                Location lastLocation = locationResult.getLastLocation();
+                playerLatLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
+                Log.d(TAG, "player location has changed!");
+                if (mMap != null && !hasZoomedAtStart) {
+                    progressDialog.dismiss();
+                    CameraPosition cameraPosition = new CameraPosition.Builder().target(playerLatLng).zoom(15).build();
+                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    hasZoomedAtStart = true;
+                }
+            }
+        };
+
+        // Location request
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(1000 * 20);
+        mLocationRequest.setFastestInterval(1000 * 10);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
+        checkLocationSettings();
+
 
         heritageClusterMarkers = new ArrayList<>();
         treasureClusterMarkers = new ArrayList<>();
         stageClusterMarkers = new ArrayList<>();
         pathsPolylines = new ArrayList<>();
-
-        // TODO ProgressDialog while loading
 
         // Wait for UI to load
         new Handler().postDelayed(new Runnable() {
@@ -247,13 +290,35 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        myLocationManager.startLocationUpdates();
+        requestLocationUpdates();
+    }
+
+    private void requestLocationUpdates() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        if (requestingLocationUpdates)
+            return;
+        mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                mLocationCallback,
+                null /* Looper */);
+        requestingLocationUpdates = true;
+        Log.d(TAG, "requesting location updates");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        myLocationManager.stopLocationUpdates();
+        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        requestingLocationUpdates = false;
+        Log.d(TAG, "stopping location updates");
     }
 
     @Override
@@ -351,13 +416,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(new Intent(this, ManageCardsActivity.class).putExtra("codice", 100));
         } else if (id == R.id.nav_missions) {
             startActivity(new Intent(this, MissionsActivity.class));
-        }
-        /* else if (id == R.id.nav_active_paths) {
-            Toast.makeText(this, "Active paths activity", Toast.LENGTH_SHORT).show();
-        } else if (id == R.id.nav_my_paths) {
-            startActivity(new Intent(this, MyPathsActivity.class));
-        } */
-        else if (id == R.id.nav_medals) {
+        } else if (id == R.id.nav_medals) {
             startActivity(new Intent(this, MedalsActivity.class));
         } else if (id == R.id.nav_rankings) {
             startActivity(new Intent(this, RankingActivity.class));
@@ -374,7 +433,7 @@ public class MainActivity extends AppCompatActivity
     public void onMapReady(GoogleMap map) {
         mMap = map;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
+            // Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
@@ -383,9 +442,6 @@ public class MainActivity extends AppCompatActivity
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        // TODO getCurrentLatLng can return null if position isn't immediately available, should implement a listener for currentLatLng ready (not null)
-        CameraPosition cameraPosition = new CameraPosition.Builder().target(myLocationManager.getCurrentLatLng()).zoom(15).build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         mMap.setMyLocationEnabled(true);
         mClusterManager = new ClusterManager<>(this, mMap);
         //mClusterManager.setAlgorithm(new GridBasedAlgorithm<AbstractClusterMarker>());
@@ -395,7 +451,7 @@ public class MainActivity extends AppCompatActivity
         mMap.setOnCameraIdleListener(mClusterManager);
         mClusterManager.setOnClusterClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
-        mMap.setOnPolylineClickListener(this);
+        //mMap.setOnPolylineClickListener(this);
         getAllHeritages();
     }
 
@@ -543,8 +599,6 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == RC_LOCATION_SETTINGS) {
             if (resultCode == RESULT_OK) {
                 Log.d(TAG, "location services enabled");
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(myLocationManager.getCurrentLatLng()).zoom(15).build();
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             } else {
                 Log.d(TAG, "location services not enabled");
                 Toast.makeText(this, getString(R.string.need_location_permission), Toast.LENGTH_LONG).show();
@@ -554,7 +608,7 @@ public class MainActivity extends AppCompatActivity
             if (resultCode == Activity.RESULT_OK) {
                 mClusterManager.removeItem(tempClusterMarker);
                 mClusterManager.cluster();
-                checkIfCanAdvanceInRankingAndShowDialog();
+                //checkIfCanAdvanceInRankingAndShowDialog();
                 //setObtainedMarkerIcon(tempClusterMarker);
             }
         } else if (requestCode == RC_STAGE) {
@@ -570,7 +624,7 @@ public class MainActivity extends AppCompatActivity
         } else if (requestCode == RC_HERITAGE) {
             if (resultCode == Activity.RESULT_OK) {
                 Log.d(TAG, "onActivityResult Heritage");
-                checkIfCanAdvanceInRankingAndShowDialog();
+                //checkIfCanAdvanceInRankingAndShowDialog();
             }
         } else if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
@@ -708,7 +762,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onClusterItemClick(ClusterMarker clusterMarker) {
-        if (myLocationManager.getCurrentLatLng() != null) {
+        if (playerLatLng != null) {
             // TODO Implement validity areas
             //boolean inRange = SphericalUtil.computeDistanceBetween(playerLatLng, getLatLngByHeritageCode(Integer.parseInt(marker.getTitle()))) <= RANGE_METERS;
             boolean inRange = true;
@@ -758,13 +812,15 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /*
     @Override
     public void onPolylineClick(Polyline polyline) {
         startActivity(new Intent(MainActivity.this, PathActivity.class).putExtra("title", (String) polyline.getTag()));
     }
+    */
 
+    /*
     private ClusterMarker getClosestTreasureClusterMarker() {
-        LatLng playerLatLng = myLocationManager.getCurrentLatLng();
         ClusterMarker result = null;
         double minDistance = Double.MAX_VALUE;
         for (ClusterMarker marker : treasureClusterMarkers) {
@@ -778,7 +834,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private ClusterMarker getClosestHeritageClusterMarker() {
-        LatLng playerLatLng = myLocationManager.getCurrentLatLng();
         ClusterMarker result = null;
         double minDistance = Double.MAX_VALUE;
         for (ClusterMarker marker : heritageClusterMarkers) {
@@ -791,6 +846,9 @@ public class MainActivity extends AppCompatActivity
         return result;
     }
 
+    */
+
+    /*
     private void checkIfCanAdvanceInRankingAndShowDialog() {
         RequestQueue queue = Volley.newRequestQueue(this);
         //noinspection ConstantConditions
@@ -814,6 +872,7 @@ public class MainActivity extends AppCompatActivity
 
         queue.add(request);
     }
+    */
 
     /*
     private void checkIfCanAdvanceInRankingWithNextHeritageAndShowDialog() {
@@ -865,6 +924,7 @@ public class MainActivity extends AppCompatActivity
                         .show();
                 break;
             */
+            /*
             case "newHeritage":
                 builder.setMessage(R.string.almost_advance_in_ranking)
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
@@ -887,6 +947,7 @@ public class MainActivity extends AppCompatActivity
                         .setIcon(android.R.drawable.star_off)
                         .show();
                 break;
+                */
             case "info":
                 builder.setTitle(R.string.about_gopoleis)
                         .setMessage(R.string.gopoleis_info)
@@ -950,6 +1011,44 @@ public class MainActivity extends AppCompatActivity
             progDialog.dismiss();
         }
 
+    }
+
+    public void checkLocationSettings() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest);
+        SettingsClient client = LocationServices.getSettingsClient(this);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+
+        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                Log.d(TAG, "locationSettingsResponse onSuccess called");
+            }
+        });
+
+        task.addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                int statusCode = ((ApiException) e).getStatusCode();
+                switch (statusCode) {
+                    case CommonStatusCodes.RESOLUTION_REQUIRED:
+                        Log.d(TAG, "Need resolution");
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            ResolvableApiException resolvable = (ResolvableApiException) e;
+                            resolvable.startResolutionForResult(MainActivity.this, RC_LOCATION_SETTINGS);
+                        } catch (IntentSender.SendIntentException sendEx) {
+                            Log.d(TAG, "ERROR RESOLVING LOCATION SETTINGS");
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way
+                        // to fix the settings so we won't show the dialog.
+                        break;
+                }
+            }
+        });
     }
 
 }

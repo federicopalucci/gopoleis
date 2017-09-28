@@ -51,12 +51,12 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
                 <TextView
-                    android:id="@+id/card_details_cost"
+                    android:id="@+id/card_details_rarity"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
-                    android:text="@string/card_details_cost" />
+                    android:text="@string/card_details_rarity" />
 
                 <TextView
                     android:id="@+id/cardDetailsEmpty2"

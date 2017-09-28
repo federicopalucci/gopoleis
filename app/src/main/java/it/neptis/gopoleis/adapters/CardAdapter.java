@@ -20,13 +20,13 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.MyViewHolder> 
     private Context context;
 
     class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView code, cost, name, description;
+        public TextView code, rarity, name, description;
         public ImageView image;
 
         MyViewHolder(View view) {
             super (view);
             code = (TextView) view.findViewById(R.id.card_code);
-            cost = (TextView) view.findViewById(R.id.valore_costo);
+            rarity = (TextView) view.findViewById(R.id.rarity_value);
             name = (TextView) view.findViewById(R.id.nome);
             description = (TextView) view.findViewById(R.id.d);
             image = (ImageView) view.findViewById(R.id.card_icon);
@@ -49,7 +49,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.MyViewHolder> 
     public void onBindViewHolder (MyViewHolder holder, int position) {
         Card card = cardsList.get(position);
         holder.code.setText(card.getCode());
-        holder.cost.setText(card.getCost());
+        holder.rarity.setText(card.getRarity());
         holder.name.setText(card.getName());
         holder.description.setText(card.getDescription());
         GlideApp.with(context).load(cardsList.get(position).getFilepath()).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(holder.image);

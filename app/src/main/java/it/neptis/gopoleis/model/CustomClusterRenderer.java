@@ -40,10 +40,7 @@ public class CustomClusterRenderer extends DefaultClusterRenderer<ClusterMarker>
                 break;
             case "treasure":
                 Drawable treasureDrawable;
-                if (!item.isObtained())
                     treasureDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.cards_icon, null);
-                else
-                    treasureDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.chest_opened, null);
                 markerOptions.icon(getMarkerIconFromDrawable(treasureDrawable));
                 break;
             case "stage":
@@ -75,8 +72,6 @@ public class CustomClusterRenderer extends DefaultClusterRenderer<ClusterMarker>
     public void setObtainedMarkerIcon(Marker marker){
         if (marker.getSnippet().equals("heritage"))
             marker.setIcon(getMarkerIconFromDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.heritage_visited, null)));
-        if (marker.getSnippet().equals("treasure"))
-            marker.setIcon(getMarkerIconFromDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.chest_opened, null)));
         if (marker.getSnippet().equals("stage"))
             marker.setIcon(getMarkerIconFromDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.stage_completed, null)));
     }

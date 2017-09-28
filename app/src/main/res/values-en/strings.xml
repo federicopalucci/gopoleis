@@ -25,14 +25,14 @@
     <string name="upcoming_puzzles">Upcoming puzzles:</string>
     <string name="user_login">User login</string>
     <string name="user_register">Register a new account</string>
-    <string name="card_details_cost">Cost: %1$s</string>
+    <string name="card_details_rarity">Cost: %1$s</string>
     <string name="site_information">Site information</string>
     <string name="photo_taken">Photo taken!</string>
     <string name="too_far">You\'re too far, get closer!</string>
     <string name="need_location_permission">Accesso to location is necessary</string>
     <string name="network_error">No network connection</string>
     <string name="unknown_error">Unknown error</string>
-    <string name="card_cost_adapter">Cost:</string>
+    <string name="card_rarity_adapter">Cost:</string>
     <string name="latitude">Latitude: %1$s</string>
     <string name="longitude">Longitude: %1$s</string>
     <string name="open_treasure">Open the coffer!</string>

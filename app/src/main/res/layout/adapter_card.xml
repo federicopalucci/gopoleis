@@ -33,13 +33,13 @@
         android:layout_toEndOf="@+id/card_icon">
 
         <TextView
-            android:id="@+id/valore_costo"
+            android:id="@+id/rarity_value"
             android:layout_width="wrap_content"
             android:layout_height="10dp"
-            android:layout_alignBottom="@+id/costo"
+            android:layout_alignBottom="@+id/rarity"
             android:layout_below="@+id/nome"
             android:layout_marginStart="7dp"
-            android:layout_toEndOf="@+id/costo"
+            android:layout_toEndOf="@+id/rarity"
             android:text="va"
             android:textSize="9sp" />
 
@@ -52,20 +52,20 @@
             android:textSize="15dp" />
 
         <TextView
-            android:id="@+id/costo"
+            android:id="@+id/rarity"
             android:layout_width="wrap_content"
             android:layout_height="10dp"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/nome"
             android:scrollbarAlwaysDrawVerticalTrack="true"
-            android:text="@string/card_cost_adapter"
+            android:text="@string/card_rarity_adapter"
             android:textSize="9sp" />
 
         <TextView
             android:id="@+id/d"
             android:layout_width="160dp"
             android:layout_height="60dp"
-            android:layout_below="@+id/costo"
+            android:layout_below="@+id/rarity"
             android:layout_marginTop="4dp"
             android:text="textView"
             android:textSize="10sp" />

@@ -22,7 +22,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -53,7 +52,7 @@ public class TreasureActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
 
     private List<Card> treas_card_list;
-    private String c_name, c_cost, c_description, c_code;
+    private String c_name, c_rarity, c_description, c_code;
 
     private String[] random_card_codes = new String[5];
 
@@ -85,16 +84,6 @@ public class TreasureActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(R.string.booster_pack);
 
         getSetTreasureInfo();
-    }
-
-    private void treasureFound() {
-        coffer.setImageResource(R.drawable.forziere_aperto);
-        View dynamicTreasureView = findViewById(R.id.dynamicTreasureView);
-        ViewGroup parent = (ViewGroup) dynamicTreasureView.getParent();
-        int index = parent.indexOfChild(dynamicTreasureView);
-        parent.removeView(dynamicTreasureView);
-        dynamicTreasureView = getLayoutInflater().inflate(R.layout.treasure_found_text, parent, false);
-        parent.addView(dynamicTreasureView, index);
     }
 
     private void treasureNotFound() {
@@ -134,9 +123,7 @@ public class TreasureActivity extends AppCompatActivity {
     }
 
     private void treasureOpened() {
-        // TODO Card rarity, also in layout.xml
         opened = true;
-        //coffer.setImageResource(0);
         View dynamicTreasureView = findViewById(R.id.dynamicTreasureView);
         ViewGroup parent = (ViewGroup) dynamicTreasureView.getParent();
         int index = parent.indexOfChild(dynamicTreasureView);
@@ -163,7 +150,7 @@ public class TreasureActivity extends AppCompatActivity {
                 Card card = treas_card_list.get(position);
                 Intent openCardDetails = new Intent(TreasureActivity.this, CardDetailsActivity.class);
                 openCardDetails.putExtra("cardName", card.getName());
-                openCardDetails.putExtra("cardCost", card.getCost());
+                openCardDetails.putExtra("cardRarity", card.getRarity());
                 openCardDetails.putExtra("cardDescription", card.getDescription());
                 openCardDetails.putExtra("cardCode", card.getCode());
                 startActivity(openCardDetails);
@@ -185,10 +172,10 @@ public class TreasureActivity extends AppCompatActivity {
                         JSONObject jsObj = (JSONObject) response.get(i);
                         c_code = jsObj.getString("code");
                         c_name = jsObj.getString("name");
-                        c_cost = jsObj.getString("cost");
+                        c_rarity = jsObj.getString("rarity");
                         c_description = jsObj.getString("description");
                         String filename = jsObj.getString("filename");
-                        treas_card_list.add(new Card(c_code, c_cost, c_name, c_description, getString(R.string.server_url) + "images/cards/" + filename));
+                        treas_card_list.add(new Card(c_code, c_rarity, c_name, c_description, getString(R.string.server_url) + "images/cards/" + filename));
                     }
                     cardAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
@@ -230,11 +217,8 @@ public class TreasureActivity extends AppCompatActivity {
                         info.setText(jsObj.getString("description"));
                         latitude.setText(String.format(getString(R.string.latitude), jsObj.getString("latitude")));
                         longitude.setText(String.format(getString(R.string.longitude), jsObj.getString("longitude")));
-                        if (jsObj.getInt("found") == 1) {
-                            treasureFound();
-                        } else {
-                            treasureNotFound();
-                        }
+
+                        treasureNotFound();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

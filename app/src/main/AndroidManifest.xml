@@ -52,15 +52,7 @@
             android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activities.PathActivity"
-            android:parentActivityName=".activities.MainActivity"
-            android:screenOrientation="portrait" />
-        <activity
             android:name=".activities.StageActivity"
-            android:parentActivityName=".activities.MainActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".activities.MyPathsActivity"
             android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity

@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -42,9 +43,9 @@ public class HeritageActivity extends AppCompatActivity {
     private String heritageCode;
     private FirebaseAuth mAuth;
     private ImageView image;
-    private Button submitReviewButton, readReviewsButton;
     private String userReview;
     private boolean hasReviewed = false;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,8 +65,8 @@ public class HeritageActivity extends AppCompatActivity {
         historicalPeriod = (TextView) findViewById(R.id.heritage_historicalperiod);
         description = (TextView) findViewById(R.id.heritage_description);
         image = (ImageView) findViewById(R.id.imageView2);
-        submitReviewButton = (Button) findViewById(R.id.submit_reviews_button);
-        readReviewsButton = (Button) findViewById(R.id.read_reviews_button);
+        Button submitReviewButton = (Button) findViewById(R.id.submit_reviews_button);
+        Button readReviewsButton = (Button) findViewById(R.id.read_reviews_button);
 
         submitReviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,6 +94,13 @@ public class HeritageActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(R.string.heritage);
 
         getHeritage();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mediaPlayer.release();
+        mediaPlayer = null;
     }
 
     private void showWriteReviewDialog() {
@@ -127,6 +135,8 @@ public class HeritageActivity extends AppCompatActivity {
                 dialog.cancel();
             }
         });
+        mediaPlayer = MediaPlayer.create(this, R.raw.popup);
+        mediaPlayer.start();
         builder.show();
     }
 

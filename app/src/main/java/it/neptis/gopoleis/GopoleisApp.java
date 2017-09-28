@@ -15,9 +15,6 @@ public class GopoleisApp extends MultiDexApplication {
     public void onCreate() {
         super.onCreate();
 
-        Log.d(TAG, "Initializing MylocationManager");
-        MyLocationManager.getInstance(getApplicationContext());
-
         Twitter.initialize(this);
 
         FacebookSdk.sdkInitialize(getApplicationContext());
