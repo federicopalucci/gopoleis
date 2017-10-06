@@ -99,8 +99,10 @@ public class HeritageActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        mediaPlayer.release();
-        mediaPlayer = null;
+        if (mediaPlayer != null) {
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 
     private void showWriteReviewDialog() {

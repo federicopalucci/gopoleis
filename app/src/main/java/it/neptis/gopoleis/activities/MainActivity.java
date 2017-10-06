@@ -142,8 +142,12 @@ public class MainActivity extends AppCompatActivity
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        final ProgressDialog progressDialog = ProgressDialog.show(this, "", getString(R.string.loading), true);
+        //final ProgressDialog progressDialog = ProgressDialog.show(this, "", getString(R.string.loading), true);
+        final ProgressDialog progressDialog = new ProgressDialog(this, R.style.MyTheme);
+        progressDialog.setCancelable(false);
+        progressDialog.show();
         progressDialog.setContentView(R.layout.loading_logo);
+
 
         mLocationCallback = new LocationCallback() {
             @Override

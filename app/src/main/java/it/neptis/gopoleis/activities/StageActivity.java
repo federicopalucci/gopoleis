@@ -81,6 +81,7 @@ public class StageActivity extends AppCompatActivity {
         RequestQueue queue = Volley.newRequestQueue(this);
         String formattedUserAnswer = userAnswer.trim().replaceAll("\\s+", " ").replace(" ", "%20").toUpperCase();
         String url = getString(R.string.server_url) + "submitStageAnswer/" + stage.getCode() + "/" + mAuth.getCurrentUser().getEmail() + "/" + formattedUserAnswer + "/";
+        Log.d(TAG, url);
         JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
@@ -214,6 +215,12 @@ public class StageActivity extends AppCompatActivity {
                 Toast.makeText(StageActivity.this, stage.getQuestion().getHintByPaying(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     @Override

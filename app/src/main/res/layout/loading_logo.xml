@@ -30,7 +30,9 @@
         android:text="@string/gopoleis"
         android:textAlignment="center"
         android:textColor="#ffffff"
-        android:textSize="30sp" />
+        android:textSize="30sp"
+        android:shadowColor="#000000"
+        android:shadowRadius="1"/>
 
     <TextView
         android:layout_width="match_parent"
