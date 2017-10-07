@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
@@ -17,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -25,11 +27,18 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.model.Question;
@@ -78,42 +87,63 @@ public class StageActivity extends AppCompatActivity {
     }
 
     private void submitStageAnswer() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String formattedUserAnswer = userAnswer.trim().replaceAll("\\s+", " ").replace(" ", "%20").toUpperCase();
-        String url = getString(R.string.server_url) + "submitStageAnswer/" + stage.getCode() + "/" + mAuth.getCurrentUser().getEmail() + "/" + formattedUserAnswer + "/";
-        Log.d(TAG, url);
-        JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    if (response.length() == 0)
-                        Toast.makeText(StageActivity.this, R.string.wrong_stage_answer, Toast.LENGTH_SHORT).show();
-                    else {
-                        // stage completed
-                        showDialog(getString(R.string.stage_completed));
-                        solved = true;
+        final String[] idToken = new String[1];
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getIdToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            idToken[0] = task.getResult().getToken();
+                            // Send token to your backend via HTTPS
+                            RequestQueue queue = Volley.newRequestQueue(StageActivity.this);
+                            String formattedUserAnswer = userAnswer.trim().replaceAll("\\s+", " ").replace(" ", "%20").toUpperCase();
+                            String url = getString(R.string.server_url) + "player/submitStageAnswer/" + stage.getCode() + "/" + mAuth.getCurrentUser().getEmail() + "/" + formattedUserAnswer + "/";
+                            JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                                @Override
+                                public void onResponse(JSONArray response) {
+                                    try {
+                                        if (response.length() == 0)
+                                            Toast.makeText(StageActivity.this, R.string.wrong_stage_answer, Toast.LENGTH_SHORT).show();
+                                        else {
+                                            // stage completed
+                                            showDialog(getString(R.string.stage_completed));
+                                            solved = true;
 
-                        boolean pathCompleted = response.getBoolean(0);
-                        if (pathCompleted)
-                            showDialog(getString(R.string.path_completed));
-                        isCompleted = true;
+                                            boolean pathCompleted = response.getBoolean(0);
+                                            if (pathCompleted)
+                                                showDialog(getString(R.string.path_completed));
+                                            isCompleted = true;
 
-                        for (int i = 0; i < ((JSONArray) response.get(1)).length(); i++) {
-                            showDialog(getString(R.string.congratulations_mission));
+                                            for (int i = 0; i < ((JSONArray) response.get(1)).length(); i++) {
+                                                showDialog(getString(R.string.congratulations_mission));
+                                            }
+                                        }
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, error.toString());
+                                }
+                            }) {
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError {
+                                    Map<String, String> params = new HashMap<String, String>();
+                                    params.put("MyToken", idToken[0]);
+                                    return params;
+                                }
+                            };
+
+                            queue.add(jsArray);
+                        } else {
+                            // Handle error -> task.getException();
+                            Log.d(TAG, task.getException().toString());
+                            Toast.makeText(StageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
                         }
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
-
-        queue.add(jsArray);
+                });
     }
 
     private void showDialog(String message) {

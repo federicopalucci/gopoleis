@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -19,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -26,11 +28,18 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.model.GlideApp;
@@ -83,8 +92,6 @@ public class HeritageActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-        // TODO Check for medals unlocking
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -143,35 +150,57 @@ public class HeritageActivity extends AppCompatActivity {
     }
 
     private void submitReview() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        userReview = userReview.replaceAll(" ", "%20");
-        String url = getString(R.string.server_url) + "submitReview/" + mAuth.getCurrentUser().getEmail() + "/" + heritageCode + "/" + userReview + "/";
-        Log.d(TAG, url);
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                hasReviewed = true;
-                for (int i = 0; i < response.length(); i++) {
-                    AlertDialog.Builder builder;
-                    builder = new AlertDialog.Builder(HeritageActivity.this);
-                    builder.setTitle(R.string.congratulations)
-                            .setMessage(R.string.congratulations_mission)
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
+        final String[] idToken = new String[1];
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getIdToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            idToken[0] = task.getResult().getToken();
+                            // Send token to your backend via HTTPS
+                            RequestQueue queue = Volley.newRequestQueue(HeritageActivity.this);
+                            userReview = userReview.replaceAll(" ", "%20");
+                            String url = getString(R.string.server_url) + "player/submitReview/" + mAuth.getCurrentUser().getEmail() + "/" + heritageCode + "/" + userReview + "/";
+                            Log.d(TAG, url);
+                            JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                                @Override
+                                public void onResponse(JSONArray response) {
+                                    hasReviewed = true;
+                                    for (int i = 0; i < response.length(); i++) {
+                                        AlertDialog.Builder builder;
+                                        builder = new AlertDialog.Builder(HeritageActivity.this);
+                                        builder.setTitle(R.string.congratulations)
+                                                .setMessage(R.string.congratulations_mission)
+                                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                    }
+                                                })
+                                                .setIcon(android.R.drawable.star_off)
+                                                .show();
+                                    }
                                 }
-                            })
-                            .setIcon(android.R.drawable.star_off)
-                            .show();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, error.toString());
+                                }
+                            }) {
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError {
+                                    Map<String, String> params = new HashMap<String, String>();
+                                    params.put("MyToken", idToken[0]);
+                                    return params;
+                                }
+                            };
 
-        queue.add(jsonArrayRequest);
+                            queue.add(jsonArrayRequest);
+                        } else {
+                            // Handle error -> task.getException();
+                            Log.d(TAG, task.getException().toString());
+                            Toast.makeText(HeritageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     private void showDialog(String title, String message) {
@@ -227,35 +256,57 @@ public class HeritageActivity extends AppCompatActivity {
     }
 
     private void addVisitedHeritage() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = getString(R.string.server_url) + "addVisitedHeritage/" + mAuth.getCurrentUser().getEmail() + "/" + String.valueOf(heritageCode) + "/";
-        JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                if (response.length() != 0) {
-                    // Some medal(s)/missions unlocked
-                    try {
-                        JSONArray jsArray = (JSONArray) response.get(0);
-                        for (int j = 0; j < jsArray.length(); j++) {
-                            showDialog(getString(R.string.congratulations), getString(R.string.congratulations_medal2));
-                        }
-                        jsArray = (JSONArray) response.get(1);
-                        for (int j = 0; j < jsArray.length(); j++) {
-                            showDialog(getString(R.string.congratulations), getString(R.string.congratulations_mission));
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
+        final String[] idToken = new String[1];
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getIdToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            idToken[0] = task.getResult().getToken();
+                            // Send token to your backend via HTTPS
+                            RequestQueue queue = Volley.newRequestQueue(HeritageActivity.this);
+                            String url = getString(R.string.server_url) + "player/addVisitedHeritage/" + mAuth.getCurrentUser().getEmail() + "/" + String.valueOf(heritageCode) + "/";
+                            JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                                @Override
+                                public void onResponse(JSONArray response) {
+                                    if (response.length() != 0) {
+                                        // Some medal(s)/missions unlocked
+                                        try {
+                                            JSONArray jsArray = (JSONArray) response.get(0);
+                                            for (int j = 0; j < jsArray.length(); j++) {
+                                                showDialog(getString(R.string.congratulations), getString(R.string.congratulations_medal2));
+                                            }
+                                            jsArray = (JSONArray) response.get(1);
+                                            for (int j = 0; j < jsArray.length(); j++) {
+                                                showDialog(getString(R.string.congratulations), getString(R.string.congratulations_mission));
+                                            }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, error.toString());
+                                }
+                            }) {
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError {
+                                    Map<String, String> params = new HashMap<String, String>();
+                                    params.put("MyToken", idToken[0]);
+                                    return params;
+                                }
+                            };
 
-        queue.add(jsHeritageInfo);
+                            queue.add(jsHeritageInfo);
+                        } else {
+                            // Handle error -> task.getException();
+                            Log.d(TAG, task.getException().toString());
+                            Toast.makeText(HeritageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     @Override

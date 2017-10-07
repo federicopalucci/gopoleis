@@ -1,26 +1,36 @@
 package it.neptis.gopoleis.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.adapters.RankingAdapter;
@@ -35,23 +45,6 @@ public class RankingFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.ranking_layout, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.ranking_listview);
-        Bundle args = getArguments();
-
-        /*
-        switch (args.getInt("number")) {
-            case 0:
-                break;
-            case 1:
-                getRankingByCards(listView);
-                break;
-            case 2:
-                getRankingByMedals(listView);
-                break;
-            case 3:
-                getRankingByPaths(listView);
-                break;
-        }
-        */
 
         getRankingByCoins(listView);
 
@@ -59,115 +52,53 @@ public class RankingFragment extends Fragment {
     }
 
     private void getRankingByCoins(final ListView listView) {
-        RequestQueue queue = Volley.newRequestQueue(getActivity());
-        //noinspection ConstantConditions
-        String url = getString(R.string.server_url) + "getRankingByCoins/";
-        JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    rankingRows = new ArrayList<>();
-                    for (int i = 0; i < response.length(); i++) {
-                        JSONObject jsObj = (JSONObject) response.get(i);
-                        rankingRows.add(new RankingRow(jsObj.getString("email"), jsObj.getInt("coins")));
+        final String[] idToken = new String[1];
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getIdToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            idToken[0] = task.getResult().getToken();
+                            // Send token to your backend via HTTPS
+                            RequestQueue queue = Volley.newRequestQueue(getActivity());
+                            //noinspection ConstantConditions
+                            String url = getString(R.string.server_url) + "player/getRankingByCoins/";
+                            JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                                @Override
+                                public void onResponse(JSONArray response) {
+                                    try {
+                                        rankingRows = new ArrayList<>();
+                                        for (int i = 0; i < response.length(); i++) {
+                                            JSONObject jsObj = (JSONObject) response.get(i);
+                                            rankingRows.add(new RankingRow(jsObj.getString("email"), jsObj.getInt("coins")));
+                                        }
+                                        listView.setAdapter(new RankingAdapter(getContext(), rankingRows.toArray(new RankingRow[rankingRows.size()])));
+                                    } catch (JSONException e) {
+                                        Log.d(TAG, e.getMessage());
+                                    }
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, error.toString());
+                                }
+                            }) {
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError {
+                                    Map<String, String> params = new HashMap<String, String>();
+                                    params.put("MyToken", idToken[0]);
+                                    return params;
+                                }
+                            };
+
+                            queue.add(jsTotal);
+                        } else {
+                            // Handle error -> task.getException();
+                            Log.d(TAG, task.getException().toString());
+                            Toast.makeText(getActivity(), "There was an error with your request", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                    listView.setAdapter(new RankingAdapter(getContext(), rankingRows.toArray(new RankingRow[rankingRows.size()])));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
-
-        queue.add(jsTotal);
-    }
-
-    private void getRankingByCards(final ListView listView) {
-        RequestQueue queue = Volley.newRequestQueue(getActivity());
-        //noinspection ConstantConditions
-        String url = getString(R.string.server_url) + "getRankingByCards/";
-        JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    rankingRows = new ArrayList<>();
-                    for (int i = 0; i < response.length(); i++) {
-                        JSONObject jsObj = (JSONObject) response.get(i);
-                        rankingRows.add(new RankingRow(jsObj.getString("player"), jsObj.getInt("cards")));
-                    }
-                    listView.setAdapter(new RankingAdapter(getContext(), rankingRows.toArray(new RankingRow[rankingRows.size()])));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
-
-        queue.add(jsTotal);
-    }
-
-    private void getRankingByMedals(final ListView listView) {
-        RequestQueue queue = Volley.newRequestQueue(getActivity());
-        //noinspection ConstantConditions
-        String url = getString(R.string.server_url) + "getRankingByMedals/";
-        JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    rankingRows = new ArrayList<>();
-                    for (int i = 0; i < response.length(); i++) {
-                        JSONObject jsObj = (JSONObject) response.get(i);
-                        rankingRows.add(new RankingRow(jsObj.getString("player"), jsObj.getInt("medals")));
-                    }
-                    listView.setAdapter(new RankingAdapter(getContext(), rankingRows.toArray(new RankingRow[rankingRows.size()])));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
-
-        queue.add(jsTotal);
-    }
-
-    private void getRankingByPaths(final ListView listView) {
-        RequestQueue queue = Volley.newRequestQueue(getActivity());
-        //noinspection ConstantConditions
-        String url = getString(R.string.server_url) + "getRankingByPaths/";
-        JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    rankingRows = new ArrayList<>();
-                    for (int i = 0; i < response.length(); i++) {
-                        JSONObject jsObj = (JSONObject) response.get(i);
-                        rankingRows.add(new RankingRow(jsObj.getString("player"), jsObj.getInt("paths")));
-                    }
-                    listView.setAdapter(new RankingAdapter(getContext(), rankingRows.toArray(new RankingRow[rankingRows.size()])));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
-
-        queue.add(jsTotal);
+                });
     }
 
 }

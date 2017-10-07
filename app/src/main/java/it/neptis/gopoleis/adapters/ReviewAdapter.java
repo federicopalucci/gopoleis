@@ -1,6 +1,7 @@
 package it.neptis.gopoleis.adapters;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,23 +12,32 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.model.Card;
 import it.neptis.gopoleis.model.GlideApp;
+import it.neptis.gopoleis.model.RankingRow;
 import it.neptis.gopoleis.model.Review;
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHolder> {
@@ -81,8 +91,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
             holder.thumbDownButton.setImageResource(R.drawable.ic_thumb_down_red_24dp);
             holder.thumbUpButton.setClickable(false);
             holder.thumbDownButton.setClickable(false);
-        }
-        else{
+        } else {
             holder.thumbUpButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -108,25 +117,48 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
         }
     }
 
-    private void voteReview(String email, String code, boolean thumbUp) {
-        RequestQueue queue = Volley.newRequestQueue(context);
-        String url = "http://77.81.226.246:8000/voteReview/" + code + "/" + email + "/" + thumbUp;
-        final JsonArrayRequest jsReviews = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("That didn't work!", error.toString());
-            }
-        });
+    private void voteReview(final String email, final String code, final boolean thumbUp) {
+        final String[] idToken = new String[1];
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getIdToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            idToken[0] = task.getResult().getToken();
+                            // Send token to your backend via HTTPS
+                            RequestQueue queue = Volley.newRequestQueue(context);
+                            String url = "http://77.81.226.246:8000/player/voteReview/" + code + "/" + email + "/" + thumbUp;
+                            final JsonArrayRequest jsReviews = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                                @Override
+                                public void onResponse(JSONArray response) {
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, error.toString());
+                                }
+                            }) {
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError {
+                                    Map<String, String> params = new HashMap<String, String>();
+                                    params.put("MyToken", idToken[0]);
+                                    return params;
+                                }
+                            };
 
-        queue.add(jsReviews);
+                            queue.add(jsReviews);
+                        } else {
+                            // Handle error -> task.getException();
+                            Log.d(TAG, task.getException().toString());
+                            Toast.makeText(context, "There was an error with your request", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     @Override
     public int getItemCount() {
         return reviewsList.size();
     }
+
 }

@@ -612,8 +612,6 @@ public class MainActivity extends AppCompatActivity
             if (resultCode == Activity.RESULT_OK) {
                 mClusterManager.removeItem(tempClusterMarker);
                 mClusterManager.cluster();
-                //checkIfCanAdvanceInRankingAndShowDialog();
-                //setObtainedMarkerIcon(tempClusterMarker);
             }
         } else if (requestCode == RC_STAGE) {
             if (resultCode == Activity.RESULT_OK) {
@@ -628,7 +626,6 @@ public class MainActivity extends AppCompatActivity
         } else if (requestCode == RC_HERITAGE) {
             if (resultCode == Activity.RESULT_OK) {
                 Log.d(TAG, "onActivityResult Heritage");
-                //checkIfCanAdvanceInRankingAndShowDialog();
             }
         } else if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
@@ -815,94 +812,6 @@ public class MainActivity extends AppCompatActivity
                 customClusterRenderer.setObtainedMarkerIcon(tempMarker);
         }
     }
-
-    /*
-    @Override
-    public void onPolylineClick(Polyline polyline) {
-        startActivity(new Intent(MainActivity.this, PathActivity.class).putExtra("title", (String) polyline.getTag()));
-    }
-    */
-
-    /*
-    private ClusterMarker getClosestTreasureClusterMarker() {
-        ClusterMarker result = null;
-        double minDistance = Double.MAX_VALUE;
-        for (ClusterMarker marker : treasureClusterMarkers) {
-            double tempDistance = SphericalUtil.computeDistanceBetween(playerLatLng, marker.getPosition());
-            if (tempDistance < minDistance) {
-                minDistance = tempDistance;
-                result = marker;
-            }
-        }
-        return result;
-    }
-
-    private ClusterMarker getClosestHeritageClusterMarker() {
-        ClusterMarker result = null;
-        double minDistance = Double.MAX_VALUE;
-        for (ClusterMarker marker : heritageClusterMarkers) {
-            double tempDistance = SphericalUtil.computeDistanceBetween(playerLatLng, marker.getPosition());
-            if (tempDistance < minDistance && marker != tempClusterMarker && !marker.isObtained()) {
-                minDistance = tempDistance;
-                result = marker;
-            }
-        }
-        return result;
-    }
-
-    */
-
-    /*
-    private void checkIfCanAdvanceInRankingAndShowDialog() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        //noinspection ConstantConditions
-        String url = getString(R.string.server_url) + "canAdvanceInRankingWithNextHeritage/" + mAuth.getCurrentUser().getEmail() + "/";
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    if (response.getBoolean("answer"))
-                        showDialog("newHeritage");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
-
-        queue.add(request);
-    }
-    */
-
-    /*
-    private void checkIfCanAdvanceInRankingWithNextHeritageAndShowDialog() {
-        RequestQueue queue = Volley.newRequestQueue(this);
-        //noinspection ConstantConditions
-        String url = getString(R.string.server_url) + "canAdvanceInRankingWithNextHeritage/" + mAuth.getCurrentUser().getEmail() + "/";
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    if (response.getBoolean("answer"))
-                        showDialog("newHeritage");
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
-
-        queue.add(request);
-    }
-    */
 
     private void showDialog(String parameter) {
         final AlertDialog.Builder builder;

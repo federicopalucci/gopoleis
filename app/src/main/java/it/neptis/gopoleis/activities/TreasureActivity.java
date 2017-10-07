@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -16,14 +17,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,8 +38,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.adapters.CardAdapter;
@@ -87,39 +96,62 @@ public class TreasureActivity extends AppCompatActivity {
     }
 
     private void treasureNotFound() {
-        Button open_treasure = (Button) findViewById(R.id.open_treasure_button);
-        open_treasure.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RequestQueue queue = Volley.newRequestQueue(v.getContext());
-                String url = getString(R.string.server_url) + "addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasureCode + "/";
-                JsonArrayRequest jsAddTreasToGame = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        treasureOpened();
-                        for (int i = 0; i < response.length(); i++) {
-                            AlertDialog.Builder builder;
-                            builder = new AlertDialog.Builder(TreasureActivity.this);
-                            builder.setTitle(R.string.congratulations)
-                                    .setMessage(R.string.congratulations_mission)
-                                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int which) {
+        final Button open_treasure = (Button) findViewById(R.id.open_treasure_button);
+
+        final String[] idToken = new String[1];
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getIdToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            idToken[0] = task.getResult().getToken();
+                            // Send token to your backend via HTTPS
+                            open_treasure.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    RequestQueue queue = Volley.newRequestQueue(TreasureActivity.this);
+                                    String url = getString(R.string.server_url) + "player/addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasureCode + "/";
+                                    JsonArrayRequest jsAddTreasToGame = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                                        @Override
+                                        public void onResponse(JSONArray response) {
+                                            treasureOpened();
+                                            for (int i = 0; i < response.length(); i++) {
+                                                AlertDialog.Builder builder;
+                                                builder = new AlertDialog.Builder(TreasureActivity.this);
+                                                builder.setTitle(R.string.congratulations)
+                                                        .setMessage(R.string.congratulations_mission)
+                                                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                                            public void onClick(DialogInterface dialog, int which) {
+                                                            }
+                                                        })
+                                                        .setIcon(android.R.drawable.star_off)
+                                                        .show();
+                                            }
                                         }
-                                    })
-                                    .setIcon(android.R.drawable.star_off)
-                                    .show();
+                                    }, new Response.ErrorListener() {
+                                        @Override
+                                        public void onErrorResponse(VolleyError error) {
+                                            Log.d(TAG, error.toString());
+                                        }
+                                    }) {
+                                        @Override
+                                        public Map<String, String> getHeaders() throws AuthFailureError {
+                                            Map<String, String> params = new HashMap<String, String>();
+                                            params.put("MyToken", idToken[0]);
+                                            return params;
+                                        }
+                                    };
+
+                                    queue.add(jsAddTreasToGame);
+                                }
+                            });
+                        } else {
+                            // Handle error -> task.getException();
+                            Log.d(TAG, task.getException().toString());
+                            Toast.makeText(TreasureActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
                         }
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, error.toString());
-                    }
                 });
-
-                queue.add(jsAddTreasToGame);
-            }
-        });
     }
 
     private void treasureOpened() {
@@ -247,35 +279,57 @@ public class TreasureActivity extends AppCompatActivity {
     }
 
     public void addCardsToCollection(String[] card_codes) {
-        RequestQueue queue3 = Volley.newRequestQueue(this);
-        String url = getString(R.string.server_url) + "addFiveCardsToUserCollection/" + mAuth.getCurrentUser().getEmail() + "/";
-        for (String tempString : random_card_codes)
-            url += tempString + "/";
+        final String[] idToken = new String[1];
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getIdToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            idToken[0] = task.getResult().getToken();
+                            // Send token to your backend via HTTPS
+                            RequestQueue queue3 = Volley.newRequestQueue(TreasureActivity.this);
+                            String url = getString(R.string.server_url) + "player/addFiveCardsToUserCollection/" + mAuth.getCurrentUser().getEmail() + "/";
+                            for (String tempString : random_card_codes)
+                                url += tempString + "/";
 
-        JsonArrayRequest jsAddCardToCollection = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                for (int i = 0; i < response.length(); i++) {
-                    AlertDialog.Builder builder;
-                    builder = new AlertDialog.Builder(TreasureActivity.this);
-                    builder.setTitle(R.string.congratulations)
-                            .setMessage(R.string.congratulations_mission)
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
+                            JsonArrayRequest jsAddCardToCollection = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                                @Override
+                                public void onResponse(JSONArray response) {
+                                    for (int i = 0; i < response.length(); i++) {
+                                        AlertDialog.Builder builder;
+                                        builder = new AlertDialog.Builder(TreasureActivity.this);
+                                        builder.setTitle(R.string.congratulations)
+                                                .setMessage(R.string.congratulations_mission)
+                                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                    }
+                                                })
+                                                .setIcon(android.R.drawable.star_off)
+                                                .show();
+                                    }
                                 }
-                            })
-                            .setIcon(android.R.drawable.star_off)
-                            .show();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Log.d(TAG, error.toString());
+                                }
+                            }) {
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError {
+                                    Map<String, String> params = new HashMap<String, String>();
+                                    params.put("MyToken", idToken[0]);
+                                    return params;
+                                }
+                            };
 
-        queue3.add(jsAddCardToCollection);
+                            queue3.add(jsAddCardToCollection);
+                        } else {
+                            // Handle error -> task.getException();
+                            Log.d(TAG, task.getException().toString());
+                            Toast.makeText(TreasureActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     @Override
