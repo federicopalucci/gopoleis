@@ -6,12 +6,21 @@ public class Medal {
     private String name;
     private String filePath;
     private int category;
+    private boolean obtained;
 
     public Medal(int code, String name, String filePath, int category) {
         this.code = code;
         this.name = name;
         this.filePath = filePath;
         this.category = category;
+    }
+
+    public Medal(int code, String name, String filePath, int category, boolean obtained) {
+        this.code = code;
+        this.name = name;
+        this.filePath = filePath;
+        this.category = category;
+        this.obtained = obtained;
     }
 
     public int getCode() {
@@ -46,4 +55,11 @@ public class Medal {
         this.category = category;
     }
 
+    public boolean isObtained() {
+        return obtained;
+    }
+
+    public void setObtained(boolean obtained) {
+        this.obtained = obtained;
+    }
 }

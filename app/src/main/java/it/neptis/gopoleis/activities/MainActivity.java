@@ -83,6 +83,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.TwitterAuthProvider;
+import com.google.maps.android.SphericalUtil;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
@@ -110,6 +111,8 @@ public class MainActivity extends AppCompatActivity
     private static final int RC_STAGE = 4;
     private static final int RC_SIGN_IN = 9001;
     private static final int RC_HERITAGE = 5;
+    // 200mt range
+    private static final double RANGE_METERS = 200;
 
     private FirebaseAuth mAuth;
     private GoogleMap mMap;
@@ -138,6 +141,32 @@ public class MainActivity extends AppCompatActivity
 
         if (mAuth.getCurrentUser() == null) {
             firebaseLogin();
+        }
+        if (mAuth.getCurrentUser() != null) {
+            checkUserAndCreate();
+
+            // Wait for UI to load
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    ImageView playerIcon = (ImageView) findViewById(R.id.player_icon_drawer);
+                    try {
+                        Glide.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).into(playerIcon);
+                    } catch (Exception e) {
+                        playerIcon.setImageResource(R.drawable.default_user);
+                    }
+
+                    TextView playerName = (TextView) findViewById(R.id.player_name_drawer);
+                    playerName.setText(mAuth.getCurrentUser().getDisplayName());
+                    TextView playerEmail = (TextView) findViewById(R.id.player_email_drawer);
+                    playerEmail.setText(mAuth.getCurrentUser().getEmail());
+
+                    MapFragment mapFragment = (MapFragment) getFragmentManager()
+                            .findFragmentById(R.id.map);
+                    Log.d(TAG, "Getting map...");
+                    mapFragment.getMapAsync(MainActivity.this);
+                }
+            }, 1000);
         }
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -177,28 +206,6 @@ public class MainActivity extends AppCompatActivity
         treasureClusterMarkers = new ArrayList<>();
         stageClusterMarkers = new ArrayList<>();
         pathsPolylines = new ArrayList<>();
-
-        // Wait for UI to load
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ImageView playerIcon = (ImageView) findViewById(R.id.player_icon_drawer);
-                try {
-                    Glide.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).into(playerIcon);
-                } catch (Exception e) {
-                    playerIcon.setImageResource(R.drawable.default_user);
-                }
-
-                TextView playerName = (TextView) findViewById(R.id.player_name_drawer);
-                playerName.setText(mAuth.getCurrentUser().getDisplayName());
-                TextView playerEmail = (TextView) findViewById(R.id.player_email_drawer);
-                playerEmail.setText(mAuth.getCurrentUser().getEmail());
-
-                MapFragment mapFragment = (MapFragment) getFragmentManager()
-                        .findFragmentById(R.id.map);
-                mapFragment.getMapAsync(MainActivity.this);
-            }
-        }, 1000);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -294,6 +301,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d(TAG, "About to request location updates");
         requestLocationUpdates();
     }
 
@@ -435,6 +443,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onMapReady(GoogleMap map) {
+        Log.d(TAG, "MAP READY");
         mMap = map;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Consider calling
@@ -648,6 +657,29 @@ public class MainActivity extends AppCompatActivity
                             });
 
                     checkUserAndCreate();
+
+                    // Wait for UI to load
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            ImageView playerIcon = (ImageView) findViewById(R.id.player_icon_drawer);
+                            try {
+                                Glide.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).into(playerIcon);
+                            } catch (Exception e) {
+                                playerIcon.setImageResource(R.drawable.default_user);
+                            }
+
+                            TextView playerName = (TextView) findViewById(R.id.player_name_drawer);
+                            playerName.setText(mAuth.getCurrentUser().getDisplayName());
+                            TextView playerEmail = (TextView) findViewById(R.id.player_email_drawer);
+                            playerEmail.setText(mAuth.getCurrentUser().getEmail());
+
+                            MapFragment mapFragment = (MapFragment) getFragmentManager()
+                                    .findFragmentById(R.id.map);
+                            Log.d(TAG, "Getting map...");
+                            mapFragment.getMapAsync(MainActivity.this);
+                        }
+                    }, 1000);
                 }
                 //startActivity(SignedInActivity.createIntent(this, response));
             } else {
@@ -764,9 +796,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onClusterItemClick(ClusterMarker clusterMarker) {
         if (playerLatLng != null) {
-            // TODO Implement validity areas
-            //boolean inRange = SphericalUtil.computeDistanceBetween(playerLatLng, getLatLngByHeritageCode(Integer.parseInt(marker.getTitle()))) <= RANGE_METERS;
-            boolean inRange = true;
+            boolean inRange = SphericalUtil.computeDistanceBetween(playerLatLng, clusterMarker.getPosition()) <= RANGE_METERS;
+            inRange = true;
             //noinspection ConstantConditions
             if (inRange) {
                 switch (clusterMarker.getSnippet()) {

@@ -7,7 +7,6 @@ public class Heritage {
     private int code;
     private String name;
     private String description;
-    // TODO implement Heritage.image
     private String latitude;
     private String longitude;
     private String province;

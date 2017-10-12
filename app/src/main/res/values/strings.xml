@@ -123,5 +123,10 @@
     <string name="missions">Missioni</string>
     <string name="congratulations_mission">Hai completato una missione!</string>
     <string name="congratulations_medal2">Hai sbloccato una medaglia!</string>
+    <string name="not_enough_coins">Non hai abbastanza coins</string>
+    <string name="medal_details">Dettagli Medaglia</string>
+    <string name="medal_details_name">Nome: %1$s</string>
+    <string name="medal_details_category">Categoria: %1$s</string>
+    <string name="medal_details_heritages">Beni interessati: %1$s</string>
 
 </resources>

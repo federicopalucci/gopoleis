@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/regions_medal_image"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="100dp"
-    android:layout_height="match_parent"
-    android:background="@android:color/transparent" />
+    android:layout_height="match_parent">
+
+    <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/regions_medal_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent" />
+
+    <ImageView
+        android:id="@+id/medal_obtained_image"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:visibility="invisible"
+        app:srcCompat="@drawable/done_check_mark" />
+
+</FrameLayout>

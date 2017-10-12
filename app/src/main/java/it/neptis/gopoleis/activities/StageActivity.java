@@ -168,7 +168,7 @@ public class StageActivity extends AppCompatActivity {
                 try {
                     for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        stage = new Stage(jsObj.getInt("stagecode"), jsObj.getString("title"), jsObj.getString("curiosity"), new LatLng(Double.parseDouble(jsObj.getString("latitude")), Double.parseDouble(jsObj.getString("longitude"))), new Question(jsObj.getInt("questioncode"), jsObj.getString("question"), jsObj.getString("hintonsite"), jsObj.getString("hintbypaying"), jsObj.getString("answer")), null, jsObj.getString("isfinal").equals("true"));
+                        stage = new Stage(jsObj.getInt("stagecode"), jsObj.getString("title"), jsObj.getString("curiosity"), new LatLng(Double.parseDouble(jsObj.getString("latitude")), Double.parseDouble(jsObj.getString("longitude"))), new Question(jsObj.getInt("questioncode"), jsObj.getString("question"), jsObj.getString("hintonsite"), jsObj.getString("hintbypaying"), jsObj.getString("answer")), null, jsObj.getString("isfinal").equals("true"), jsObj.getInt("hintUnlocked") == 1);
 
                         setUIData();
 
@@ -230,7 +230,6 @@ public class StageActivity extends AppCompatActivity {
         curiosityTextView.setText(String.format(getString(R.string.stage_curiosity), stage.getCuriosity()));
         questionTextView.setText(stage.getQuestion().getQuestion());
 
-        // TODO Check position
         hintOnSiteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -238,11 +237,67 @@ public class StageActivity extends AppCompatActivity {
             }
         });
 
-        // TODO Implement coins
         hintByPayingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(StageActivity.this, stage.getQuestion().getHintByPaying(), Toast.LENGTH_SHORT).show();
+                if (stage.isHintUnlocked()) {
+                    Toast.makeText(StageActivity.this, stage.getQuestion().getHintByPaying(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                AlertDialog.Builder builder;
+                builder = new AlertDialog.Builder(StageActivity.this);
+                builder.setMessage("Questo indizio ti costerà 1 coin, vuoi sbloccarlo?")
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                final String[] idToken = new String[1];
+                                FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+                                mUser.getIdToken(true)
+                                        .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                                            public void onComplete(@NonNull Task<GetTokenResult> task) {
+                                                if (task.isSuccessful()) {
+                                                    idToken[0] = task.getResult().getToken();
+                                                    // Send token to your backend via HTTPS
+                                                    RequestQueue queue = Volley.newRequestQueue(StageActivity.this);
+                                                    String url = getString(R.string.server_url) + "player/buyHint/" + stage.getCode() + "/" + mAuth.getCurrentUser().getEmail() + "/";
+                                                    JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                                                        @Override
+                                                        public void onResponse(JSONArray response) {
+                                                            if (response.length() == 0) {
+                                                                Toast.makeText(StageActivity.this, stage.getQuestion().getHintByPaying(), Toast.LENGTH_SHORT).show();
+                                                                stage.setHintUnlocked(true);
+                                                            }
+                                                            else
+                                                                Toast.makeText(StageActivity.this, R.string.not_enough_coins, Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }, new Response.ErrorListener() {
+                                                        @Override
+                                                        public void onErrorResponse(VolleyError error) {
+                                                            Log.d(TAG, error.toString());
+                                                        }
+                                                    }) {
+                                                        @Override
+                                                        public Map<String, String> getHeaders() throws AuthFailureError {
+                                                            Map<String, String> params = new HashMap<String, String>();
+                                                            params.put("MyToken", idToken[0]);
+                                                            return params;
+                                                        }
+                                                    };
+
+                                                    queue.add(jsArray);
+                                                } else {
+                                                    // Handle error -> task.getException();
+                                                    Log.d(TAG, task.getException().toString());
+                                                    Toast.makeText(StageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .show();
             }
         });
     }

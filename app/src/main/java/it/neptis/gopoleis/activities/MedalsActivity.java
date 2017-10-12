@@ -1,5 +1,6 @@
 package it.neptis.gopoleis.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -54,7 +55,6 @@ public class MedalsActivity extends AppCompatActivity {
         getPlayerMedals();
 
         RecyclerView regionsRecyclerView = (RecyclerView) findViewById(R.id.regionsRecyclerView);
-        // TODO Get regionMedals list from server and pass it to adapter constructor, then implement onItemTouch
         regionsMedalAdapter = new MedalAdapter(this, regionMedals);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(MedalsActivity.this, LinearLayoutManager.HORIZONTAL, false);
         regionsRecyclerView.setLayoutManager(layoutManager);
@@ -63,7 +63,8 @@ public class MedalsActivity extends AppCompatActivity {
         regionsRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), regionsRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                Toast.makeText(MedalsActivity.this, regionMedals.get(position).getName(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MedalsActivity.this, regionMedals.get(position).getName(), Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MedalsActivity.this, MedalDetailsActivity.class).putExtra("code", regionMedals.get(position).getCode()).putExtra("filepath", regionMedals.get(position).getFilePath()));
             }
         }));
 
@@ -76,7 +77,8 @@ public class MedalsActivity extends AppCompatActivity {
         historicalPeriodRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), historicalPeriodRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                Toast.makeText(MedalsActivity.this, historicalperiodMedals.get(position).getName(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MedalsActivity.this, historicalperiodMedals.get(position).getName(), Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MedalsActivity.this, MedalDetailsActivity.class).putExtra("code", historicalperiodMedals.get(position).getCode()).putExtra("filepath", historicalperiodMedals.get(position).getFilePath()));
             }
         }));
 
@@ -89,7 +91,8 @@ public class MedalsActivity extends AppCompatActivity {
         structuretypeRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), structuretypeRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                Toast.makeText(MedalsActivity.this, structuretypeMedals.get(position).getName(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MedalsActivity.this, structuretypeMedals.get(position).getName(), Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(MedalsActivity.this, MedalDetailsActivity.class).putExtra("code", structuretypeMedals.get(position).getCode()).putExtra("filepath", structuretypeMedals.get(position).getFilePath()));
             }
         }));
 
@@ -110,7 +113,7 @@ public class MedalsActivity extends AppCompatActivity {
                 try {
                     for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        Medal tempMedal = new Medal(jsObj.getInt("code"), jsObj.getString("name"), getString(R.string.server_url) + "images/medals/" + jsObj.getString("filename"), jsObj.getInt("category"));
+                        Medal tempMedal = new Medal(jsObj.getInt("code"), jsObj.getString("name"), getString(R.string.server_url) + "images/medals/" + jsObj.getString("filename"), jsObj.getInt("category"), jsObj.getString("obtained").equals("1"));
                         if (tempMedal.getCategory() == 1)
                             regionMedals.add(tempMedal);
                         else if (tempMedal.getCategory() == 2)

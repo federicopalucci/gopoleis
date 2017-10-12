@@ -10,6 +10,7 @@ public class Stage {
     private Question question;
     private Path path;
     private boolean isFinal;
+    private boolean hintUnlocked;
 
     public Stage(int code, String title, String curiosity, LatLng coordinates, Question question, Path path, boolean isFinal) {
         this.code = code;
@@ -19,6 +20,17 @@ public class Stage {
         this.question = question;
         this.path = path;
         this.isFinal = isFinal;
+    }
+
+    public Stage(int code, String title, String curiosity, LatLng coordinates, Question question, Path path, boolean isFinal, boolean hintUnlocked) {
+        this.code = code;
+        this.title = title;
+        this.curiosity = curiosity;
+        this.coordinates = coordinates;
+        this.question = question;
+        this.path = path;
+        this.isFinal = isFinal;
+        this.hintUnlocked = hintUnlocked;
     }
 
     public int getCode() {
@@ -77,4 +89,11 @@ public class Stage {
         isFinal = aFinal;
     }
 
+    public boolean isHintUnlocked() {
+        return hintUnlocked;
+    }
+
+    public void setHintUnlocked(boolean hintUnlocked) {
+        this.hintUnlocked = hintUnlocked;
+    }
 }

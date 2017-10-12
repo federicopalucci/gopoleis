@@ -26,14 +26,16 @@ public class MedalAdapter extends RecyclerView.Adapter<MedalAdapter.MyViewHolder
 
     class MyViewHolder extends RecyclerView.ViewHolder {
         public ImageView image;
+        public ImageView obtainedMarker;
 
         MyViewHolder(View view) {
-            super (view);
+            super(view);
             image = (ImageView) view.findViewById(R.id.regions_medal_image);
+            obtainedMarker = (ImageView) view.findViewById(R.id.medal_obtained_image);
         }
     }
 
-    public MedalAdapter(int[] thumbsID){
+    public MedalAdapter(int[] thumbsID) {
         mThumbIds = thumbsID;
     }
 
@@ -46,10 +48,12 @@ public class MedalAdapter extends RecyclerView.Adapter<MedalAdapter.MyViewHolder
     }
 
     @Override
-    public void onBindViewHolder (MyViewHolder holder, int position) {
-        if (medals != null)
+    public void onBindViewHolder(MyViewHolder holder, int position) {
+        if (medals != null) {
             GlideApp.with(context).load(medals.get(position).getFilePath()).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(holder.image);
-        else
+            if (medals.get(position).isObtained())
+                holder.obtainedMarker.setVisibility(View.VISIBLE);
+        } else
             holder.image.setImageResource(mThumbIds[position]);
     }
 
