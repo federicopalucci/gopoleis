@@ -92,11 +92,29 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.model.ClusterMarker;
@@ -138,6 +156,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         mAuth = FirebaseAuth.getInstance();
+
+        getSocketFactory();
 
         if (mAuth.getCurrentUser() == null) {
             firebaseLogin();
@@ -470,6 +490,7 @@ public class MainActivity extends AppCompatActivity
 
     public void getAllHeritages() {
         RequestQueue queue = Volley.newRequestQueue(this);
+        Log.d(TAG, "Getting all heritages...");
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getAllHeritages/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -725,6 +746,7 @@ public class MainActivity extends AppCompatActivity
 
     private void checkUserAndCreate() {
         RequestQueue queue = Volley.newRequestQueue(this);
+        Log.d(TAG, "Checking if player exists in db");
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "checkPlayer/" + mAuth.getCurrentUser().getEmail();
         JsonArrayRequest jsInfoTreasure = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -993,6 +1015,72 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+    }
+
+    private SSLSocketFactory getSocketFactory() {
+
+        CertificateFactory cf = null;
+        try {
+            cf = CertificateFactory.getInstance("X.509");
+            InputStream caInput = getResources().openRawResource(R.raw.gopoleis_server);
+            Certificate ca;
+            try {
+                ca = cf.generateCertificate(caInput);
+                Log.e("CERT", "ca=" + ((X509Certificate) ca).getSubjectDN());
+            } finally {
+                caInput.close();
+            }
+
+
+            String keyStoreType = KeyStore.getDefaultType();
+            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            keyStore.load(null, null);
+            keyStore.setCertificateEntry("ca", ca);
+
+
+            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+            tmf.init(keyStore);
+
+
+            HostnameVerifier hostnameVerifier = new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+
+                    Log.e("CipherUsed", session.getCipherSuite());
+                    return hostname.compareTo("77.81.226.246")==0; //The Hostname of your server
+
+                }
+            };
+
+
+            HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
+            SSLContext context = null;
+            context = SSLContext.getInstance("TLS");
+
+            context.init(null, tmf.getTrustManagers(), null);
+            HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+
+            SSLSocketFactory sf = context.getSocketFactory();
+
+
+            return sf;
+
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+
+        return  null;
     }
 
 }

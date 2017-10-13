@@ -127,7 +127,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
                             RequestQueue queue = Volley.newRequestQueue(context);
-                            String url = "http://77.81.226.246:8000/player/voteReview/" + code + "/" + email + "/" + thumbUp;
+                            String url = "https://77.81.226.246:8000/player/voteReview/" + code + "/" + email + "/" + thumbUp;
                             final JsonArrayRequest jsReviews = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                                 @Override
                                 public void onResponse(JSONArray response) {
