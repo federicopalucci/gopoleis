@@ -38,7 +38,7 @@
 
     <fragment
         android:id="@+id/ranking_fragment"
-        android:name="it.neptis.gopoleis.fragments.RankingFragment"
+        android:name="it.neptis.go.fragments.RankingFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
