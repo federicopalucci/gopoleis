@@ -9,7 +9,7 @@
     android:layout_marginRight="@dimen/activity_horizontal_margin"
     android:layout_marginTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    tools:context="it.neptis.go.activities.RankingActivity"
+    tools:context="it.neptis.gopoleis.activities.RankingActivity"
     tools:showIn="@layout/activity_ranking">
 
     <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"

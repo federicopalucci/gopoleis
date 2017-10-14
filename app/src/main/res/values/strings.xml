@@ -129,6 +129,5 @@
     <string name="medal_details_category">Categoria: %1$s</string>
     <string name="medal_details_heritages">Beni interessati: %1$s</string>
     <string name="no_reviews">Non ci sono recensioni al momento, aggiungine una!</string>
-    <string name="title_activity_maps">Map</string>
 
 </resources>

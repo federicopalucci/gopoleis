@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="it.neptis.go">
+    package="it.neptis.gopoleis">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -17,7 +17,7 @@
         android:required="true" />
 
     <application
-        android:name="it.neptis.go.GopoleisApp"
+        android:name=".GopoleisApp"
         android:allowBackup="true"
         android:icon="@drawable/logo"
         android:label="@string/app_name"
@@ -26,37 +26,37 @@
         android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAeRy_cfM6uYf6t0_B4Ck1iDl9Nbsrn1c4" />
+            android:value="@string/google_maps_key" />
         <meta-data
             android:name="android.app.default_searchable"
             android:value="SearchResultsActivity" />
 
         <activity
-            android:name="it.neptis.go.activities.MedalsActivity"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
+            android:name=".activities.MedalsActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="it.neptis.go.activities.ManageCardsActivity"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
+            android:name=".activities.ManageCardsActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="it.neptis.go.activities.CardDetailsActivity"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
+            android:name=".activities.CardDetailsActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="it.neptis.go.activities.TreasureActivity"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
+            android:name=".activities.TreasureActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="it.neptis.go.activities.HeritageActivity"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
+            android:name=".activities.HeritageActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="it.neptis.go.activities.StageActivity"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
+            android:name=".activities.StageActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="it.neptis.go.activities.MainActivity"
+            android:name=".activities.MainActivity"
             android:label="@string/gopoleis"
             android:launchMode="singleTop"
             android:screenOrientation="portrait">
@@ -67,10 +67,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="it.neptis.go.activities.SearchResultsActivity"
+            android:name=".activities.SearchResultsActivity"
             android:label="@string/title_activity_search_results"
             android:launchMode="singleTop"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
@@ -81,24 +81,18 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name="it.neptis.go.activities.RankingActivity"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
+            android:name=".activities.RankingActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="it.neptis.go.activities.ReviewsActivity"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
+            android:name=".activities.ReviewsActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="it.neptis.go.activities.MissionsActivity"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
+            android:name=".activities.MissionsActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name="it.neptis.go.activities.MedalDetailsActivity"
-            android:parentActivityName="it.neptis.go.activities.MainActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name="it.neptis.go.activities.MapsActivity"
-            android:label="@string/title_activity_maps" />
+        <activity android:name=".activities.MedalDetailsActivity"></activity>
     </application>
 
 </manifest>

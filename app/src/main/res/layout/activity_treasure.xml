@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="it.neptis.go.activities.TreasureActivity">
+    tools:context="it.neptis.gopoleis.activities.TreasureActivity">
 
     <include layout="@layout/toolbar" />
 

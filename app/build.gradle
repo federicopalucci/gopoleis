@@ -5,7 +5,7 @@ android {
     buildToolsVersion '25.0.0'
 
     defaultConfig {
-        applicationId "it.neptis.go"
+        applicationId "it.neptis.gopoleis"
         minSdkVersion 19
         targetSdkVersion 24
         versionCode 1
@@ -40,7 +40,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.0.0-RC1'
 }
-
 
 
 apply plugin: 'com.google.gms.google-services'
