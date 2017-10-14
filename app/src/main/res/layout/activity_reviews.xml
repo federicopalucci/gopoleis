@@ -10,6 +10,7 @@
     <include layout="@layout/toolbar" />
 
     <LinearLayout
+        android:id="@+id/reviews_container_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="@dimen/activity_vertical_margin"

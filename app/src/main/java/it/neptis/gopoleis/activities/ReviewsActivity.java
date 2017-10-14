@@ -9,6 +9,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -44,6 +46,8 @@ public class ReviewsActivity extends AppCompatActivity {
     ReviewAdapter reviewAdapter;
     String heritageCode;
     private FirebaseAuth mAuth;
+    LinearLayout reviewsContainerLayout;
+    private TextView noReviewsText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +60,11 @@ public class ReviewsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.reviews);
+
+        reviewsContainerLayout = (LinearLayout) findViewById(R.id.reviews_container_layout);
+        noReviewsText = new TextView(ReviewsActivity.this);
+        noReviewsText.setText(R.string.no_reviews);
+        noReviewsText.setTextSize(30);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -101,8 +110,15 @@ public class ReviewsActivity extends AppCompatActivity {
                             return Integer.compare(likes1, likes2) * -1;
                         }
                     });
-                    Log.d(TAG, all_reviews.toString());
                     reviewAdapter.notifyDataSetChanged();
+
+                    if (all_reviews.isEmpty()) {
+                        reviewsContainerLayout.addView(noReviewsText, 0);
+                        Log.d(TAG, "added");
+                    } else {
+                        reviewsContainerLayout.removeView(noReviewsText);
+                        Log.d(TAG, "not");
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -115,7 +131,5 @@ public class ReviewsActivity extends AppCompatActivity {
         });
 
         queue.add(jsReviews);
-
-
     }
 }

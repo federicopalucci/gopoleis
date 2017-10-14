@@ -41,7 +41,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
@@ -119,6 +118,7 @@ import javax.net.ssl.TrustManagerFactory;
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.model.ClusterMarker;
 import it.neptis.gopoleis.model.CustomClusterRenderer;
+import it.neptis.gopoleis.model.GlideApp;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker> {
@@ -142,6 +142,7 @@ public class MainActivity extends AppCompatActivity
     private ClusterMarker tempClusterMarker;
     private ActionBarDrawerToggle mDrawerToggle;
     private List<Polyline> pathsPolylines;
+    private List<PolylineOptions> pathsPolylinesOptions;
 
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
@@ -169,16 +170,12 @@ public class MainActivity extends AppCompatActivity
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    ImageView playerIcon = (ImageView) findViewById(R.id.player_icon_drawer);
-                    try {
-                        Glide.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).into(playerIcon);
-                    } catch (Exception e) {
-                        playerIcon.setImageResource(R.drawable.default_user);
-                    }
+                    ImageView playerIcon = (ImageView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_icon_drawer);
+                    GlideApp.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).error(R.drawable.ic_account_circle_black_24dp).into(playerIcon);
 
-                    TextView playerName = (TextView) findViewById(R.id.player_name_drawer);
+                    TextView playerName = (TextView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_name_drawer);
                     playerName.setText(mAuth.getCurrentUser().getDisplayName());
-                    TextView playerEmail = (TextView) findViewById(R.id.player_email_drawer);
+                    TextView playerEmail = (TextView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_email_drawer);
                     playerEmail.setText(mAuth.getCurrentUser().getEmail());
 
                     MapFragment mapFragment = (MapFragment) getFragmentManager()
@@ -186,7 +183,7 @@ public class MainActivity extends AppCompatActivity
                     Log.d(TAG, "Getting map...");
                     mapFragment.getMapAsync(MainActivity.this);
                 }
-            }, 1000);
+            }, 3000);
         }
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -226,6 +223,7 @@ public class MainActivity extends AppCompatActivity
         treasureClusterMarkers = new ArrayList<>();
         stageClusterMarkers = new ArrayList<>();
         pathsPolylines = new ArrayList<>();
+        pathsPolylinesOptions = new ArrayList<>();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -574,17 +572,19 @@ public class MainActivity extends AppCompatActivity
 
                         int pathCode = jsObj.getInt("pathcode");
                         if (pathCode != prevPathCode && prevPathCode != 0) {
-                            Polyline polyline = mMap.addPolyline(new PolylineOptions()
+                            PolylineOptions options = new PolylineOptions()
                                     .clickable(true)
                                     .endCap(new RoundCap())
                                     .startCap(new RoundCap())
                                     .color(0xffF57F17)
                                     .jointType(JointType.ROUND)
-                                    .addAll(latLngs));
+                                    .addAll(latLngs);
+                            Polyline polyline = mMap.addPolyline(options);
                             polyline.setTag(jsObj.getString("pathtitle"));
                             Log.d(TAG, polyline.getPoints().toString());
                             latLngs.clear();
                             pathsPolylines.add(polyline);
+                            pathsPolylinesOptions.add(options);
                         }
 
                         prevPathCode = pathCode;
@@ -595,17 +595,19 @@ public class MainActivity extends AppCompatActivity
                         latLngs.add(new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude)));
 
                         if (i == response.length() - 1) {
-                            Polyline polyline = mMap.addPolyline(new PolylineOptions()
+                            PolylineOptions options = new PolylineOptions()
                                     .clickable(true)
                                     .endCap(new RoundCap())
                                     .startCap(new RoundCap())
                                     .color(0xffF57F17)
                                     .jointType(JointType.ROUND)
-                                    .addAll(latLngs));
+                                    .addAll(latLngs);
+                            Polyline polyline = mMap.addPolyline(options);
                             polyline.setTag(jsObj.getString("pathtitle"));
                             Log.d(TAG, polyline.getPoints().toString());
                             latLngs.clear();
                             pathsPolylines.add(polyline);
+                            pathsPolylinesOptions.add(options);
                         }
 
                         boolean completed = jsObj.getInt("completed") == 1;
@@ -642,6 +644,7 @@ public class MainActivity extends AppCompatActivity
             if (resultCode == Activity.RESULT_OK) {
                 mClusterManager.removeItem(tempClusterMarker);
                 mClusterManager.cluster();
+                treasureClusterMarkers.remove(tempClusterMarker);
             }
         } else if (requestCode == RC_STAGE) {
             if (resultCode == Activity.RESULT_OK) {
@@ -649,6 +652,7 @@ public class MainActivity extends AppCompatActivity
                     if (i != stageClusterMarkers.size() - 1 && stageClusterMarkers.get(i).getTitle().equals(tempClusterMarker.getTitle())) {
                         Log.d(TAG, "found stage to be made clickable");
                         stageClusterMarkers.get(i + 1).setStageClickable(true);
+                        setNextStageIcon(stageClusterMarkers.get(i + 1));
                     }
                 }
                 setObtainedMarkerIcon(tempClusterMarker);
@@ -679,28 +683,7 @@ public class MainActivity extends AppCompatActivity
 
                     checkUserAndCreate();
 
-                    // Wait for UI to load
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            ImageView playerIcon = (ImageView) findViewById(R.id.player_icon_drawer);
-                            try {
-                                Glide.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).into(playerIcon);
-                            } catch (Exception e) {
-                                playerIcon.setImageResource(R.drawable.default_user);
-                            }
-
-                            TextView playerName = (TextView) findViewById(R.id.player_name_drawer);
-                            playerName.setText(mAuth.getCurrentUser().getDisplayName());
-                            TextView playerEmail = (TextView) findViewById(R.id.player_email_drawer);
-                            playerEmail.setText(mAuth.getCurrentUser().getEmail());
-
-                            MapFragment mapFragment = (MapFragment) getFragmentManager()
-                                    .findFragmentById(R.id.map);
-                            Log.d(TAG, "Getting map...");
-                            mapFragment.getMapAsync(MainActivity.this);
-                        }
-                    }, 1000);
+                    recreate();
                 }
                 //startActivity(SignedInActivity.createIntent(this, response));
             } else {
@@ -866,6 +849,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void setNextStageIcon(ClusterMarker marker) {
+        Collection<Marker> markerCollection = mClusterManager.getMarkerCollection().getMarkers();
+        for (Marker tempMarker : markerCollection) {
+            if (tempMarker.getTitle().equals(marker.getTitle()) && tempMarker.getSnippet().equals(marker.getSnippet()))
+                customClusterRenderer.setNextStageIcon(tempMarker);
+        }
+    }
+
     private void showDialog(String parameter) {
         final AlertDialog.Builder builder;
         builder = new AlertDialog.Builder(MainActivity.this);
@@ -930,6 +921,7 @@ public class MainActivity extends AppCompatActivity
 
     private class SelectMarkers extends AsyncTask<String, Integer, Void> {
         ProgressDialog progDialog;
+        String markerTypeSelected;
 
         @Override
         protected void onPreExecute() {
@@ -940,11 +932,18 @@ public class MainActivity extends AppCompatActivity
             progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progDialog.setCancelable(false);
             progDialog.show();
+
+            Log.d(TAG, "removing polylines...");
+            for (Polyline p : pathsPolylines) {
+                p.remove();
+                Log.d(TAG, p.toString());
+            }
         }
 
         @Override
         protected Void doInBackground(String... markerType) {
             mClusterManager.clearItems();
+            markerTypeSelected = markerType[0];
             switch (markerType[0]) {
                 case "all":
                     for (ClusterMarker marker : treasureClusterMarkers)
@@ -973,6 +972,10 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(Void unused) {
             super.onPostExecute(unused);
+            pathsPolylines.clear();
+            if (markerTypeSelected.equals("path") || markerTypeSelected.equals("all"))
+                for (PolylineOptions po : pathsPolylinesOptions)
+                    pathsPolylines.add(mMap.addPolyline(po));
             mClusterManager.cluster();
             progDialog.dismiss();
         }
@@ -1048,7 +1051,7 @@ public class MainActivity extends AppCompatActivity
                 public boolean verify(String hostname, SSLSession session) {
 
                     Log.e("CipherUsed", session.getCipherSuite());
-                    return hostname.compareTo("77.81.226.246")==0; //The Hostname of your server
+                    return hostname.compareTo("77.81.226.246") == 0; //The Hostname of your server
 
                 }
             };
@@ -1080,7 +1083,7 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
-        return  null;
+        return null;
     }
 
 }

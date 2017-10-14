@@ -27,7 +27,7 @@ public class CustomClusterRenderer extends DefaultClusterRenderer<ClusterMarker>
     }
 
     @Override
-    protected void onBeforeClusterItemRendered(ClusterMarker item, MarkerOptions markerOptions){
+    protected void onBeforeClusterItemRendered(ClusterMarker item, MarkerOptions markerOptions) {
         super.onBeforeClusterItemRendered(item, markerOptions);
         switch (item.getSnippet()) {
             case "heritage":
@@ -40,15 +40,17 @@ public class CustomClusterRenderer extends DefaultClusterRenderer<ClusterMarker>
                 break;
             case "treasure":
                 Drawable treasureDrawable;
-                    treasureDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.cards_icon, null);
+                treasureDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.cards_icon, null);
                 markerOptions.icon(getMarkerIconFromDrawable(treasureDrawable));
                 break;
             case "stage":
                 Drawable stageDrawable;
-                if (!item.isObtained())
+                if (item.isObtained())
+                    stageDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.stage_completed, null);
+                else if (!item.isStageClickable())
                     stageDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.stage, null);
                 else
-                    stageDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.stage_completed, null);
+                    stageDrawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.stage_next, null);
                 markerOptions.icon(getMarkerIconFromDrawable(stageDrawable));
                 break;
         }
@@ -69,11 +71,15 @@ public class CustomClusterRenderer extends DefaultClusterRenderer<ClusterMarker>
         return BitmapDescriptorFactory.fromBitmap(resizedBitmap);
     }
 
-    public void setObtainedMarkerIcon(Marker marker){
+    public void setObtainedMarkerIcon(Marker marker) {
         if (marker.getSnippet().equals("heritage"))
             marker.setIcon(getMarkerIconFromDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.heritage_visited, null)));
         if (marker.getSnippet().equals("stage"))
             marker.setIcon(getMarkerIconFromDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.stage_completed, null)));
+    }
+
+    public void setNextStageIcon(Marker marker) {
+        marker.setIcon(getMarkerIconFromDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.stage_next, null)));
     }
 
 }

@@ -146,13 +146,15 @@ public class StageActivity extends AppCompatActivity {
                 });
     }
 
-    private void showDialog(String message) {
+    private void showDialog(final String message) {
         AlertDialog.Builder builder;
         builder = new AlertDialog.Builder(StageActivity.this);
         builder.setTitle(R.string.congratulations)
                 .setMessage(message)
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+                        if (message.equals(getString(R.string.stage_completed)))
+                            onBackPressed();
                     }
                 })
                 .setIcon(android.R.drawable.star_off)
