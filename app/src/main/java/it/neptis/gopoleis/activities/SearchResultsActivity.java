@@ -25,6 +25,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.adapters.SearchResultAdapter;
 import it.neptis.gopoleis.model.SearchResult;
@@ -84,7 +85,7 @@ public class SearchResultsActivity extends AppCompatActivity {
     public void search(String query) {
         query = query.trim().replaceAll("\\s+", " ").replace(" ", "%20").toLowerCase();
         query = query.substring(0, 1).toUpperCase() + query.substring(1);
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "search/" + query + "/";
         JsonObjectRequest jsTotal = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {

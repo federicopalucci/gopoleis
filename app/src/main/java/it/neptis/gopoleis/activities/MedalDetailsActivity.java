@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.model.GlideApp;
 
@@ -58,7 +59,7 @@ public class MedalDetailsActivity extends AppCompatActivity {
     }
 
     private void getMedalDetails() {
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         String url = getString(R.string.server_url) + "getMedalDetails/" + code + "/";
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override

@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.model.Card;
 import it.neptis.gopoleis.model.GlideApp;
@@ -126,7 +127,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
                         if (task.isSuccessful()) {
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
-                            RequestQueue queue = Volley.newRequestQueue(context);
+                            RequestQueue queue = Volley.newRequestQueue(context, HurlStackProvider.getHurlStack());
                             String url = "https://77.81.226.246:8000/player/voteReview/" + code + "/" + email + "/" + thumbUp;
                             final JsonArrayRequest jsReviews = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                                 @Override

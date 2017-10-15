@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.adapters.ClickListener;
 import it.neptis.gopoleis.adapters.MedalAdapter;
@@ -105,7 +106,7 @@ public class MedalsActivity extends AppCompatActivity {
     }
 
     private void getPlayerMedals() {
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         String url = getString(R.string.server_url) + "getPlayerMedals/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
@@ -113,7 +114,7 @@ public class MedalsActivity extends AppCompatActivity {
                 try {
                     for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        Medal tempMedal = new Medal(jsObj.getInt("code"), jsObj.getString("name"), getString(R.string.server_url) + "images/medals/" + jsObj.getString("filename"), jsObj.getInt("category"), jsObj.getString("obtained").equals("1"));
+                        Medal tempMedal = new Medal(jsObj.getInt("code"), jsObj.getString("name"), getString(R.string.server_url_http) + "images/medals/" + jsObj.getString("filename"), jsObj.getInt("category"), jsObj.getString("obtained").equals("1"));
                         if (tempMedal.getCategory() == 1)
                             regionMedals.add(tempMedal);
                         else if (tempMedal.getCategory() == 2)

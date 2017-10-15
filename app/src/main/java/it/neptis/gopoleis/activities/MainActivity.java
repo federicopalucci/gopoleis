@@ -39,7 +39,9 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
@@ -94,6 +96,8 @@ import org.json.JSONObject;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -113,9 +117,13 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
+import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
+import it.neptis.gopoleis.SslCertificateAuthority;
 import it.neptis.gopoleis.model.ClusterMarker;
 import it.neptis.gopoleis.model.CustomClusterRenderer;
 import it.neptis.gopoleis.model.GlideApp;
@@ -158,12 +166,27 @@ public class MainActivity extends AppCompatActivity
 
         mAuth = FirebaseAuth.getInstance();
 
-        getSocketFactory();
+        //getSocketFactory();
+        // ****************************************
+        //InputStream caInput = getResources().openRawResource(R.raw.gopoleis_server);
+        //SslCertificateAuthority.setCustomCertificateAuthority(caInput);
+        // ****************************************
+
+        try {
+            InputStream caInput = getResources().openRawResource(R.raw.gopoleis_server); // this cert file stored in \app\src\main\res\raw folder path
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            Certificate ca = cf.generateCertificate(caInput);
+            caInput.close();
+            HurlStackProvider.init(ca);
+        } catch (Exception e) {
+        }
+        // ****************************************
 
         if (mAuth.getCurrentUser() == null) {
             firebaseLogin();
         }
         if (mAuth.getCurrentUser() != null) {
+            Log.d(TAG, "About to check user");
             checkUserAndCreate();
 
             // Wait for UI to load
@@ -171,7 +194,10 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void run() {
                     ImageView playerIcon = (ImageView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_icon_drawer);
-                    GlideApp.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).error(R.drawable.ic_account_circle_black_24dp).into(playerIcon);
+                    try {
+                        GlideApp.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).into(playerIcon);
+                    } catch (Exception e) {
+                    }
 
                     TextView playerName = (TextView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_name_drawer);
                     playerName.setText(mAuth.getCurrentUser().getDisplayName());
@@ -487,7 +513,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void getAllHeritages() {
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         Log.d(TAG, "Getting all heritages...");
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getAllHeritages/" + mAuth.getCurrentUser().getEmail() + "/";
@@ -521,7 +547,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void getAllTreasures() {
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getAllTreasures/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -557,7 +583,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void getAllStages() {
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getActiveStages/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -728,7 +754,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void checkUserAndCreate() {
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         Log.d(TAG, "Checking if player exists in db");
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "checkPlayer/" + mAuth.getCurrentUser().getEmail();
@@ -761,7 +787,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void createUser() {
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "createPlayer/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsInfoTreasure = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {

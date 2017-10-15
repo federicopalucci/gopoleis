@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.model.GlideApp;
 
@@ -56,7 +57,7 @@ public class CardDetailsActivity extends AppCompatActivity {
     }
 
     private void getSetCardImage() {
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         String url = getString(R.string.server_url) + "getCard/" + code + "/";
         Log.d(TAG, url);
         JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -66,7 +67,7 @@ public class CardDetailsActivity extends AppCompatActivity {
                     for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
                         Log.d(TAG, jsObj.getString("filename"));
-                        GlideApp.with(CardDetailsActivity.this).load(getString(R.string.server_url) + "images/cards/" + jsObj.getString("filename")).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
+                        GlideApp.with(CardDetailsActivity.this).load(getString(R.string.server_url_http) + "images/cards/" + jsObj.getString("filename")).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

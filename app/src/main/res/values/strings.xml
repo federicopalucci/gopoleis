@@ -36,6 +36,7 @@
 
     <!--<string name="server_url">http://10.0.2.2:8000/</string>-->
     <string name="server_url" translatable="false">https://77.81.226.246:8000/</string>
+    <string name="server_url_http" translatable="false">http://77.81.226.246:8090/</string>
     <string name="gopoleis" translatable="false">GoPoleis</string>
 
     <string name="available_puzzles">Enigmi disponibili:</string>

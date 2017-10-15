@@ -43,6 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
 import it.neptis.gopoleis.adapters.CardAdapter;
 import it.neptis.gopoleis.adapters.ClickListener;
@@ -109,7 +110,7 @@ public class TreasureActivity extends AppCompatActivity {
                             open_treasure.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    RequestQueue queue = Volley.newRequestQueue(TreasureActivity.this);
+                                    RequestQueue queue = Volley.newRequestQueue(TreasureActivity.this, HurlStackProvider.getHurlStack());
                                     String url = getString(R.string.server_url) + "player/addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasureCode + "/";
                                     JsonArrayRequest jsAddTreasToGame = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                                         @Override
@@ -191,7 +192,7 @@ public class TreasureActivity extends AppCompatActivity {
         // ------------------------------------------------------------------------
 
 
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         String url = getString(R.string.server_url) + "getFiveTreasureCardsInfo/";
         for (String tempString : random_card_codes)
             url += tempString + "/";
@@ -207,7 +208,7 @@ public class TreasureActivity extends AppCompatActivity {
                         c_rarity = jsObj.getString("rarity");
                         c_description = jsObj.getString("description");
                         String filename = jsObj.getString("filename");
-                        treas_card_list.add(new Card(c_code, c_rarity, c_name, c_description, getString(R.string.server_url) + "images/cards/" + filename));
+                        treas_card_list.add(new Card(c_code, c_rarity, c_name, c_description, getString(R.string.server_url_http) + "images/cards/" + filename));
                     }
                     cardAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
@@ -238,7 +239,7 @@ public class TreasureActivity extends AppCompatActivity {
     }
 
     private void getSetTreasureInfo() {
-        RequestQueue queue = Volley.newRequestQueue(this);
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         String url = getString(R.string.server_url) + "getInfoTreasure/" + treasureCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
@@ -287,7 +288,7 @@ public class TreasureActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
-                            RequestQueue queue3 = Volley.newRequestQueue(TreasureActivity.this);
+                            RequestQueue queue3 = Volley.newRequestQueue(TreasureActivity.this, HurlStackProvider.getHurlStack());
                             String url = getString(R.string.server_url) + "player/addFiveCardsToUserCollection/" + mAuth.getCurrentUser().getEmail() + "/";
                             for (String tempString : random_card_codes)
                                 url += tempString + "/";

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "17491503324-vv7g7klr3vkne3bdv30nqtotni5nmvgs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.neptis.gopoleis",
+            "certificate_hash": "38bbf5fa1e5568fafc5c04ba2ce8ab9ebb121e7a"
+          }
+        },
+        {
           "client_id": "17491503324-tul97db3j16j9v76apes2q1ol0e70505.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -29,7 +37,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDaDs_uLDsyz3X4V350tAa4vRYK4ltHEkQ"
+          "current_key": "AIzaSyCU4CuyBR-56vJTQy2vOuHRqF97QA1uRaA"
         }
       ],
       "services": {
