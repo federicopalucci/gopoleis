@@ -267,7 +267,6 @@ public class TreasureActivity extends AppCompatActivity {
     }
 
     public void generateCards() {
-        // TODO hardcoded card number
         ArrayList<Integer> list = new ArrayList<Integer>();
         for (int i = 1; i <= 20; i++) {
             list.add(i);
