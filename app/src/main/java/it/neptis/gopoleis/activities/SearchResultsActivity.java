@@ -1,5 +1,6 @@
 package it.neptis.gopoleis.activities;
 
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.os.Bundle;
@@ -34,17 +35,20 @@ public class SearchResultsActivity extends AppCompatActivity {
 
     private static final String TAG = "SearchResults";
 
-    private FirebaseAuth mAuth;
     private ListView listView;
     private List<Integer> codes;
     private List<SearchResult> searchResults;
+    private ProgressDialog progressDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
 
-        mAuth = FirebaseAuth.getInstance();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
 
         listView = (ListView) findViewById(R.id.search_results_listview);
 
@@ -63,6 +67,7 @@ public class SearchResultsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.results);
@@ -109,6 +114,7 @@ public class SearchResultsActivity extends AppCompatActivity {
                     SearchResult[] searchResultsArray = searchResults.toArray(new SearchResult[searchResults.size()]);
                     SearchResultAdapter adapter = new SearchResultAdapter(SearchResultsActivity.this, searchResultsArray);
                     listView.setAdapter(adapter);
+                    progressDialog.dismiss();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

@@ -1,5 +1,6 @@
 package it.neptis.gopoleis.fragments;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -41,11 +42,17 @@ public class RankingFragment extends Fragment {
 
     private static final String TAG = "RankingFragment";
     private List<RankingRow> rankingRows;
+    private ProgressDialog progressDialog;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.ranking_layout, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.ranking_listview);
+
+        progressDialog = new ProgressDialog(getActivity());
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
 
         getRankingByCoins(listView);
 
@@ -74,6 +81,7 @@ public class RankingFragment extends Fragment {
                                             rankingRows.add(new RankingRow(jsObj.getString("email"), jsObj.getInt("coins")));
                                         }
                                         listView.setAdapter(new RankingAdapter(getContext(), rankingRows.toArray(new RankingRow[rankingRows.size()])));
+                                        progressDialog.dismiss();
                                     } catch (JSONException e) {
                                         Log.d(TAG, e.getMessage());
                                     }

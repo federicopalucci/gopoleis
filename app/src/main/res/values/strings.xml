@@ -87,9 +87,9 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-    <string name="loading">Caricamento...</string>
+    <string name="loading">Caricamento…</string>
     <string name="search_title">Cerca</string>
-    <string name="search_hint">Cerca...</string>
+    <string name="search_hint">Cerca…</string>
     <string name="title_activity_search_results">SearchResultsActivity</string>
     <string name="results">Risultati</string>
     <string name="cards">Carte</string>
@@ -130,5 +130,6 @@
     <string name="medal_details_category">Categoria: %1$s</string>
     <string name="medal_details_heritages">Beni interessati: %1$s</string>
     <string name="no_reviews">Non ci sono recensioni al momento, aggiungine una!</string>
+    <string name="no_cards">Non ci sono carte nella tua collezione! Apri i pacchetti per trovarle!</string>
 
 </resources>

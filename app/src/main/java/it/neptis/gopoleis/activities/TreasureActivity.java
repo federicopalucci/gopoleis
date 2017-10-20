@@ -2,6 +2,7 @@ package it.neptis.gopoleis.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -69,11 +70,17 @@ public class TreasureActivity extends AppCompatActivity {
     private CardAdapter cardAdapter;
 
     boolean opened;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_treasure);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -89,6 +96,7 @@ public class TreasureActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.booster_pack);
@@ -250,6 +258,8 @@ public class TreasureActivity extends AppCompatActivity {
                         info.setText(jsObj.getString("description"));
                         latitude.setText(String.format(getString(R.string.latitude), jsObj.getString("latitude")));
                         longitude.setText(String.format(getString(R.string.longitude), jsObj.getString("longitude")));
+
+                        progressDialog.dismiss();
 
                         treasureNotFound();
                     }

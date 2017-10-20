@@ -2,6 +2,7 @@ package it.neptis.gopoleis.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -58,11 +59,17 @@ public class StageActivity extends AppCompatActivity {
     private TextView titleTextView, curiosityTextView, questionTextView;
     private ImageButton hintOnSiteButton, hintByPayingButton;
     private boolean solved;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stage);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
 
         stageCode = getIntent().getStringExtra("code");
 
@@ -80,6 +87,7 @@ public class StageActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.stage);
@@ -232,6 +240,8 @@ public class StageActivity extends AppCompatActivity {
         titleTextView.setText(stage.getTitle());
         curiosityTextView.setText(String.format(getString(R.string.stage_curiosity), stage.getCuriosity()));
         questionTextView.setText(stage.getQuestion().getQuestion());
+
+        progressDialog.dismiss();
 
         hintOnSiteButton.setOnClickListener(new View.OnClickListener() {
             @Override

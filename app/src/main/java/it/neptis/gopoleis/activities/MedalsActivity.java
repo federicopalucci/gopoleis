@@ -1,5 +1,6 @@
 package it.neptis.gopoleis.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -42,11 +43,17 @@ public class MedalsActivity extends AppCompatActivity {
     private MedalAdapter regionsMedalAdapter;
     private MedalAdapter historicalPeriodMedalAdapter;
     private MedalAdapter structuretypeMedalAdapter;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_medals);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -125,6 +132,7 @@ public class MedalsActivity extends AppCompatActivity {
                     regionsMedalAdapter.notifyDataSetChanged();
                     historicalPeriodMedalAdapter.notifyDataSetChanged();
                     structuretypeMedalAdapter.notifyDataSetChanged();
+                    progressDialog.dismiss();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

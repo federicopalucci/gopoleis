@@ -51,6 +51,7 @@ public class CardDetailsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.card_details);
@@ -58,8 +59,7 @@ public class CardDetailsActivity extends AppCompatActivity {
 
     private void getSetCardImage() {
         RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
-        String url = getString(R.string.server_url) + "getCard/" + code + "/";
-        Log.d(TAG, url);
+        String url = getString(R.string.server_url) + "getCardByCode/" + code + "/";
         JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {

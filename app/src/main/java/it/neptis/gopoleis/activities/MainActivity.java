@@ -15,10 +15,10 @@ import android.content.res.Configuration;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -39,9 +39,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
@@ -93,43 +91,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
 import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
-import it.neptis.gopoleis.SslCertificateAuthority;
 import it.neptis.gopoleis.model.ClusterMarker;
 import it.neptis.gopoleis.model.CustomClusterRenderer;
 import it.neptis.gopoleis.model.GlideApp;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker> {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker> {
 
     private static final String TAG = "MainActivity";
     private static final int RC_LOCATION_SETTINGS = 2;
@@ -139,6 +116,7 @@ public class MainActivity extends AppCompatActivity
     private static final int RC_HERITAGE = 5;
     // 200mt range
     private static final double RANGE_METERS = 200;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 30;
 
     private FirebaseAuth mAuth;
     private GoogleMap mMap;
@@ -166,21 +144,19 @@ public class MainActivity extends AppCompatActivity
 
         mAuth = FirebaseAuth.getInstance();
 
-        //getSocketFactory();
-        // ****************************************
-        //InputStream caInput = getResources().openRawResource(R.raw.gopoleis_server);
-        //SslCertificateAuthority.setCustomCertificateAuthority(caInput);
-        // ****************************************
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
 
         try {
-            InputStream caInput = getResources().openRawResource(R.raw.gopoleis_server); // this cert file stored in \app\src\main\res\raw folder path
+            InputStream caInput = getResources().openRawResource(R.raw.gopoleis_server);
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             Certificate ca = cf.generateCertificate(caInput);
             caInput.close();
             HurlStackProvider.init(ca);
         } catch (Exception e) {
+            Log.d(TAG, "Error retrieving server certificate");
         }
-        // ****************************************
 
         if (mAuth.getCurrentUser() == null) {
             firebaseLogin();
@@ -189,32 +165,29 @@ public class MainActivity extends AppCompatActivity
             Log.d(TAG, "About to check user");
             checkUserAndCreate();
 
-            // Wait for UI to load
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    ImageView playerIcon = (ImageView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_icon_drawer);
-                    try {
-                        GlideApp.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).into(playerIcon);
-                    } catch (Exception e) {
-                    }
 
-                    TextView playerName = (TextView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_name_drawer);
-                    playerName.setText(mAuth.getCurrentUser().getDisplayName());
-                    TextView playerEmail = (TextView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_email_drawer);
-                    playerEmail.setText(mAuth.getCurrentUser().getEmail());
+            ImageView playerIcon = (ImageView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_icon_drawer);
+            try {
+                GlideApp.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).into(playerIcon);
+            } catch (Exception e) {
+                Log.d(TAG, "Error retrieving player avatar");
+            }
 
-                    MapFragment mapFragment = (MapFragment) getFragmentManager()
-                            .findFragmentById(R.id.map);
-                    Log.d(TAG, "Getting map...");
-                    mapFragment.getMapAsync(MainActivity.this);
-                }
-            }, 3000);
+            TextView playerName = (TextView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_name_drawer);
+            playerName.setText(mAuth.getCurrentUser().getDisplayName());
+            TextView playerEmail = (TextView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_email_drawer);
+            playerEmail.setText(mAuth.getCurrentUser().getEmail());
+
+            MapFragment mapFragment = (MapFragment) getFragmentManager()
+                    .findFragmentById(R.id.map);
+            Log.d(TAG, "Getting map...");
+            if (mapFragment != null)
+                mapFragment.getMapAsync(MainActivity.this);
+
         }
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        //final ProgressDialog progressDialog = ProgressDialog.show(this, "", getString(R.string.loading), true);
         final ProgressDialog progressDialog = new ProgressDialog(this, R.style.MyTheme);
         progressDialog.setCancelable(false);
         progressDialog.show();
@@ -350,14 +323,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void requestLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         if (requestingLocationUpdates)
@@ -489,14 +455,7 @@ public class MainActivity extends AppCompatActivity
     public void onMapReady(GoogleMap map) {
         Log.d(TAG, "MAP READY");
         mMap = map;
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         mMap.setMyLocationEnabled(true);
@@ -711,7 +670,6 @@ public class MainActivity extends AppCompatActivity
 
                     recreate();
                 }
-                //startActivity(SignedInActivity.createIntent(this, response));
             } else {
                 if (response == null) {
                     // User pressed back button
@@ -1046,70 +1004,19 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private SSLSocketFactory getSocketFactory() {
-
-        CertificateFactory cf = null;
-        try {
-            cf = CertificateFactory.getInstance("X.509");
-            InputStream caInput = getResources().openRawResource(R.raw.gopoleis_server);
-            Certificate ca;
-            try {
-                ca = cf.generateCertificate(caInput);
-                Log.e("CERT", "ca=" + ((X509Certificate) ca).getSubjectDN());
-            } finally {
-                caInput.close();
-            }
-
-
-            String keyStoreType = KeyStore.getDefaultType();
-            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-            keyStore.load(null, null);
-            keyStore.setCertificateEntry("ca", ca);
-
-
-            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-            tmf.init(keyStore);
-
-
-            HostnameVerifier hostnameVerifier = new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-
-                    Log.e("CipherUsed", session.getCipherSuite());
-                    return hostname.compareTo("77.81.226.246") == 0; //The Hostname of your server
-
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_PERMISSION_REQUEST_CODE: {
+                // If request is cancelled, the result arrays are empty.
+                if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Toast.makeText(this, getString(R.string.need_location_permission), Toast.LENGTH_SHORT).show();
+                    finish();
                 }
-            };
-
-
-            HttpsURLConnection.setDefaultHostnameVerifier(hostnameVerifier);
-            SSLContext context = null;
-            context = SSLContext.getInstance("TLS");
-
-            context.init(null, tmf.getTrustManagers(), null);
-            HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
-
-            SSLSocketFactory sf = context.getSocketFactory();
-
-
-            return sf;
-
-        } catch (CertificateException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (KeyStoreException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
+            }
         }
-
-        return null;
     }
 
 }

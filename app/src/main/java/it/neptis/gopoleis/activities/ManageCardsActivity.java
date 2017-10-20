@@ -1,5 +1,6 @@
 package it.neptis.gopoleis.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,6 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -46,6 +49,8 @@ public class ManageCardsActivity extends AppCompatActivity {
     CardAdapter cardAdapter;
 
     private FirebaseAuth mAuth;
+    private LinearLayout cardsContainerLayout;
+    private TextView noCardsText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +63,16 @@ public class ManageCardsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.cards);
+
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
+
+        cardsContainerLayout = (LinearLayout) findViewById(R.id.cards_container_layout);
+        noCardsText = new TextView(ManageCardsActivity.this);
+        noCardsText.setText(R.string.no_cards);
+        noCardsText.setTextSize(30);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -90,17 +105,20 @@ public class ManageCardsActivity extends AppCompatActivity {
 
         // Retrieve cards
         RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
+        int requestMethod = 0;
         switch (button_code) {
             case ALL_CARDS_REQUEST_CODE:
                 url = getString(R.string.server_url) + "getAllCards/";
+                requestMethod = Request.Method.POST;
                 break;
             case MY_CARDS_REQUEST_CODE:
                 url = getString(R.string.server_url) + "getMyCards/" + mAuth.getCurrentUser().getEmail() + "/";
+                requestMethod = Request.Method.GET;
                 break;
             default:
                 break;
         }
-        final JsonArrayRequest jsCardCodes = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        final JsonArrayRequest jsCardCodes = new JsonArrayRequest(requestMethod, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
@@ -115,6 +133,13 @@ public class ManageCardsActivity extends AppCompatActivity {
                         all_cards.add(new Card(code, rarity, name, description, getString(R.string.server_url_http) + "images/cards/" + filename));
                     }
                     cardAdapter.notifyDataSetChanged();
+                    progressDialog.dismiss();
+
+                    if (all_cards.isEmpty()) {
+                        cardsContainerLayout.addView(noCardsText, 0);
+                    } else {
+                        cardsContainerLayout.removeView(noCardsText);
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

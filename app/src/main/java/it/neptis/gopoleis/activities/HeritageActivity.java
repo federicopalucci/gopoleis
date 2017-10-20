@@ -2,6 +2,7 @@ package it.neptis.gopoleis.activities;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -55,11 +56,17 @@ public class HeritageActivity extends AppCompatActivity {
     private String userReview;
     private boolean hasReviewed = false;
     private MediaPlayer mediaPlayer;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_heritage);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -96,6 +103,7 @@ public class HeritageActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.heritage);
@@ -235,6 +243,8 @@ public class HeritageActivity extends AppCompatActivity {
                         description.setText(jsObj.getString("description"));
                         hasReviewed = jsObj.getString("hasReviewed").equals("1");
                         GlideApp.with(HeritageActivity.this).load(getString(R.string.server_url_http) + "images/heritages/" + jsObj.getString("filename")).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
+
+                        progressDialog.dismiss();
 
                         if (jsObj.getInt("visited") == 0) {
                             addVisitedHeritage();

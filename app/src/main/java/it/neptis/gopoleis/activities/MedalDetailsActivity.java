@@ -1,7 +1,8 @@
 package it.neptis.gopoleis.activities;
 
-import android.support.v7.app.AppCompatActivity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.ImageView;
@@ -16,9 +17,6 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
@@ -34,15 +32,22 @@ public class MedalDetailsActivity extends AppCompatActivity {
     private TextView heritages;
     private ImageView image;
     private String filepath;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_medal_details);
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.medal_details);
@@ -75,6 +80,7 @@ public class MedalDetailsActivity extends AppCompatActivity {
                             heritagesNames = heritagesNames.concat(response.get(i) + ", ");
                     }
                     heritages.setText(String.format(getString(R.string.medal_details_heritages), heritagesNames));
+                    progressDialog.dismiss();
                     GlideApp.with(MedalDetailsActivity.this).load(filepath).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
                 } catch (JSONException e) {
                     e.printStackTrace();

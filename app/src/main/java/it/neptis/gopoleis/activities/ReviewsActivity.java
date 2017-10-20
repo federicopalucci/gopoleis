@@ -1,5 +1,6 @@
 package it.neptis.gopoleis.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -49,15 +50,22 @@ public class ReviewsActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     LinearLayout reviewsContainerLayout;
     private TextView noReviewsText;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reviews);
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.reviews);
@@ -112,6 +120,7 @@ public class ReviewsActivity extends AppCompatActivity {
                         }
                     });
                     reviewAdapter.notifyDataSetChanged();
+                    progressDialog.dismiss();
 
                     if (all_reviews.isEmpty()) {
                         reviewsContainerLayout.addView(noReviewsText, 0);

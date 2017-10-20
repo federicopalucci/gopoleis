@@ -1,6 +1,7 @@
 package it.neptis.gopoleis.activities;
 
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,15 +43,22 @@ public class MissionsActivity extends AppCompatActivity {
     private boolean[] completed;
     private FirebaseAuth mAuth;
     private ListView listview;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_missions);
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setTitle(R.string.missions);
@@ -60,10 +68,6 @@ public class MissionsActivity extends AppCompatActivity {
         listview = (ListView) findViewById(R.id.missions_listview);
 
         getMissions();
-
-        //final StableArrayAdapter adapter = new StableArrayAdapter(this, android.R.layout.simple_list_item_1, list);
-        //final ArrayAdapter <String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, list);
-
     }
 
     private void getMissions() {
@@ -82,6 +86,7 @@ public class MissionsActivity extends AppCompatActivity {
                     }
                     adapter = new MissionAdapter(MissionsActivity.this, missions, completed);
                     listview.setAdapter(adapter);
+                    progressDialog.dismiss();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
