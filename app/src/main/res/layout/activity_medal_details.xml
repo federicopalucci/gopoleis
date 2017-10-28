@@ -7,49 +7,57 @@
 
     <include layout="@layout/toolbar" />
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:orientation="vertical">
+        android:fillViewport="true"
+        android:scrollbars="none">
 
-        <ImageView
-            android:id="@+id/medal_details_image"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:paddingBottom="32dp" />
-
-        <TextView
-            android:id="@+id/medal_details_name"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.3"
-            android:gravity="center_vertical"
-            android:text="@string/medal_details_name"
-            android:textSize="20sp" />
-
-        <TextView
-            android:id="@+id/medal_details_category"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.3"
-            android:gravity="center_vertical"
-            android:text="@string/medal_details_category"
-            android:textSize="20sp" />
-
-        <TextView
-            android:id="@+id/medal_details_heritages"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="128dp"
-            android:gravity="center_vertical"
-            android:text="@string/medal_details_heritages"
-            android:textSize="20sp" />
+            android:orientation="vertical">
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/medal_details_image"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingBottom="32dp" />
+
+            <TextView
+                android:id="@+id/medal_details_name"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.3"
+                android:gravity="center_vertical"
+                android:text="@string/medal_details_name"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/medal_details_category"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.3"
+                android:gravity="center_vertical"
+                android:text="@string/medal_details_category"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/medal_details_heritages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="128dp"
+                android:gravity="center_vertical"
+                android:text="@string/medal_details_heritages"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>

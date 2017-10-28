@@ -57,7 +57,7 @@ public class TreasureActivity extends AppCompatActivity {
 
     private String treasureCode;
 
-    private TextView info, latitude, longitude;
+    private TextView info, coordinates;
     private ImageView coffer;
 
     private FirebaseAuth mAuth;
@@ -89,8 +89,7 @@ public class TreasureActivity extends AppCompatActivity {
         treasureCode = getIntent().getStringExtra("code");
 
         info = (TextView) findViewById(R.id.treasure_description);
-        latitude = (TextView) findViewById(R.id.treasure_latitude);
-        longitude = (TextView) findViewById(R.id.treasure_longitude);
+        coordinates = (TextView) findViewById(R.id.treasure_coordinates);
         coffer = (ImageView) findViewById(R.id.treasure_image);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -102,6 +101,36 @@ public class TreasureActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(R.string.booster_pack);
 
         getSetTreasureInfo();
+    }
+
+    private void getSetTreasureInfo() {
+        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
+        String url = getString(R.string.server_url) + "getInfoTreasure/" + treasureCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
+        JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    for (int i = 0; i < response.length(); i++) {
+                        JSONObject jsObj = (JSONObject) response.get(i);
+                        info.setText(jsObj.getString("description"));
+                        coordinates.setText(String.format(getString(R.string.ne_coordinates), jsObj.getString("latitude"), jsObj.getString("longitude")));
+
+                        progressDialog.dismiss();
+
+                        treasureNotFound();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d(TAG, error.toString());
+            }
+        });
+
+        queue.add(jsHeritageInfo);
     }
 
     private void treasureNotFound() {
@@ -118,24 +147,47 @@ public class TreasureActivity extends AppCompatActivity {
                             open_treasure.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    progressDialog = new ProgressDialog(TreasureActivity.this);
+                                    progressDialog.setCancelable(false);
+                                    progressDialog.setMessage(getString(R.string.loading));
+                                    progressDialog.show();
+
                                     RequestQueue queue = Volley.newRequestQueue(TreasureActivity.this, HurlStackProvider.getHurlStack());
                                     String url = getString(R.string.server_url) + "player/addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasureCode + "/";
                                     JsonArrayRequest jsAddTreasToGame = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                                         @Override
                                         public void onResponse(JSONArray response) {
-                                            treasureOpened();
-                                            for (int i = 0; i < response.length(); i++) {
-                                                AlertDialog.Builder builder;
-                                                builder = new AlertDialog.Builder(TreasureActivity.this);
-                                                builder.setTitle(R.string.congratulations)
-                                                        .setMessage(R.string.congratulations_mission)
-                                                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                                            public void onClick(DialogInterface dialog, int which) {
-                                                            }
-                                                        })
-                                                        .setIcon(android.R.drawable.star_off)
-                                                        .show();
+
+                                            progressDialog.dismiss();
+
+
+                                            // First element contains unlocked missions
+                                            try {
+                                                JSONArray unlockedMissionsJSONArray = (JSONArray) response.get(0);
+                                                for (int i = 0; i < unlockedMissionsJSONArray.length(); i++) {
+                                                    if (! unlockedMissionsJSONArray.getString(0).equals("null")) {
+                                                        AlertDialog.Builder builder;
+                                                        builder = new AlertDialog.Builder(TreasureActivity.this);
+                                                        builder.setTitle(R.string.congratulations)
+                                                                .setMessage(R.string.congratulations_mission)
+                                                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                                                    public void onClick(DialogInterface dialog, int which) {
+                                                                    }
+                                                                })
+                                                                .setIcon(android.R.drawable.star_off)
+                                                                .show();
+                                                    }
+                                                }
+
+                                                JSONArray cardsJSONArray = (JSONArray) response.get(1);
+                                                for (int i = 0; i < cardsJSONArray.length(); i++) {
+                                                    random_card_codes[i] = cardsJSONArray.getString(i);
+                                                }
+                                            } catch (JSONException e) {
+                                                e.printStackTrace();
                                             }
+
+                                            treasureOpened();
                                         }
                                     }, new Response.ErrorListener() {
                                         @Override
@@ -171,8 +223,6 @@ public class TreasureActivity extends AppCompatActivity {
         parent.removeView(dynamicTreasureView);
         dynamicTreasureView = getLayoutInflater().inflate(R.layout.cards_found, parent, false);
         parent.addView(dynamicTreasureView, index);
-
-        generateCards();
 
         treas_card_list = new LinkedList<>();
 
@@ -232,8 +282,6 @@ public class TreasureActivity extends AppCompatActivity {
 
         queue.add(jsInfoCardTreasure);
 
-        addCardsToCollection(random_card_codes);
-
         AlertDialog.Builder builder;
         builder = new AlertDialog.Builder(TreasureActivity.this);
         builder.setTitle(R.string.congratulations)
@@ -244,103 +292,6 @@ public class TreasureActivity extends AppCompatActivity {
                 })
                 .setIcon(android.R.drawable.star_off)
                 .show();
-    }
-
-    private void getSetTreasureInfo() {
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
-        String url = getString(R.string.server_url) + "getInfoTreasure/" + treasureCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
-        JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    for (int i = 0; i < response.length(); i++) {
-                        JSONObject jsObj = (JSONObject) response.get(i);
-                        info.setText(jsObj.getString("description"));
-                        latitude.setText(String.format(getString(R.string.latitude), jsObj.getString("latitude")));
-                        longitude.setText(String.format(getString(R.string.longitude), jsObj.getString("longitude")));
-
-                        progressDialog.dismiss();
-
-                        treasureNotFound();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
-            }
-        });
-
-        queue.add(jsHeritageInfo);
-    }
-
-    public void generateCards() {
-        // TODO hardcoded card number
-        ArrayList<Integer> list = new ArrayList<Integer>();
-        for (int i = 1; i <= 20; i++) {
-            list.add(i);
-        }
-        Collections.shuffle(list);
-        for (int i = 0; i < random_card_codes.length; i++) {
-            random_card_codes[i] = String.valueOf(list.get(i));
-        }
-    }
-
-    public void addCardsToCollection(String[] card_codes) {
-        final String[] idToken = new String[1];
-        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
-        mUser.getIdToken(true)
-                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                    public void onComplete(@NonNull Task<GetTokenResult> task) {
-                        if (task.isSuccessful()) {
-                            idToken[0] = task.getResult().getToken();
-                            // Send token to your backend via HTTPS
-                            RequestQueue queue3 = Volley.newRequestQueue(TreasureActivity.this, HurlStackProvider.getHurlStack());
-                            String url = getString(R.string.server_url) + "player/addFiveCardsToUserCollection/" + mAuth.getCurrentUser().getEmail() + "/";
-                            for (String tempString : random_card_codes)
-                                url += tempString + "/";
-
-                            JsonArrayRequest jsAddCardToCollection = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-                                @Override
-                                public void onResponse(JSONArray response) {
-                                    for (int i = 0; i < response.length(); i++) {
-                                        AlertDialog.Builder builder;
-                                        builder = new AlertDialog.Builder(TreasureActivity.this);
-                                        builder.setTitle(R.string.congratulations)
-                                                .setMessage(R.string.congratulations_mission)
-                                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                    }
-                                                })
-                                                .setIcon(android.R.drawable.star_off)
-                                                .show();
-                                    }
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    Log.d(TAG, error.toString());
-                                }
-                            }) {
-                                @Override
-                                public Map<String, String> getHeaders() throws AuthFailureError {
-                                    Map<String, String> params = new HashMap<String, String>();
-                                    params.put("MyToken", idToken[0]);
-                                    return params;
-                                }
-                            };
-
-                            queue3.add(jsAddCardToCollection);
-                        } else {
-                            // Handle error -> task.getException();
-                            Log.d(TAG, task.getException().toString());
-                            Toast.makeText(TreasureActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
     }
 
     @Override

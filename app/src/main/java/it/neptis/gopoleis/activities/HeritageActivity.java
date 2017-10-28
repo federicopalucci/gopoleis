@@ -49,7 +49,7 @@ public class HeritageActivity extends AppCompatActivity {
 
     private static final String TAG = "HeritageActivity";
 
-    private TextView name, structureType, latitude, longitude, province, region, historicalPeriod, description;
+    private TextView name, structureType, coordinates, province_region, historicalPeriod, description;
     private String heritageCode;
     private FirebaseAuth mAuth;
     private ImageView image;
@@ -74,10 +74,8 @@ public class HeritageActivity extends AppCompatActivity {
 
         name = (TextView) findViewById(R.id.heritage_name);
         structureType = (TextView) findViewById(R.id.heritage_structuretype);
-        latitude = (TextView) findViewById(R.id.heritage_latitude);
-        longitude = (TextView) findViewById(R.id.heritage_longitude);
-        province = (TextView) findViewById(R.id.heritage_province);
-        region = (TextView) findViewById(R.id.heritage_region);
+        coordinates = (TextView) findViewById(R.id.heritage_coordinates);
+        province_region = (TextView) findViewById(R.id.heritage_province_region);
         historicalPeriod = (TextView) findViewById(R.id.heritage_historicalperiod);
         description = (TextView) findViewById(R.id.heritage_description);
         image = (ImageView) findViewById(R.id.imageView2);
@@ -235,21 +233,19 @@ public class HeritageActivity extends AppCompatActivity {
                         JSONObject jsObj = (JSONObject) response.get(i);
                         name.setText(jsObj.getString("name"));
                         structureType.setText(String.format(getString(R.string.structuretype), jsObj.getString("structuretype")));
-                        latitude.setText((String.format(getString(R.string.latitude), jsObj.getString("latitude"))));
-                        longitude.setText((String.format(getString(R.string.longitude), jsObj.getString("longitude"))));
-                        province.setText((String.format(getString(R.string.province), jsObj.getString("province"))));
-                        region.setText((String.format(getString(R.string.region), jsObj.getString("region"))));
+                        coordinates.setText((String.format(getString(R.string.ne_coordinates), jsObj.getString("latitude"), jsObj.getString("longitude"))));
+                        province_region.setText((String.format(getString(R.string.heritage_province_region), jsObj.getString("province"), jsObj.getString("region"))));
                         historicalPeriod.setText((String.format(getString(R.string.historicalperiod), jsObj.getString("historicalperiod"))));
                         description.setText(jsObj.getString("description"));
                         hasReviewed = jsObj.getString("hasReviewed").equals("1");
                         GlideApp.with(HeritageActivity.this).load(getString(R.string.server_url_http) + "images/heritages/" + jsObj.getString("filename")).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
 
-                        progressDialog.dismiss();
-
                         if (jsObj.getInt("visited") == 0) {
                             addVisitedHeritage();
                             showDialog(getString(R.string.congratulations), getString(R.string.congratulations_heritage));
                         }
+                        else
+                            progressDialog.dismiss();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -293,6 +289,7 @@ public class HeritageActivity extends AppCompatActivity {
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
+                                        progressDialog.dismiss();
                                     }
                                 }
                             }, new Response.ErrorListener() {

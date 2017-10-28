@@ -12,10 +12,6 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:fillViewport="true"
         android:scrollbars="none">
 
@@ -24,94 +20,146 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/heritage_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="30sp"
-                android:textAlignment="center"
-                android:layout_marginBottom="8dp"
-                android:text="Heritage info..." />
-
             <ImageView
                 android:id="@+id/imageView2"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"/>
+                android:layout_height="wrap_content" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginRight="@dimen/activity_horizontal_margin"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/heritage_structuretype"
+                    android:id="@+id/heritage_name"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="@string/structuretype" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:text="Heritage info..."
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/imageView7"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingEnd="8dp"
+                            android:src="@drawable/ic_heritage" />
+
+                        <TextView
+                            android:id="@+id/heritage_structuretype"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center_vertical"
+                            android:text="@string/structuretype" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/imageView6"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingEnd="8dp"
+                            android:src="@drawable/ic_access_time_black_24dp" />
+
+                        <TextView
+                            android:id="@+id/heritage_historicalperiod"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center_vertical"
+                            android:text="@string/historicalperiod" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/imageView4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingEnd="8dp"
+                            android:src="@drawable/ic_place_black_24dp" />
+
+                        <TextView
+                            android:id="@+id/heritage_coordinates"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center_vertical"
+                            android:text="@string/ne_coordinates" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/imageView5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingEnd="8dp"
+                            android:src="@drawable/ic_place_black_24dp"
+                            android:visibility="invisible" />
+
+                        <TextView
+                            android:id="@+id/heritage_province_region"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center_vertical"
+                            android:text="@string/heritage_province_region" />
+                    </LinearLayout>
+
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/heritage_historicalperiod"
+                    android:id="@+id/heritage_description"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="@string/historicalperiod" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="Heritage description..."
+                    android:textSize="16dp" />
 
-                <TextView
-                    android:id="@+id/heritage_latitude"
+                <Button
+                    android:id="@+id/read_reviews_button"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="@string/latitude" />
+                    android:layout_height="wrap_content"
+                    android:text="Read reviews" />
 
-                <TextView
-                    android:id="@+id/heritage_longitude"
+                <Button
+                    android:id="@+id/submit_reviews_button"
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="@string/longitude" />
-
-                <TextView
-                    android:id="@+id/heritage_province"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="@string/province" />
-
-                <TextView
-                    android:id="@+id/heritage_region"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:text="@string/region" />
+                    android:layout_height="wrap_content"
+                    android:text="Submit a review" />
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/heritage_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Heritage description..."
-                android:layout_marginBottom="8dp"
-                android:textSize="16dp"/>
-
-            <Button
-                android:id="@+id/read_reviews_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Read reviews" />
-
-            <Button
-                android:id="@+id/submit_reviews_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Submit a review" />
-
         </LinearLayout>
+
     </ScrollView>
 
 </LinearLayout>

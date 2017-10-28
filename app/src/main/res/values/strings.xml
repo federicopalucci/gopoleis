@@ -73,7 +73,7 @@
     <string name="region">Regione: %1$s</string>
     <string name="historicalperiod">Periodo storico: %1$s</string>
     <string name="congratulations_medal">Hai sbloccato la %1$s!</string>
-    <string name="stage_curiosity">Curiosità: %1$s</string>
+    <string name="stage_curiosity">%1$s</string>
     <string name="input_answer">Inserisci la risposta</string>
     <string name="wrong_stage_answer">La risposta è sbagliata!</string>
     <string name="stage_completed">Hai completato uno stage!</string>
@@ -131,5 +131,7 @@
     <string name="medal_details_heritages">Beni interessati: %1$s</string>
     <string name="no_reviews">Non ci sono recensioni al momento, aggiungine una!</string>
     <string name="no_cards">Non ci sono carte nella tua collezione! Apri i pacchetti per trovarle!</string>
+    <string name="ne_coordinates">%1$s N, %2$s E</string>
+    <string name="heritage_province_region">%1$s, %2$s</string>
 
 </resources>
