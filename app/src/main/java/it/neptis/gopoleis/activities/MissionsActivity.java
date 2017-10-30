@@ -1,15 +1,10 @@
 package it.neptis.gopoleis.activities;
 
-import android.app.ListActivity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.android.volley.Request;
@@ -24,15 +19,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
-import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
+import it.neptis.gopoleis.RequestQueueSingleton;
 import it.neptis.gopoleis.adapters.MissionAdapter;
-import it.neptis.gopoleis.model.GlideApp;
 
 public class MissionsActivity extends AppCompatActivity {
 
@@ -71,7 +60,6 @@ public class MissionsActivity extends AppCompatActivity {
     }
 
     private void getMissions() {
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         String url = getString(R.string.server_url) + "getMissions/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
@@ -98,7 +86,7 @@ public class MissionsActivity extends AppCompatActivity {
             }
         });
 
-        queue.add(jsHeritageInfo);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsHeritageInfo);
     }
 
 }

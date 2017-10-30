@@ -37,23 +37,6 @@
         </menu>
     </item>
 
-    <!--
-
-    <item android:title="@string/puzzles">
-        <menu>
-            <item
-                android:id="@+id/nav_active_paths"
-                android:icon="@drawable/ic_menu_share"
-                android:title="@string/active_paths" />
-            <item
-                android:id="@+id/nav_my_paths"
-                android:icon="@drawable/ic_menu_send"
-                android:title="@string/my_paths" />
-        </menu>
-    </item>
-
-    -->
-
     <item
         android:id="@+id/nav_missions"
         android:icon="@drawable/ic_missions_black_24dp"

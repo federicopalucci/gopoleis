@@ -33,8 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
+import it.neptis.gopoleis.RequestQueueSingleton;
 import it.neptis.gopoleis.adapters.RankingAdapter;
 import it.neptis.gopoleis.model.RankingRow;
 
@@ -68,7 +68,6 @@ public class RankingFragment extends Fragment {
                         if (task.isSuccessful()) {
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
-                            RequestQueue queue = Volley.newRequestQueue(getActivity(), HurlStackProvider.getHurlStack());
                             //noinspection ConstantConditions
                             String url = getString(R.string.server_url) + "player/getRankingByCoins/";
                             JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -100,7 +99,7 @@ public class RankingFragment extends Fragment {
                                 }
                             };
 
-                            queue.add(jsTotal);
+                            RequestQueueSingleton.getInstance(getActivity()).addToRequestQueue(jsTotal);
                         } else {
                             // Handle error -> task.getException();
                             Log.d(TAG, task.getException().toString());

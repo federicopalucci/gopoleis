@@ -1,7 +1,6 @@
 package it.neptis.gopoleis.activities;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -9,7 +8,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -30,13 +28,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
-import it.neptis.gopoleis.adapters.CardAdapter;
-import it.neptis.gopoleis.adapters.ClickListener;
-import it.neptis.gopoleis.adapters.RecyclerTouchListener;
+import it.neptis.gopoleis.RequestQueueSingleton;
 import it.neptis.gopoleis.adapters.ReviewAdapter;
-import it.neptis.gopoleis.model.Card;
 import it.neptis.gopoleis.model.Review;
 
 public class ReviewsActivity extends AppCompatActivity {
@@ -92,7 +86,6 @@ public class ReviewsActivity extends AppCompatActivity {
         recyclerView.setNestedScrollingEnabled(true);
         // ------------------------------------------------------------------------
 
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         String url = getString(R.string.server_url) + "getReviews/" + heritageCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
         final JsonArrayRequest jsReviews = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
@@ -140,6 +133,6 @@ public class ReviewsActivity extends AppCompatActivity {
             }
         });
 
-        queue.add(jsReviews);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsReviews);
     }
 }

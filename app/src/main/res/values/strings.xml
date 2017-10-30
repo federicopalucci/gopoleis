@@ -1,46 +1,30 @@
 <resources xmlns:android="http://schemas.android.com/tools">
-    <string name="app_name">GoPoleis</string>
+    <string name="app_name" translatable="false">GoPoleis</string>
     //
-    <string name="treasure">PORTALE DEI TESORI</string>
-    <string name="portal">PORTALE</string>
     <string name="cards_list">LISTA DELLE CARTE</string>
     <string name="achievement_list">LISTA DEGLI ACHIEVEMENT</string>
 
-    <string name="spin">Scegli una struttura</string>
-    <string name="textLogin" translatable="false">Login</string>
-    <string name="textCancel">Annulla</string>
-    <string name="register">Registrati qui</string>
     <string name="etPassword" translatable="false">Password</string>
-    <string name="etEmail">Email</string>
-    <string name="user_login">Login utente</string>
-    <string name="register_account">Registrati</string>
+    <string name="etEmail" translatable="false">Email</string>
     <string name="etConfirmPass">Conferma Password</string>
-    <string name="user_register">Registra un nuovo account</string>
     <string name="cancel_login">Operazione annullata</string>
     <string name="error_login">Errore nel login!</string>
     <string name="logout" translatable="false">Log-out</string>
     <string name="or">------------------------ O --------------------------</string>
-    <string name="logged_in_as">Accesso eseguito come: %1$s</string>
-    <string name="please_log_in">Eseguire l\'accesso</string>
     <string name="done_log_out">Log-out effettuato</string>
     <string name="card_details_rarity">Rarità: %1$s</string>
-    <string name="photo_taken">Foto scattata!</string>
     <string name="too_far">Sei troppo lontano, avvicinati!</string>
 
-    <string name="title_travel">PORTALE DEI VIAGGI</string>
     <!-- <string name="google_maps_key">AIzaSyCqEkdkjEv2l9kvTV74woCIHzb98EmSD6s</string>-->
 
-    <string name="title_puzzle">PORTALE DEGLI ENIGMI</string>
     <string name="empty_puzz_list">Non ci sono puzzle attivi da visualizzare!</string>
     <string name="empty_inc_puzz_list">Non ci sono puzzle in programmazione!</string>
 
     <!--<string name="server_url">http://10.0.2.2:8000/</string>-->
-    <string name="server_url" translatable="false">https://77.81.226.246:8000/</string>
-    <string name="server_url_http" translatable="false">http://77.81.226.246:8090/</string>
+    <string name="server_url" translatable="false">https://neptis-poleis.diag.uniroma1.it:8000/</string>
     <string name="gopoleis" translatable="false">GoPoleis</string>
 
     <string name="available_puzzles">Enigmi disponibili:</string>
-    <string name="upcoming_puzzles">Enigmi in preparazione:</string>
 
     <!-- Twitter API -->
     <string name="com.twitter.sdk.android.CONSUMER_KEY" translatable="false">Cj86YafdhuMfED5OJANW5ArnO</string>
@@ -50,7 +34,6 @@
     <string name="facebook_application_id" translatable="false">231506257356189</string>
     <!-- Facebook Application ID, prefixed by 'fb'.  Enables Chrome Custom tabs. -->
     <string name="facebook_login_protocol_scheme" translatable="false">fb231506257356189</string>
-    <string name="site_information">Informazioni sul sito</string>
     <string name="need_location_permission">L\'accesso alla posizione è necessario</string>
     <string name="network_error">Nessuna connessione internet</string>
     <string name="unknown_error">Errore sconosciuto</string>
@@ -64,7 +47,6 @@
     <string name="historical_period_text">Periodo storico</string>
     <string name="typology_text">Tipologia</string>
     <string name="cards_title">Carte</string>
-    <string name="path_coming_soon">Questo percorso sarà presto disponibile!</string>
     <string name="congratulations_treasure">Hai collezionato 5 nuove carte! Guarda la tua collezione dal menu principale!</string>
     <string name="congratulations">Congratulazioni!</string>
     <string name="congratulations_heritage">Hai visitato un nuovo bene culturale!</string>
@@ -72,25 +54,20 @@
     <string name="province">Provincia: %1$s</string>
     <string name="region">Regione: %1$s</string>
     <string name="historicalperiod">Periodo storico: %1$s</string>
-    <string name="congratulations_medal">Hai sbloccato la %1$s!</string>
-    <string name="stage_curiosity">%1$s</string>
+    <string name="stage_curiosity" translatable="false">%1$s</string>
     <string name="input_answer">Inserisci la risposta</string>
     <string name="wrong_stage_answer">La risposta è sbagliata!</string>
     <string name="stage_completed">Hai completato uno stage!</string>
     <string name="path_completed">Hai completato un percorso!</string>
     <string name="stage_already_completed">Hai già completato questo stage!</string>
-    <string name="my_paths">I miei percorsi</string>
-    <string name="path_already_completed">Percorso completato!</string>
-    <string name="title_activity_main">MainActivity</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
 
-    <string name="action_settings">Settings</string>
     <string name="loading">Caricamento…</string>
     <string name="search_title">Cerca</string>
     <string name="search_hint">Cerca…</string>
-    <string name="title_activity_search_results">SearchResultsActivity</string>
+    <string name="title_activity_search_results" translatable="false">SearchResultsActivity</string>
     <string name="results">Risultati</string>
     <string name="cards">Carte</string>
     <string name="card_details">Info carta</string>
@@ -98,13 +75,7 @@
     <string name="stage">Stage</string>
     <string name="path">Percorso</string>
     <string name="medals">Medaglie</string>
-    <string name="title_activity_ranking">RankingActivity</string>
     <string name="rankings">Classifiche</string>
-    <string name="no_thanks">No, grazie</string>
-    <string name="can_advance_in_treasure_ranking">Puoi avanzare di una posizione in classifica aprendo il pacchetto di figurine più vicino, vuoi che te lo mostri?</string>
-    <string name="can_advance_in_heritage_ranking">Puoi avanzare nella classifica se visiti il bene culturale più vicino a te, vuoi che te lo mostri?</string>
-    <string name="almost_advance_in_ranking">Sei ad un passo dal guadagnare una posizione in classifica, vuoi che ti mostri il bene culturale più vicino a te?</string>
-    <string name="view_in_map">Guarda sulla mappa</string>
     <string name="heritage">Bene culturale</string>
     <string name="navigation">Navigazione</string>
     <string name="all">Tutto</string>
@@ -113,10 +84,8 @@
     <string name="paths">Percorsi</string>
     <string name="my_cards">Le mie carte</string>
     <string name="all_cards">Tutte le carte</string>
-    <string name="puzzles">Enigmi</string>
-    <string name="active_paths">Percorsi attivi</string>
     <string name="info">Informazioni</string>
-    <string name="gopoleis_info">Lasciati guidare alla scoperta del nostro patrimonio artistico e culturale.\n\nCon quest\'applicazione potrai collezionare figurine, risolvere enigmi e collezionare medaglie visitando quanti più beni culturali possibile.\n\nGoPoleis è stata sviluppata presso l\'Università degli Studi di Roma "La Sapienza" nell\'ambito del progetto Neptis.</string>
+    <string name="gopoleis_info">Lasciati guidare alla scoperta del nostro patrimonio artistico e culturale.\n\nCon quest\'applicazione potrai collezionare figurine, risolvere enigmi e collezionare medaglie visitando quanti più beni culturali possibile.\n\nGoPoleis è stata sviluppata presso l\'Università degli Studi di Roma \"La Sapienza\" nell\'ambito del progetto \"Neptis\".</string>
     <string name="about_gopoleis">Informazioni su GoPoleis</string>
     <string name="close">Chiudi</string>
     <string name="input_review">Scrivi la tua recensione</string>
@@ -131,7 +100,7 @@
     <string name="medal_details_heritages">Beni interessati: %1$s</string>
     <string name="no_reviews">Non ci sono recensioni al momento, aggiungine una!</string>
     <string name="no_cards">Non ci sono carte nella tua collezione! Apri i pacchetti per trovarle!</string>
-    <string name="ne_coordinates">%1$s N, %2$s E</string>
-    <string name="heritage_province_region">%1$s, %2$s</string>
+    <string name="ne_coordinates" translatable="false">%1$s N, %2$s E</string>
+    <string name="heritage_province_region" translatable="false">%1$s, %2$s</string>
 
 </resources>

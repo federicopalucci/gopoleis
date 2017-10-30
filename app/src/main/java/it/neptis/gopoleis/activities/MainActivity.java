@@ -91,17 +91,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.InputStream;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
+import it.neptis.gopoleis.RequestQueueSingleton;
 import it.neptis.gopoleis.model.ClusterMarker;
 import it.neptis.gopoleis.model.CustomClusterRenderer;
 import it.neptis.gopoleis.model.GlideApp;
@@ -146,16 +143,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-        }
-
-        try {
-            InputStream caInput = getResources().openRawResource(R.raw.gopoleis_server);
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            Certificate ca = cf.generateCertificate(caInput);
-            caInput.close();
-            HurlStackProvider.init(ca);
-        } catch (Exception e) {
-            Log.d(TAG, "Error retrieving server certificate");
         }
 
         if (mAuth.getCurrentUser() == null) {
@@ -472,7 +459,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void getAllHeritages() {
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         Log.d(TAG, "Getting all heritages...");
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getAllHeritages/" + mAuth.getCurrentUser().getEmail() + "/";
@@ -502,11 +488,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        queue.add(jsTotal);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsTotal);
     }
 
     public void getAllTreasures() {
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getAllTreasures/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -538,11 +523,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        queue.add(jsTotal);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsTotal);
     }
 
     public void getAllStages() {
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getActiveStages/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -612,7 +596,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        queue.add(jsTotal);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsTotal);
     }
 
     @Override
@@ -712,7 +696,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void checkUserAndCreate() {
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         Log.d(TAG, "Checking if player exists in db");
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "checkPlayer/" + mAuth.getCurrentUser().getEmail();
@@ -741,11 +724,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        queue.add(jsInfoTreasure);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsInfoTreasure);
     }
 
     private void createUser() {
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "createPlayer/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsInfoTreasure = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -768,7 +750,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        queue.add(jsInfoTreasure);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsInfoTreasure);
     }
 
     @Override
@@ -845,50 +827,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final AlertDialog.Builder builder;
         builder = new AlertDialog.Builder(MainActivity.this);
         switch (parameter) {
-            /*
-            case "newTreasure":
-                builder.setMessage(R.string.can_advance_in_treasure_ranking)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ClusterMarker closestTreasureMarker = getClosestTreasureClusterMarker();
-                                CameraPosition cameraPosition = new CameraPosition.Builder().target(closestTreasureMarker.getPosition()).zoom(15).build();
-                                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                            }
-                        })
-                        .setNegativeButton(R.string.no_thanks, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                            }
-                        })
-                        .setIcon(android.R.drawable.star_off)
-                        .show();
-                break;
-            */
-            /*
-            case "newHeritage":
-                builder.setMessage(R.string.almost_advance_in_ranking)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                ClusterMarker closestHeritageMarker = getClosestHeritageClusterMarker();
-                                if (closestHeritageMarker == null) {
-                                    Toast.makeText(MainActivity.this, "Hai già visitato tutti i beni culturali disponibili", Toast.LENGTH_LONG).show();
-                                    return;
-                                }
-                                CameraPosition cameraPosition = new CameraPosition.Builder().target(closestHeritageMarker.getPosition()).zoom(20).build();
-                                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                            }
-                        })
-                        .setNegativeButton(R.string.no_thanks, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                            }
-                        })
-                        .setIcon(android.R.drawable.star_off)
-                        .show();
-                break;
-                */
             case "info":
                 builder.setTitle(R.string.about_gopoleis)
                         .setMessage(R.string.gopoleis_info)

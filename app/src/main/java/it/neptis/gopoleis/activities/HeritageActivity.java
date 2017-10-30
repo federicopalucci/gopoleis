@@ -41,8 +41,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
+import it.neptis.gopoleis.RequestQueueSingleton;
 import it.neptis.gopoleis.model.GlideApp;
 
 public class HeritageActivity extends AppCompatActivity {
@@ -164,7 +164,6 @@ public class HeritageActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
-                            RequestQueue queue = Volley.newRequestQueue(HeritageActivity.this, HurlStackProvider.getHurlStack());
                             userReview = userReview.replaceAll(" ", "%20");
                             String url = getString(R.string.server_url) + "player/submitReview/" + mAuth.getCurrentUser().getEmail() + "/" + heritageCode + "/" + userReview + "/";
                             Log.d(TAG, url);
@@ -199,7 +198,7 @@ public class HeritageActivity extends AppCompatActivity {
                                 }
                             };
 
-                            queue.add(jsonArrayRequest);
+                            RequestQueueSingleton.getInstance(HeritageActivity.this).addToRequestQueue(jsonArrayRequest);
                         } else {
                             // Handle error -> task.getException();
                             Log.d(TAG, task.getException().toString());
@@ -223,7 +222,6 @@ public class HeritageActivity extends AppCompatActivity {
     }
 
     private void getHeritage() {
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         String url = getString(R.string.server_url) + "getHeritageInfo/" + heritageCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
@@ -238,7 +236,7 @@ public class HeritageActivity extends AppCompatActivity {
                         historicalPeriod.setText((String.format(getString(R.string.historicalperiod), jsObj.getString("historicalperiod"))));
                         description.setText(jsObj.getString("description"));
                         hasReviewed = jsObj.getString("hasReviewed").equals("1");
-                        GlideApp.with(HeritageActivity.this).load(getString(R.string.server_url_http) + "images/heritages/" + jsObj.getString("filename")).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
+                        GlideApp.with(HeritageActivity.this).load(getString(R.string.server_url) + "images/heritages/" + jsObj.getString("filename")).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
 
                         if (jsObj.getInt("visited") == 0) {
                             addVisitedHeritage();
@@ -258,7 +256,7 @@ public class HeritageActivity extends AppCompatActivity {
             }
         });
 
-        queue.add(jsHeritageInfo);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsHeritageInfo);
     }
 
     private void addVisitedHeritage() {
@@ -270,7 +268,6 @@ public class HeritageActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
-                            RequestQueue queue = Volley.newRequestQueue(HeritageActivity.this, HurlStackProvider.getHurlStack());
                             String url = getString(R.string.server_url) + "player/addVisitedHeritage/" + mAuth.getCurrentUser().getEmail() + "/" + String.valueOf(heritageCode) + "/";
                             JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                                 @Override
@@ -306,7 +303,7 @@ public class HeritageActivity extends AppCompatActivity {
                                 }
                             };
 
-                            queue.add(jsHeritageInfo);
+                            RequestQueueSingleton.getInstance(HeritageActivity.this).addToRequestQueue(jsHeritageInfo);
                         } else {
                             // Handle error -> task.getException();
                             Log.d(TAG, task.getException().toString());

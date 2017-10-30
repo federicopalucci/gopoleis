@@ -25,7 +25,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -41,8 +40,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
+import it.neptis.gopoleis.RequestQueueSingleton;
 import it.neptis.gopoleis.model.Question;
 import it.neptis.gopoleis.model.Stage;
 
@@ -104,7 +103,6 @@ public class StageActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
-                            RequestQueue queue = Volley.newRequestQueue(StageActivity.this, HurlStackProvider.getHurlStack());
                             String formattedUserAnswer = userAnswer.trim().replaceAll("\\s+", " ").replace(" ", "%20").toUpperCase();
                             String url = getString(R.string.server_url) + "player/submitStageAnswer/" + stage.getCode() + "/" + mAuth.getCurrentUser().getEmail() + "/" + formattedUserAnswer + "/";
                             JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -145,7 +143,7 @@ public class StageActivity extends AppCompatActivity {
                                 }
                             };
 
-                            queue.add(jsArray);
+                            RequestQueueSingleton.getInstance(StageActivity.this).addToRequestQueue(jsArray);
                         } else {
                             // Handle error -> task.getException();
                             Log.d(TAG, task.getException().toString());
@@ -171,7 +169,6 @@ public class StageActivity extends AppCompatActivity {
     }
 
     private void getStage() {
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         String url = getString(R.string.server_url) + "getStageByCode/" + stageCode + "/" + mAuth.getCurrentUser().getEmail();
         JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
@@ -233,7 +230,7 @@ public class StageActivity extends AppCompatActivity {
             }
         });
 
-        queue.add(jsArray);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsArray);
     }
 
     private void setUIData() {
@@ -270,7 +267,6 @@ public class StageActivity extends AppCompatActivity {
                                                 if (task.isSuccessful()) {
                                                     idToken[0] = task.getResult().getToken();
                                                     // Send token to your backend via HTTPS
-                                                    RequestQueue queue = Volley.newRequestQueue(StageActivity.this, HurlStackProvider.getHurlStack());
                                                     String url = getString(R.string.server_url) + "player/buyHint/" + stage.getCode() + "/" + mAuth.getCurrentUser().getEmail() + "/";
                                                     JsonArrayRequest jsArray = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                                                         @Override
@@ -296,7 +292,7 @@ public class StageActivity extends AppCompatActivity {
                                                         }
                                                     };
 
-                                                    queue.add(jsArray);
+                                                    RequestQueueSingleton.getInstance(StageActivity.this).addToRequestQueue(jsArray);
                                                 } else {
                                                     // Handle error -> task.getException();
                                                     Log.d(TAG, task.getException().toString());

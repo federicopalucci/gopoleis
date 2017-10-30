@@ -20,7 +20,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 
-import it.neptis.gopoleis.HurlStackProvider;
+import it.neptis.gopoleis.RequestQueueSingleton;
 import it.neptis.gopoleis.adapters.CardAdapter;
 import it.neptis.gopoleis.adapters.ClickListener;
 import it.neptis.gopoleis.adapters.RecyclerTouchListener;
@@ -104,7 +104,6 @@ public class ManageCardsActivity extends AppCompatActivity {
         int button_code = getIntent().getExtras().getInt("codice");
 
         // Retrieve cards
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         int requestMethod = 0;
         switch (button_code) {
             case ALL_CARDS_REQUEST_CODE:
@@ -130,7 +129,7 @@ public class ManageCardsActivity extends AppCompatActivity {
                         name = jsObj.getString("name");
                         description = jsObj.getString("description");
                         String filename = jsObj.getString("filename");
-                        all_cards.add(new Card(code, rarity, name, description, getString(R.string.server_url_http) + "images/cards/" + filename));
+                        all_cards.add(new Card(code, rarity, name, description, getString(R.string.server_url) + "images/cards/" + filename));
                     }
                     cardAdapter.notifyDataSetChanged();
                     progressDialog.dismiss();
@@ -151,7 +150,7 @@ public class ManageCardsActivity extends AppCompatActivity {
             }
         });
 
-        queue.add(jsCardCodes);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsCardCodes);
     }
 
 }

@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,19 +25,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
-import it.neptis.gopoleis.model.Card;
-import it.neptis.gopoleis.model.GlideApp;
-import it.neptis.gopoleis.model.RankingRow;
+import it.neptis.gopoleis.RequestQueueSingleton;
 import it.neptis.gopoleis.model.Review;
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHolder> {
@@ -127,8 +120,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
                         if (task.isSuccessful()) {
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
-                            RequestQueue queue = Volley.newRequestQueue(context, HurlStackProvider.getHurlStack());
-                            String url = "https://77.81.226.246:8000/player/voteReview/" + code + "/" + email + "/" + thumbUp;
+                            String url = "https://neptis-poleis.diag.uniroma1.it:8000/player/voteReview/" + code + "/" + email + "/" + thumbUp;
                             final JsonArrayRequest jsReviews = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                                 @Override
                                 public void onResponse(JSONArray response) {
@@ -147,7 +139,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
                                 }
                             };
 
-                            queue.add(jsReviews);
+                            RequestQueueSingleton.getInstance(context).addToRequestQueue(jsReviews);
                         } else {
                             // Handle error -> task.getException();
                             Log.d(TAG, task.getException().toString());

@@ -17,7 +17,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,8 +25,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.neptis.gopoleis.HurlStackProvider;
 import it.neptis.gopoleis.R;
+import it.neptis.gopoleis.RequestQueueSingleton;
 import it.neptis.gopoleis.adapters.SearchResultAdapter;
 import it.neptis.gopoleis.model.SearchResult;
 
@@ -90,7 +89,6 @@ public class SearchResultsActivity extends AppCompatActivity {
     public void search(String query) {
         query = query.trim().replaceAll("\\s+", " ").replace(" ", "%20").toLowerCase();
         query = query.substring(0, 1).toUpperCase() + query.substring(1);
-        RequestQueue queue = Volley.newRequestQueue(this, HurlStackProvider.getHurlStack());
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "search/" + query + "/";
         JsonObjectRequest jsTotal = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
@@ -126,7 +124,7 @@ public class SearchResultsActivity extends AppCompatActivity {
             }
         });
 
-        queue.add(jsTotal);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsTotal);
     }
 
 }
