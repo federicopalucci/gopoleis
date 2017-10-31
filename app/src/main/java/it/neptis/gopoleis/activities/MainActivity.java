@@ -36,11 +36,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
@@ -82,6 +80,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.TwitterAuthProvider;
+import com.google.maps.android.PolyUtil;
 import com.google.maps.android.SphericalUtil;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
@@ -111,7 +110,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int RC_STAGE = 4;
     private static final int RC_SIGN_IN = 9001;
     private static final int RC_HERITAGE = 5;
-    // 200mt range
     private static final double RANGE_METERS = 200;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 30;
 
@@ -765,40 +763,96 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    public boolean onClusterItemClick(ClusterMarker clusterMarker) {
+    public boolean onClusterItemClick(final ClusterMarker clusterMarker) {
         if (playerLatLng != null) {
+            // TODO inRange
             boolean inRange = SphericalUtil.computeDistanceBetween(playerLatLng, clusterMarker.getPosition()) <= RANGE_METERS;
-            inRange = true;
-            //noinspection ConstantConditions
-            if (inRange) {
-                switch (clusterMarker.getSnippet()) {
-                    case "heritage":
-                        Intent toHeritageActivity = new Intent(MainActivity.this, HeritageActivity.class);
-                        if (!clusterMarker.isObtained()) {
-                            setObtainedMarkerIcon(clusterMarker);
+            //inRange = true;
+
+            switch (clusterMarker.getSnippet()) {
+                case "heritage":
+                    final ProgressDialog progressDialog = new ProgressDialog(this);
+                    progressDialog.setCancelable(false);
+                    progressDialog.setMessage(getString(R.string.loading));
+                    progressDialog.show();
+
+                    String url = getString(R.string.server_url) + "getVAVerticesByHeritage/" + clusterMarker.getTitle() + "/";
+                    JsonArrayRequest jsVA = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                        @Override
+                        public void onResponse(JSONArray response) {
+                            try {
+                                boolean inVA = false;
+                                String shape = (String) response.get(0);
+                                if (!shape.equals("none")) {
+                                    if (shape.equals("circle")) {
+                                        JSONObject jsObj = (JSONObject) response.get(1);
+                                        inVA = SphericalUtil.computeDistanceBetween(playerLatLng, new LatLng(jsObj.getDouble("latitude"), jsObj.getDouble("longitude"))) <= jsObj.getDouble("radius");
+                                    }
+                                    if (shape.equals("polygon")) {
+                                        List<LatLng> va = new ArrayList<>();
+                                        for (int i = 1; i < response.length(); i++) {
+                                            JSONObject jsObj = (JSONObject) response.get(i);
+                                            va.add(new LatLng(jsObj.getDouble("latitude"), jsObj.getDouble("longitude")));
+                                        }
+                                        inVA = PolyUtil.containsLocation(playerLatLng.latitude, playerLatLng.longitude, va, false);
+                                    }
+                                } else {
+                                    inVA = SphericalUtil.computeDistanceBetween(playerLatLng, clusterMarker.getPosition()) <= RANGE_METERS;
+                                }
+
+                                progressDialog.dismiss();
+
+                                if (!inVA) {
+                                    Toast.makeText(MainActivity.this, getString(R.string.too_far), Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Intent toHeritageActivity = new Intent(MainActivity.this, HeritageActivity.class);
+                                    if (!clusterMarker.isObtained()) {
+                                        setObtainedMarkerIcon(clusterMarker);
+                                    }
+                                    toHeritageActivity.putExtra("code", clusterMarker.getTitle());
+                                    tempClusterMarker = clusterMarker;
+                                    startActivityForResult(toHeritageActivity, RC_HERITAGE);
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
-                        toHeritageActivity.putExtra("code", clusterMarker.getTitle());
-                        tempClusterMarker = clusterMarker;
-                        startActivityForResult(toHeritageActivity, RC_HERITAGE);
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d(TAG, error.toString());
+                        }
+                    });
+                    RequestQueueSingleton.getInstance(this).addToRequestQueue(jsVA);
+                    break;
+                case "treasure":
+                    if (!inRange) {
+                        Toast.makeText(MainActivity.this, getString(R.string.too_far), Toast.LENGTH_SHORT).show();
                         break;
-                    case "treasure":
-                        Intent toTreasureActivity = new Intent(MainActivity.this, TreasureActivity.class);
-                        toTreasureActivity.putExtra("code", clusterMarker.getTitle());
-                        tempClusterMarker = clusterMarker;
-                        startActivityForResult(toTreasureActivity, RC_TREASURE);
+                    }
+                    Intent toTreasureActivity = new Intent(MainActivity.this, TreasureActivity.class);
+                    toTreasureActivity.putExtra("code", clusterMarker.getTitle());
+                    tempClusterMarker = clusterMarker;
+                    startActivityForResult(toTreasureActivity, RC_TREASURE);
+                    break;
+                case "stage":
+                    if (!inRange) {
+                        Toast.makeText(MainActivity.this, getString(R.string.too_far), Toast.LENGTH_SHORT).show();
                         break;
-                    case "stage":
-                        if (!clusterMarker.isStageClickable())
-                            break;
-                        Intent toStageActivity = new Intent(MainActivity.this, StageActivity.class);
-                        toStageActivity.putExtra("code", clusterMarker.getTitle());
-                        tempClusterMarker = clusterMarker;
-                        startActivityForResult(toStageActivity, RC_STAGE);
+                    }
+                    if (!clusterMarker.isStageClickable())
                         break;
-                }
-            } else {
+                    Intent toStageActivity = new Intent(MainActivity.this, StageActivity.class);
+                    toStageActivity.putExtra("code", clusterMarker.getTitle());
+                    tempClusterMarker = clusterMarker;
+                    startActivityForResult(toStageActivity, RC_STAGE);
+                    break;
+            }
+            /*
+            else {
                 Toast.makeText(MainActivity.this, getString(R.string.too_far), Toast.LENGTH_LONG).show();
             }
+            */
         } else {
             Log.d(TAG, "playerLocation null");
             Toast.makeText(MainActivity.this, getString(R.string.need_location_permission), Toast.LENGTH_LONG).show();
