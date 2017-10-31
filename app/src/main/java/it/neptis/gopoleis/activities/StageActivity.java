@@ -132,7 +132,6 @@ public class StageActivity extends AppCompatActivity {
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    Log.d(TAG, error.toString());
                                 }
                             }) {
                                 @Override
@@ -146,7 +145,6 @@ public class StageActivity extends AppCompatActivity {
                             RequestQueueSingleton.getInstance(StageActivity.this).addToRequestQueue(jsArray);
                         } else {
                             // Handle error -> task.getException();
-                            Log.d(TAG, task.getException().toString());
                             Toast.makeText(StageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -220,13 +218,11 @@ public class StageActivity extends AppCompatActivity {
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Log.d(TAG, e.getMessage());
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 
@@ -281,7 +277,6 @@ public class StageActivity extends AppCompatActivity {
                                                     }, new Response.ErrorListener() {
                                                         @Override
                                                         public void onErrorResponse(VolleyError error) {
-                                                            Log.d(TAG, error.toString());
                                                         }
                                                     }) {
                                                         @Override
@@ -295,7 +290,6 @@ public class StageActivity extends AppCompatActivity {
                                                     RequestQueueSingleton.getInstance(StageActivity.this).addToRequestQueue(jsArray);
                                                 } else {
                                                     // Handle error -> task.getException();
-                                                    Log.d(TAG, task.getException().toString());
                                                     Toast.makeText(StageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
                                                 }
                                             }

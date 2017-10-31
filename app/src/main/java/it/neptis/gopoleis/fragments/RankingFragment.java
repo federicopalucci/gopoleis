@@ -82,13 +82,11 @@ public class RankingFragment extends Fragment {
                                         listView.setAdapter(new RankingAdapter(getContext(), rankingRows.toArray(new RankingRow[rankingRows.size()])));
                                         progressDialog.dismiss();
                                     } catch (JSONException e) {
-                                        Log.d(TAG, e.getMessage());
                                     }
                                 }
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    Log.d(TAG, error.toString());
                                 }
                             }) {
                                 @Override
@@ -102,7 +100,6 @@ public class RankingFragment extends Fragment {
                             RequestQueueSingleton.getInstance(getActivity()).addToRequestQueue(jsTotal);
                         } else {
                             // Handle error -> task.getException();
-                            Log.d(TAG, task.getException().toString());
                             Toast.makeText(getActivity(), "There was an error with your request", Toast.LENGTH_SHORT).show();
                         }
                     }

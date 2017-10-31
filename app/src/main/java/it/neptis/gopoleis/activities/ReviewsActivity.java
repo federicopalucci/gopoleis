@@ -117,10 +117,8 @@ public class ReviewsActivity extends AppCompatActivity {
 
                     if (all_reviews.isEmpty()) {
                         reviewsContainerLayout.addView(noReviewsText, 0);
-                        Log.d(TAG, "added");
                     } else {
                         reviewsContainerLayout.removeView(noReviewsText);
-                        Log.d(TAG, "not");
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -129,7 +127,6 @@ public class ReviewsActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 

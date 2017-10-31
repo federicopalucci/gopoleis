@@ -65,7 +65,6 @@ public class CardDetailsActivity extends AppCompatActivity {
                 try {
                     for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        Log.d(TAG, jsObj.getString("filename"));
                         GlideApp.with(CardDetailsActivity.this).load(getString(R.string.server_url) + "images/cards/" + jsObj.getString("filename")).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
                     }
                 } catch (JSONException e) {
@@ -75,7 +74,6 @@ public class CardDetailsActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 

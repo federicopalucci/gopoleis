@@ -166,7 +166,6 @@ public class HeritageActivity extends AppCompatActivity {
                             // Send token to your backend via HTTPS
                             userReview = userReview.replaceAll(" ", "%20");
                             String url = getString(R.string.server_url) + "player/submitReview/" + mAuth.getCurrentUser().getEmail() + "/" + heritageCode + "/" + userReview + "/";
-                            Log.d(TAG, url);
                             JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                                 @Override
                                 public void onResponse(JSONArray response) {
@@ -187,7 +186,6 @@ public class HeritageActivity extends AppCompatActivity {
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    Log.d(TAG, error.toString());
                                 }
                             }) {
                                 @Override
@@ -201,7 +199,6 @@ public class HeritageActivity extends AppCompatActivity {
                             RequestQueueSingleton.getInstance(HeritageActivity.this).addToRequestQueue(jsonArrayRequest);
                         } else {
                             // Handle error -> task.getException();
-                            Log.d(TAG, task.getException().toString());
                             Toast.makeText(HeritageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -252,7 +249,6 @@ public class HeritageActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 
@@ -292,7 +288,6 @@ public class HeritageActivity extends AppCompatActivity {
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    Log.d(TAG, error.toString());
                                 }
                             }) {
                                 @Override
@@ -306,7 +301,6 @@ public class HeritageActivity extends AppCompatActivity {
                             RequestQueueSingleton.getInstance(HeritageActivity.this).addToRequestQueue(jsHeritageInfo);
                         } else {
                             // Handle error -> task.getException();
-                            Log.d(TAG, task.getException().toString());
                             Toast.makeText(HeritageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -315,7 +309,6 @@ public class HeritageActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Log.d(TAG, "onBackPressed");
         setResult(Activity.RESULT_OK);
         finish();
     }

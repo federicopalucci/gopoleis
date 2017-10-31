@@ -123,7 +123,6 @@ public class TreasureActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 
@@ -188,7 +187,6 @@ public class TreasureActivity extends AppCompatActivity {
                                     }, new Response.ErrorListener() {
                                         @Override
                                         public void onErrorResponse(VolleyError error) {
-                                            Log.d(TAG, error.toString());
                                         }
                                     }) {
                                         @Override
@@ -204,7 +202,6 @@ public class TreasureActivity extends AppCompatActivity {
                             });
                         } else {
                             // Handle error -> task.getException();
-                            Log.d(TAG, task.getException().toString());
                             Toast.makeText(TreasureActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -271,7 +268,6 @@ public class TreasureActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 

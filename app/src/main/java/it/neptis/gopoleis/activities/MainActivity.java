@@ -147,7 +147,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             firebaseLogin();
         }
         if (mAuth.getCurrentUser() != null) {
-            Log.d(TAG, "About to check user");
             checkUserAndCreate();
 
 
@@ -155,7 +154,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             try {
                 GlideApp.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).into(playerIcon);
             } catch (Exception e) {
-                Log.d(TAG, "Error retrieving player avatar");
             }
 
             TextView playerName = (TextView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_name_drawer);
@@ -165,7 +163,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             MapFragment mapFragment = (MapFragment) getFragmentManager()
                     .findFragmentById(R.id.map);
-            Log.d(TAG, "Getting map...");
             if (mapFragment != null)
                 mapFragment.getMapAsync(MainActivity.this);
 
@@ -184,7 +181,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onLocationResult(LocationResult locationResult) {
                 Location lastLocation = locationResult.getLastLocation();
                 playerLatLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
-                Log.d(TAG, "player location has changed!");
                 if (mMap != null && !hasZoomedAtStart) {
                     progressDialog.dismiss();
                     CameraPosition cameraPosition = new CameraPosition.Builder().target(playerLatLng).zoom(15).build();
@@ -288,9 +284,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //noinspection ConstantConditions
                 if (polyline.getTag().equals(intent.getStringExtra("path"))) {
                     LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                    Log.d(TAG, polyline.getPoints().toString());
                     for (LatLng point : polyline.getPoints()) {
-                        Log.d(TAG, "point added");
                         builder.include(point);
                     }
                     LatLngBounds bounds = builder.build();
@@ -303,7 +297,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "About to request location updates");
         requestLocationUpdates();
     }
 
@@ -317,7 +310,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mLocationCallback,
                 null /* Looper */);
         requestingLocationUpdates = true;
-        Log.d(TAG, "requesting location updates");
     }
 
     @Override
@@ -325,7 +317,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onStop();
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
         requestingLocationUpdates = false;
-        Log.d(TAG, "stopping location updates");
     }
 
     @Override
@@ -438,7 +429,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onMapReady(GoogleMap map) {
-        Log.d(TAG, "MAP READY");
         mMap = map;
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -457,7 +447,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void getAllHeritages() {
-        Log.d(TAG, "Getting all heritages...");
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getAllHeritages/" + mAuth.getCurrentUser().getEmail() + "/";
         JsonArrayRequest jsTotal = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -482,7 +471,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 
@@ -517,7 +505,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 
@@ -548,7 +535,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     .addAll(latLngs);
                             Polyline polyline = mMap.addPolyline(options);
                             polyline.setTag(jsObj.getString("pathtitle"));
-                            Log.d(TAG, polyline.getPoints().toString());
                             latLngs.clear();
                             pathsPolylines.add(polyline);
                             pathsPolylinesOptions.add(options);
@@ -571,7 +557,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     .addAll(latLngs);
                             Polyline polyline = mMap.addPolyline(options);
                             polyline.setTag(jsObj.getString("pathtitle"));
-                            Log.d(TAG, polyline.getPoints().toString());
                             latLngs.clear();
                             pathsPolylines.add(polyline);
                             pathsPolylinesOptions.add(options);
@@ -590,7 +575,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 
@@ -601,9 +585,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RC_LOCATION_SETTINGS) {
             if (resultCode == RESULT_OK) {
-                Log.d(TAG, "location services enabled");
             } else {
-                Log.d(TAG, "location services not enabled");
                 Toast.makeText(this, getString(R.string.need_location_permission), Toast.LENGTH_LONG).show();
                 finish();
             }
@@ -617,7 +599,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (resultCode == Activity.RESULT_OK) {
                 for (int i = 0; i < stageClusterMarkers.size(); i++) {
                     if (i != stageClusterMarkers.size() - 1 && stageClusterMarkers.get(i).getTitle().equals(tempClusterMarker.getTitle())) {
-                        Log.d(TAG, "found stage to be made clickable");
                         stageClusterMarkers.get(i + 1).setStageClickable(true);
                         setNextStageIcon(stageClusterMarkers.get(i + 1));
                     }
@@ -626,7 +607,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         } else if (requestCode == RC_HERITAGE) {
             if (resultCode == Activity.RESULT_OK) {
-                Log.d(TAG, "onActivityResult Heritage");
             }
         } else if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
@@ -641,9 +621,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (task.isSuccessful()) {
-                                        Log.d(TAG, "linkWithCredential:success");
                                     } else {
-                                        Log.w(TAG, "linkWithCredential:failure", task.getException());
                                     }
                                 }
                             });
@@ -694,7 +672,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void checkUserAndCreate() {
-        Log.d(TAG, "Checking if player exists in db");
         //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "checkPlayer/" + mAuth.getCurrentUser().getEmail();
         JsonArrayRequest jsInfoTreasure = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
@@ -718,7 +695,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 
@@ -735,7 +711,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     int contLength = response.length();
                     for (int i = 0; i < contLength; i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
-                        Log.d(TAG, jsObj.toString());
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -744,7 +719,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG, error.toString());
             }
         });
 
@@ -820,7 +794,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Log.d(TAG, error.toString());
                         }
                     });
                     RequestQueueSingleton.getInstance(this).addToRequestQueue(jsVA);
@@ -854,7 +827,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             */
         } else {
-            Log.d(TAG, "playerLocation null");
             Toast.makeText(MainActivity.this, getString(R.string.need_location_permission), Toast.LENGTH_LONG).show();
         }
         return true;
@@ -909,10 +881,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             progDialog.setCancelable(false);
             progDialog.show();
 
-            Log.d(TAG, "removing polylines...");
             for (Polyline p : pathsPolylines) {
                 p.remove();
-                Log.d(TAG, p.toString());
             }
         }
 
@@ -967,7 +937,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
             @Override
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                Log.d(TAG, "locationSettingsResponse onSuccess called");
             }
         });
 
@@ -977,14 +946,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 int statusCode = ((ApiException) e).getStatusCode();
                 switch (statusCode) {
                     case CommonStatusCodes.RESOLUTION_REQUIRED:
-                        Log.d(TAG, "Need resolution");
                         try {
                             // Show the dialog by calling startResolutionForResult(),
                             // and check the result in onActivityResult().
                             ResolvableApiException resolvable = (ResolvableApiException) e;
                             resolvable.startResolutionForResult(MainActivity.this, RC_LOCATION_SETTINGS);
                         } catch (IntentSender.SendIntentException sendEx) {
-                            Log.d(TAG, "ERROR RESOLVING LOCATION SETTINGS");
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:

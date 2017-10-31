@@ -76,7 +76,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
         holder.review.setText(review.getPlayer().toUpperCase() + ": " + review.getReview());
         holder.upvotes.setText(String.valueOf(review.getLikes()));
         holder.downvotes.setText(String.valueOf(review.getDislikes()));
-        Log.d(TAG, review.isWasVoted() + " " + review.isWasVotedPositively());
         if (review.isWasVoted() && review.isWasVotedPositively()) {
             holder.thumbUpButton.setImageResource(R.drawable.ic_thumb_up_green_24dp);
             holder.thumbUpButton.setClickable(false);
@@ -128,7 +127,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    Log.d(TAG, error.toString());
                                 }
                             }) {
                                 @Override
@@ -142,7 +140,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
                             RequestQueueSingleton.getInstance(context).addToRequestQueue(jsReviews);
                         } else {
                             // Handle error -> task.getException();
-                            Log.d(TAG, task.getException().toString());
                             Toast.makeText(context, "There was an error with your request", Toast.LENGTH_SHORT).show();
                         }
                     }
