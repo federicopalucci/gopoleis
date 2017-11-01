@@ -684,8 +684,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Iterator<String> iterator = jsObj.keys();
                         while (iterator.hasNext()) {
                             String tempKey = iterator.next();
-                            if (jsObj.getInt(tempKey) == 0)
+                            if (jsObj.getInt(tempKey) == 0) {
                                 createUser();
+                            }
                         }
                     }
                 } catch (JSONException e) {
@@ -739,7 +740,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onClusterItemClick(final ClusterMarker clusterMarker) {
         if (playerLatLng != null) {
-            // TODO inRange
             boolean inRange = SphericalUtil.computeDistanceBetween(playerLatLng, clusterMarker.getPosition()) <= RANGE_METERS;
             //inRange = true;
 

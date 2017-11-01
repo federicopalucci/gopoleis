@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "17491503324-t4a1tbmse8brqohgoonb6ki2v9pah6au.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.neptis.gopoleis",
+            "certificate_hash": "c9a5c4212bd83bc745f52b859e5084bf0eac2aea"
+          }
+        },
+        {
           "client_id": "17491503324-vv7g7klr3vkne3bdv30nqtotni5nmvgs.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
