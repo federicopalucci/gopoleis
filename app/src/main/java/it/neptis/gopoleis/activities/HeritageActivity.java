@@ -6,13 +6,11 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -23,11 +21,9 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,7 +43,7 @@ import it.neptis.gopoleis.model.GlideApp;
 
 public class HeritageActivity extends AppCompatActivity {
 
-    private static final String TAG = "HeritageActivity";
+    //private static final String TAG = "HeritageActivity";
 
     private TextView name, structureType, coordinates, province_region, historicalPeriod, description;
     private String heritageCode;
@@ -55,7 +51,6 @@ public class HeritageActivity extends AppCompatActivity {
     private ImageView image;
     private String userReview;
     private boolean hasReviewed = false;
-    private MediaPlayer mediaPlayer;
     private ProgressDialog progressDialog;
 
     @Override
@@ -100,7 +95,6 @@ public class HeritageActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -112,17 +106,111 @@ public class HeritageActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
+    }
+
+    private void getHeritage() {
+        //noinspection ConstantConditions
+        String url = getString(R.string.server_url) + "getHeritageInfo/" + heritageCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
+        JsonArrayRequest heritageInfoRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    JSONObject jsObj = (JSONObject) response.get(0);
+
+                    name.setText(jsObj.getString("name"));
+                    structureType.setText(String.format(getString(R.string.structuretype), jsObj.getString("structuretype")));
+                    coordinates.setText((String.format(getString(R.string.ne_coordinates), jsObj.getString("latitude"), jsObj.getString("longitude"))));
+                    province_region.setText((String.format(getString(R.string.heritage_province_region), jsObj.getString("province"), jsObj.getString("region"))));
+                    historicalPeriod.setText((String.format(getString(R.string.historicalperiod), jsObj.getString("historicalperiod"))));
+                    description.setText(jsObj.getString("description"));
+                    hasReviewed = jsObj.getString("hasReviewed").equals("1");
+                    GlideApp.with(HeritageActivity.this).load(getString(R.string.server_url) + "images/heritages/" + jsObj.getString("filename")).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
+
+                    if (jsObj.getInt("visited") == 0) {
+                        addVisitedHeritage();
+                    } else
+                        progressDialog.dismiss();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(HeritageActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(heritageInfoRequest);
+    }
+
+    private void addVisitedHeritage() {
+        final String[] idToken = new String[1];
+        final FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        assert mUser != null;
+        mUser.getIdToken(true)
+                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                    public void onComplete(@NonNull Task<GetTokenResult> task) {
+                        if (task.isSuccessful()) {
+                            idToken[0] = task.getResult().getToken();
+                            // Send token to your backend via HTTPS
+                            String url = getString(R.string.server_url) + "player/addVisitedHeritage/" + mUser.getEmail() + "/" + String.valueOf(heritageCode) + "/";
+                            JsonArrayRequest addHeritageRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                                @Override
+                                public void onResponse(JSONArray response) {
+                                    progressDialog.dismiss();
+
+                                    if (response.length() != 0) {
+                                        // Some medal(s)/missions unlocked
+                                        try {
+                                            JSONArray jsArray = (JSONArray) response.get(0);
+                                            for (int j = 0; j < jsArray.length(); j++) {
+                                                showDialog(getString(R.string.congratulations), getString(R.string.congratulations_medal2));
+                                            }
+                                            jsArray = (JSONArray) response.get(1);
+                                            for (int j = 0; j < jsArray.length(); j++) {
+                                                showDialog(getString(R.string.congratulations), getString(R.string.congratulations_mission));
+                                            }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    showDialog(getString(R.string.congratulations), getString(R.string.congratulations_heritage));
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(HeritageActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                                }
+                            }) {
+                                @Override
+                                public Map<String, String> getHeaders() throws AuthFailureError {
+                                    Map<String, String> params = new HashMap<>();
+                                    params.put("MyToken", idToken[0]);
+                                    return params;
+                                }
+                            };
+
+                            RequestQueueSingleton.getInstance(HeritageActivity.this).addToRequestQueue(addHeritageRequest);
+                        } else {
+                            // Handle error -> task.getException();
+                            progressDialog.dismiss();
+                            Toast.makeText(HeritageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     private void showWriteReviewDialog() {
         if (hasReviewed) {
-            Toast.makeText(HeritageActivity.this, "Hai già recensito questo bene culturale", Toast.LENGTH_LONG).show();
+            Toast.makeText(HeritageActivity.this, R.string.heritage_already_reviewed, Toast.LENGTH_LONG).show();
             return;
         }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(HeritageActivity.this);
         builder.setTitle(R.string.input_review);
         final EditText reviewEditText = new EditText(HeritageActivity.this);
@@ -139,7 +227,6 @@ public class HeritageActivity extends AppCompatActivity {
                 imm.hideSoftInputFromWindow(reviewEditText.getWindowToken(), 0);
                 userReview = reviewEditText.getText().toString();
                 submitReview();
-                Toast.makeText(HeritageActivity.this, "Recensione registrata!", Toast.LENGTH_SHORT).show();
             }
         });
         builder.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
@@ -150,14 +237,18 @@ public class HeritageActivity extends AppCompatActivity {
                 dialog.cancel();
             }
         });
-        mediaPlayer = MediaPlayer.create(this, R.raw.popup);
-        mediaPlayer.start();
         builder.show();
     }
 
     private void submitReview() {
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(getString(R.string.loading));
+        progressDialog.show();
+
         final String[] idToken = new String[1];
-        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        final FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        assert mUser != null;
         mUser.getIdToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
@@ -165,10 +256,13 @@ public class HeritageActivity extends AppCompatActivity {
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
                             userReview = userReview.replaceAll(" ", "%20");
-                            String url = getString(R.string.server_url) + "player/submitReview/" + mAuth.getCurrentUser().getEmail() + "/" + heritageCode + "/" + userReview + "/";
+                            String url = getString(R.string.server_url) + "player/submitReview/" + mUser.getEmail() + "/" + heritageCode + "/" + userReview + "/";
                             JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                                 @Override
                                 public void onResponse(JSONArray response) {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(HeritageActivity.this, R.string.review_submitted, Toast.LENGTH_SHORT).show();
+
                                     hasReviewed = true;
                                     for (int i = 0; i < response.length(); i++) {
                                         AlertDialog.Builder builder;
@@ -186,11 +280,13 @@ public class HeritageActivity extends AppCompatActivity {
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(HeritageActivity.this, "Network error", Toast.LENGTH_SHORT).show();
                                 }
                             }) {
                                 @Override
                                 public Map<String, String> getHeaders() throws AuthFailureError {
-                                    Map<String, String> params = new HashMap<String, String>();
+                                    Map<String, String> params = new HashMap<>();
                                     params.put("MyToken", idToken[0]);
                                     return params;
                                 }
@@ -199,6 +295,7 @@ public class HeritageActivity extends AppCompatActivity {
                             RequestQueueSingleton.getInstance(HeritageActivity.this).addToRequestQueue(jsonArrayRequest);
                         } else {
                             // Handle error -> task.getException();
+                            progressDialog.dismiss();
                             Toast.makeText(HeritageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -216,95 +313,6 @@ public class HeritageActivity extends AppCompatActivity {
                 })
                 .setIcon(android.R.drawable.star_off)
                 .show();
-    }
-
-    private void getHeritage() {
-        String url = getString(R.string.server_url) + "getHeritageInfo/" + heritageCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
-        JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    for (int i = 0; i < response.length(); i++) {
-                        JSONObject jsObj = (JSONObject) response.get(i);
-                        name.setText(jsObj.getString("name"));
-                        structureType.setText(String.format(getString(R.string.structuretype), jsObj.getString("structuretype")));
-                        coordinates.setText((String.format(getString(R.string.ne_coordinates), jsObj.getString("latitude"), jsObj.getString("longitude"))));
-                        province_region.setText((String.format(getString(R.string.heritage_province_region), jsObj.getString("province"), jsObj.getString("region"))));
-                        historicalPeriod.setText((String.format(getString(R.string.historicalperiod), jsObj.getString("historicalperiod"))));
-                        description.setText(jsObj.getString("description"));
-                        hasReviewed = jsObj.getString("hasReviewed").equals("1");
-                        GlideApp.with(HeritageActivity.this).load(getString(R.string.server_url) + "images/heritages/" + jsObj.getString("filename")).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
-
-                        if (jsObj.getInt("visited") == 0) {
-                            addVisitedHeritage();
-                            showDialog(getString(R.string.congratulations), getString(R.string.congratulations_heritage));
-                        }
-                        else
-                            progressDialog.dismiss();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-            }
-        });
-
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsHeritageInfo);
-    }
-
-    private void addVisitedHeritage() {
-        final String[] idToken = new String[1];
-        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
-        mUser.getIdToken(true)
-                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                    public void onComplete(@NonNull Task<GetTokenResult> task) {
-                        if (task.isSuccessful()) {
-                            idToken[0] = task.getResult().getToken();
-                            // Send token to your backend via HTTPS
-                            String url = getString(R.string.server_url) + "player/addVisitedHeritage/" + mAuth.getCurrentUser().getEmail() + "/" + String.valueOf(heritageCode) + "/";
-                            JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
-                                @Override
-                                public void onResponse(JSONArray response) {
-                                    if (response.length() != 0) {
-                                        // Some medal(s)/missions unlocked
-                                        try {
-                                            JSONArray jsArray = (JSONArray) response.get(0);
-                                            for (int j = 0; j < jsArray.length(); j++) {
-                                                showDialog(getString(R.string.congratulations), getString(R.string.congratulations_medal2));
-                                            }
-                                            jsArray = (JSONArray) response.get(1);
-                                            for (int j = 0; j < jsArray.length(); j++) {
-                                                showDialog(getString(R.string.congratulations), getString(R.string.congratulations_mission));
-                                            }
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                        progressDialog.dismiss();
-                                    }
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                }
-                            }) {
-                                @Override
-                                public Map<String, String> getHeaders() throws AuthFailureError {
-                                    Map<String, String> params = new HashMap<String, String>();
-                                    params.put("MyToken", idToken[0]);
-                                    return params;
-                                }
-                            };
-
-                            RequestQueueSingleton.getInstance(HeritageActivity.this).addToRequestQueue(jsHeritageInfo);
-                        } else {
-                            // Handle error -> task.getException();
-                            Toast.makeText(HeritageActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
     }
 
     @Override

@@ -20,7 +20,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.MyViewHolder> 
     private Context context;
 
     class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView code, rarity, name, description;
+        TextView code, rarity, name, description;
         public ImageView image;
 
         MyViewHolder(View view) {
@@ -59,4 +59,5 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.MyViewHolder> 
     public int getItemCount(){
         return cardsList.size();
     }
+
 }

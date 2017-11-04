@@ -72,4 +72,8 @@
     <string name="stage_completed">You have completed a stage!</string>
     <string name="treasures">Cards</string>
     <string name="wrong_stage_answer">The answer is wrong!</string>
+    <string name="no_result">No results</string>
+    <string name="heritage_already_reviewed">You have already reviewed this cultural heritage</string>
+    <string name="review_submitted">Review submitted!</string>
+    <string name="hint_will_cost">This hint will cost you 1 coin, do you want to unlock it?</string>
 </resources>

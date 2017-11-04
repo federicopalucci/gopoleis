@@ -1,7 +1,5 @@
 package it.neptis.gopoleis.model;
 
-import android.support.annotation.NonNull;
-
 public class Review {
 
     private String code, player, heritage, review;
@@ -19,20 +17,12 @@ public class Review {
         this.wasVotedPositively = wasVotedPositively;
     }
 
-    public boolean isWasVoted() {
+    public boolean wasVoted() {
         return wasVoted;
     }
 
-    public void setWasVoted(boolean wasVoted) {
-        this.wasVoted = wasVoted;
-    }
-
-    public boolean isWasVotedPositively() {
+    public boolean wasVotedPositively() {
         return wasVotedPositively;
-    }
-
-    public void setWasVotedPositively(boolean wasVotedPositively) {
-        this.wasVotedPositively = wasVotedPositively;
     }
 
     public String getCode() {
@@ -47,10 +37,6 @@ public class Review {
         return player;
     }
 
-    public void setPlayer(String player) {
-        this.player = player;
-    }
-
     public String getHeritage() {
         return heritage;
     }
@@ -63,24 +49,12 @@ public class Review {
         return review;
     }
 
-    public void setReview(String review) {
-        this.review = review;
-    }
-
     public int getLikes() {
         return likes;
     }
 
-    public void setLikes(int likes) {
-        this.likes = likes;
-    }
-
     public int getDislikes() {
         return dislikes;
-    }
-
-    public void setDislikes(int dislikes) {
-        this.dislikes = dislikes;
     }
 
 }

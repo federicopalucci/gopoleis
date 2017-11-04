@@ -27,8 +27,9 @@ public class SearchResultAdapter extends ArrayAdapter<SearchResult> {
         }
         TextView titleTV = (TextView) convertView.findViewById(R.id.search_result_row_text);
         ImageView iconIV = (ImageView) convertView.findViewById(R.id.search_result_row_image);
+        assert searchResult != null;
         titleTV.setText(searchResult.getName());
-        switch (searchResult.getType()){
+        switch (searchResult.getType()) {
             case "heritage":
                 iconIV.setImageResource(R.drawable.ic_heritage);
                 break;
@@ -38,4 +39,5 @@ public class SearchResultAdapter extends ArrayAdapter<SearchResult> {
         }
         return convertView;
     }
+
 }

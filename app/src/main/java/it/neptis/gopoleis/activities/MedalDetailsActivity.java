@@ -4,16 +4,14 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,7 +22,7 @@ import it.neptis.gopoleis.model.GlideApp;
 
 public class MedalDetailsActivity extends AppCompatActivity {
 
-    private static final String TAG = "MedalDetails";
+    //private static final String TAG = "MedalDetails";
 
     private int code;
     private TextView name;
@@ -46,7 +44,6 @@ public class MedalDetailsActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -65,7 +62,7 @@ public class MedalDetailsActivity extends AppCompatActivity {
 
     private void getMedalDetails() {
         String url = getString(R.string.server_url) + "getMedalDetails/" + code + "/";
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        JsonArrayRequest medalInfoRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
@@ -79,18 +76,23 @@ public class MedalDetailsActivity extends AppCompatActivity {
                             heritagesNames = heritagesNames.concat(response.get(i) + ", ");
                     }
                     heritages.setText(String.format(getString(R.string.medal_details_heritages), heritagesNames));
-                    progressDialog.dismiss();
                     GlideApp.with(MedalDetailsActivity.this).load(filepath).placeholder(R.drawable.progress_animation).error(R.drawable.noimage).into(image);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                progressDialog.dismiss();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(MedalDetailsActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
 
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsonArrayRequest);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(medalInfoRequest);
     }
+
 }

@@ -14,16 +14,8 @@ public class RankingRow {
         return player;
     }
 
-    public void setPlayer(String player) {
-        this.player = player;
-    }
-
     public int getAmount() {
         return amount;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
     }
 
 }

@@ -1,22 +1,20 @@
 package it.neptis.gopoleis.activities;
 
 import android.app.ProgressDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONArray;
@@ -35,14 +33,13 @@ import it.neptis.gopoleis.model.Review;
 
 public class ReviewsActivity extends AppCompatActivity {
 
-    private static final String TAG = "ReviewsActivity";
+    //private static final String TAG = "ReviewsActivity";
 
-    RecyclerView recyclerView;
-    List<Review> all_reviews;
-    ReviewAdapter reviewAdapter;
-    String heritageCode;
+    private List<Review> all_reviews;
+    private ReviewAdapter reviewAdapter;
+    private String heritageCode;
     private FirebaseAuth mAuth;
-    LinearLayout reviewsContainerLayout;
+    private LinearLayout reviewsContainerLayout;
     private TextView noReviewsText;
     private ProgressDialog progressDialog;
 
@@ -58,7 +55,6 @@ public class ReviewsActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -73,7 +69,7 @@ public class ReviewsActivity extends AppCompatActivity {
 
         heritageCode = getIntent().getStringExtra("code");
 
-        recyclerView = (RecyclerView) findViewById(R.id.reviews_recyclerView);
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.reviews_recyclerView);
 
         all_reviews = new ArrayList<>();
 
@@ -86,8 +82,13 @@ public class ReviewsActivity extends AppCompatActivity {
         recyclerView.setNestedScrollingEnabled(true);
         // ------------------------------------------------------------------------
 
+        getReviews();
+    }
+
+    private void getReviews() {
+        //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getReviews/" + heritageCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
-        final JsonArrayRequest jsReviews = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        final JsonArrayRequest reviewsRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
@@ -113,7 +114,6 @@ public class ReviewsActivity extends AppCompatActivity {
                         }
                     });
                     reviewAdapter.notifyDataSetChanged();
-                    progressDialog.dismiss();
 
                     if (all_reviews.isEmpty()) {
                         reviewsContainerLayout.addView(noReviewsText, 0);
@@ -123,13 +123,18 @@ public class ReviewsActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                progressDialog.dismiss();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(ReviewsActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
 
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsReviews);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(reviewsRequest);
     }
+
 }

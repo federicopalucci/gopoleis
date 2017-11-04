@@ -5,28 +5,24 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,23 +47,16 @@ import it.neptis.gopoleis.model.Card;
 
 public class TreasureActivity extends AppCompatActivity {
 
-    private static final String TAG = "TreasureaActivity";
+    //private static final String TAG = "TreasureaActivity";
 
     private String treasureCode;
-
     private TextView info, coordinates;
-    private ImageView coffer;
-
     private FirebaseAuth mAuth;
-
     private List<Card> treas_card_list;
     private String c_name, c_rarity, c_description, c_code;
-
     private String[] random_card_codes = new String[5];
-
     private CardAdapter cardAdapter;
-
-    boolean opened;
+    private boolean opened;
     private ProgressDialog progressDialog;
 
     @Override
@@ -88,11 +77,9 @@ public class TreasureActivity extends AppCompatActivity {
 
         info = (TextView) findViewById(R.id.treasure_description);
         coordinates = (TextView) findViewById(R.id.treasure_coordinates);
-        coffer = (ImageView) findViewById(R.id.treasure_image);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -102,65 +89,64 @@ public class TreasureActivity extends AppCompatActivity {
     }
 
     private void getSetTreasureInfo() {
+        //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getInfoTreasure/" + treasureCode + "/" + mAuth.getCurrentUser().getEmail() + "/";
-        JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        JsonArrayRequest treasureRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
-                    for (int i = 0; i < response.length(); i++) {
-                        JSONObject jsObj = (JSONObject) response.get(i);
-                        info.setText(jsObj.getString("description"));
-                        coordinates.setText(String.format(getString(R.string.ne_coordinates), jsObj.getString("latitude"), jsObj.getString("longitude")));
+                    JSONObject jsObj = (JSONObject) response.get(0);
+                    info.setText(jsObj.getString("description"));
+                    coordinates.setText(String.format(getString(R.string.ne_coordinates), jsObj.getString("latitude"), jsObj.getString("longitude")));
 
-                        progressDialog.dismiss();
-
-                        treasureNotFound();
-                    }
+                    setupOpenTreasureButton();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                progressDialog.dismiss();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(TreasureActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
 
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsHeritageInfo);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(treasureRequest);
     }
 
-    private void treasureNotFound() {
+    private void setupOpenTreasureButton() {
         final Button open_treasure = (Button) findViewById(R.id.open_treasure_button);
 
-        final String[] idToken = new String[1];
-        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
-        mUser.getIdToken(true)
-                .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                    public void onComplete(@NonNull Task<GetTokenResult> task) {
-                        if (task.isSuccessful()) {
-                            idToken[0] = task.getResult().getToken();
-                            // Send token to your backend via HTTPS
-                            open_treasure.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    progressDialog = new ProgressDialog(TreasureActivity.this);
-                                    progressDialog.setCancelable(false);
-                                    progressDialog.setMessage(getString(R.string.loading));
-                                    progressDialog.show();
+        open_treasure.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                progressDialog = new ProgressDialog(TreasureActivity.this);
+                progressDialog.setCancelable(false);
+                progressDialog.setMessage(getString(R.string.loading));
+                progressDialog.show();
 
-                                    String url = getString(R.string.server_url) + "player/addTreasToPlayer/" + mAuth.getCurrentUser().getEmail() + "/" + treasureCode + "/";
-                                    JsonArrayRequest jsAddTreasToGame = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                final String[] idToken = new String[1];
+                final FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+                assert mUser != null;
+                mUser.getIdToken(true)
+                        .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                            public void onComplete(@NonNull Task<GetTokenResult> task) {
+                                if (task.isSuccessful()) {
+                                    idToken[0] = task.getResult().getToken();
+                                    // Send token to your backend via HTTPS
+                                    String url = getString(R.string.server_url) + "player/addTreasToPlayer/" + mUser.getEmail() + "/" + treasureCode + "/";
+                                    JsonArrayRequest addTreasureRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
                                         @Override
                                         public void onResponse(JSONArray response) {
-
-                                            progressDialog.dismiss();
-
-
                                             // First element contains unlocked missions
                                             try {
                                                 JSONArray unlockedMissionsJSONArray = (JSONArray) response.get(0);
                                                 for (int i = 0; i < unlockedMissionsJSONArray.length(); i++) {
-                                                    if (! unlockedMissionsJSONArray.getString(0).equals("null")) {
+                                                    if (!unlockedMissionsJSONArray.getString(i).equals("null")) {
                                                         AlertDialog.Builder builder;
                                                         builder = new AlertDialog.Builder(TreasureActivity.this);
                                                         builder.setTitle(R.string.congratulations)
@@ -187,25 +173,28 @@ public class TreasureActivity extends AppCompatActivity {
                                     }, new Response.ErrorListener() {
                                         @Override
                                         public void onErrorResponse(VolleyError error) {
+                                            progressDialog.dismiss();
+                                            Toast.makeText(TreasureActivity.this, "Network error", Toast.LENGTH_SHORT).show();
                                         }
                                     }) {
                                         @Override
                                         public Map<String, String> getHeaders() throws AuthFailureError {
-                                            Map<String, String> params = new HashMap<String, String>();
+                                            Map<String, String> params = new HashMap<>();
                                             params.put("MyToken", idToken[0]);
                                             return params;
                                         }
                                     };
 
-                                    RequestQueueSingleton.getInstance(TreasureActivity.this).addToRequestQueue(jsAddTreasToGame);
+                                    RequestQueueSingleton.getInstance(TreasureActivity.this).addToRequestQueue(addTreasureRequest);
+                                } else {
+                                    // Handle error -> task.getException();
+                                    progressDialog.dismiss();
+                                    Toast.makeText(TreasureActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
                                 }
-                            });
-                        } else {
-                            // Handle error -> task.getException();
-                            Toast.makeText(TreasureActivity.this, "There was an error with your request", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+                            }
+                        });
+            }
+        });
     }
 
     private void treasureOpened() {
@@ -228,7 +217,7 @@ public class TreasureActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(cardAdapter);
         recyclerView.setNestedScrollingEnabled(true);
-        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new ClickListener() {
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), new ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 Card card = treas_card_list.get(position);
@@ -247,7 +236,7 @@ public class TreasureActivity extends AppCompatActivity {
         for (String tempString : random_card_codes)
             url += tempString + "/";
 
-        JsonArrayRequest jsInfoCardTreasure = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        JsonArrayRequest cardsInfoRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
@@ -261,6 +250,19 @@ public class TreasureActivity extends AppCompatActivity {
                         treas_card_list.add(new Card(c_code, c_rarity, c_name, c_description, getString(R.string.server_url) + "images/cards/" + filename));
                     }
                     cardAdapter.notifyDataSetChanged();
+
+                    AlertDialog.Builder builder;
+                    builder = new AlertDialog.Builder(TreasureActivity.this);
+                    builder.setTitle(R.string.congratulations)
+                            .setMessage(R.string.congratulations_treasure)
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            })
+                            .setIcon(android.R.drawable.star_off)
+                            .show();
+
+                    progressDialog.dismiss();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -268,21 +270,12 @@ public class TreasureActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(TreasureActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
 
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsInfoCardTreasure);
-
-        AlertDialog.Builder builder;
-        builder = new AlertDialog.Builder(TreasureActivity.this);
-        builder.setTitle(R.string.congratulations)
-                .setMessage(R.string.congratulations_treasure)
-                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                    }
-                })
-                .setIcon(android.R.drawable.star_off)
-                .show();
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(cardsInfoRequest);
     }
 
     @Override

@@ -26,7 +26,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -104,7 +103,7 @@ import it.neptis.gopoleis.model.GlideApp;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker> {
 
-    private static final String TAG = "MainActivity";
+    //private static final String TAG = "MainActivity";
     private static final int RC_LOCATION_SETTINGS = 2;
     private static final int RC_TREASURE = 3;
     private static final int RC_STAGE = 4;
@@ -131,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private LatLng playerLatLng;
     private boolean requestingLocationUpdates;
     private boolean hasZoomedAtStart = false;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             try {
                 GlideApp.with(MainActivity.this).load(mAuth.getCurrentUser().getPhotoUrl()).into(playerIcon);
             } catch (Exception e) {
+                e.printStackTrace();
             }
 
             TextView playerName = (TextView) ((NavigationView) findViewById(R.id.nav_view)).getHeaderView(0).findViewById(R.id.player_name_drawer);
@@ -170,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        final ProgressDialog progressDialog = new ProgressDialog(this, R.style.MyTheme);
+        progressDialog = new ProgressDialog(this, R.style.MyTheme);
         progressDialog.setCancelable(false);
         progressDialog.show();
         progressDialog.setContentView(R.layout.loading_logo);
@@ -182,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Location lastLocation = locationResult.getLastLocation();
                 playerLatLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                 if (mMap != null && !hasZoomedAtStart) {
-                    progressDialog.dismiss();
+                    //progressDialog.dismiss();
                     CameraPosition cameraPosition = new CameraPosition.Builder().target(playerLatLng).zoom(15).build();
                     mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
                     hasZoomedAtStart = true;
@@ -471,6 +472,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                finish();
+                Toast.makeText(MainActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -497,6 +500,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             treasureClusterMarkers.add(tempClusterMarker);
                         }
                     }
+
                     getAllStages();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -505,6 +509,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                finish();
+                Toast.makeText(MainActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -519,6 +525,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onResponse(JSONArray response) {
                 try {
                     int prevPathCode = 0;
+                    boolean isFirstStageOfPath = true;
                     List<LatLng> latLngs = new ArrayList<>();
                     for (int i = 0; i < response.length(); i++) {
                         JSONObject jsObj = (JSONObject) response.get(i);
@@ -526,6 +533,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         int pathCode = jsObj.getInt("pathcode");
                         if (pathCode != prevPathCode && prevPathCode != 0) {
+                            isFirstStageOfPath = true;
                             PolylineOptions options = new PolylineOptions()
                                     .clickable(true)
                                     .endCap(new RoundCap())
@@ -563,18 +571,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
 
                         boolean completed = jsObj.getInt("completed") == 1;
-                        boolean isStageClickable = (completed || i == 0 || (((JSONObject) response.get(i - 1)).getInt("completed") == 1));
+                        boolean isStageClickable = (completed || isFirstStageOfPath || (((JSONObject) response.get(i - 1)).getInt("completed") == 1));
                         ClusterMarker tempClusterMarker = new ClusterMarker(Double.parseDouble(latitude), Double.parseDouble(longitude), String.valueOf(code), "stage", completed, isStageClickable);
                         mClusterManager.addItem(tempClusterMarker);
                         stageClusterMarkers.add(tempClusterMarker);
+                        isFirstStageOfPath = false;
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                progressDialog.dismiss();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                finish();
+                Toast.makeText(MainActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -584,8 +597,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RC_LOCATION_SETTINGS) {
-            if (resultCode == RESULT_OK) {
-            } else {
+            if (resultCode != RESULT_OK) {
                 Toast.makeText(this, getString(R.string.need_location_permission), Toast.LENGTH_LONG).show();
                 finish();
             }
@@ -607,6 +619,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         } else if (requestCode == RC_HERITAGE) {
             if (resultCode == Activity.RESULT_OK) {
+                if (!tempClusterMarker.isObtained()) {
+                    setObtainedMarkerIcon(tempClusterMarker);
+                }
             }
         } else if (requestCode == RC_SIGN_IN) {
             IdpResponse response = IdpResponse.fromResultIntent(data);
@@ -620,9 +635,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
+                                    /*
                                     if (task.isSuccessful()) {
                                     } else {
                                     }
+                                    */
                                 }
                             });
 
@@ -696,6 +713,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                finish();
+                Toast.makeText(MainActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -708,18 +727,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         JsonArrayRequest jsInfoTreasure = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                try {
-                    int contLength = response.length();
-                    for (int i = 0; i < contLength; i++) {
-                        JSONObject jsObj = (JSONObject) response.get(i);
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                finish();
+                Toast.makeText(MainActivity.this, "Network error", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -774,15 +787,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     inVA = SphericalUtil.computeDistanceBetween(playerLatLng, clusterMarker.getPosition()) <= RANGE_METERS;
                                 }
 
-                                progressDialog.dismiss();
-
                                 if (!inVA) {
                                     Toast.makeText(MainActivity.this, getString(R.string.too_far), Toast.LENGTH_SHORT).show();
                                 } else {
                                     Intent toHeritageActivity = new Intent(MainActivity.this, HeritageActivity.class);
-                                    if (!clusterMarker.isObtained()) {
-                                        setObtainedMarkerIcon(clusterMarker);
-                                    }
                                     toHeritageActivity.putExtra("code", clusterMarker.getTitle());
                                     tempClusterMarker = clusterMarker;
                                     startActivityForResult(toHeritageActivity, RC_HERITAGE);
@@ -790,10 +798,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
+
+                            progressDialog.dismiss();
                         }
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
+                            progressDialog.dismiss();
+                            Toast.makeText(MainActivity.this, "Network error", Toast.LENGTH_SHORT).show();
                         }
                     });
                     RequestQueueSingleton.getInstance(this).addToRequestQueue(jsVA);
@@ -952,6 +964,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             ResolvableApiException resolvable = (ResolvableApiException) e;
                             resolvable.startResolutionForResult(MainActivity.this, RC_LOCATION_SETTINGS);
                         } catch (IntentSender.SendIntentException sendEx) {
+                            sendEx.printStackTrace();
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:

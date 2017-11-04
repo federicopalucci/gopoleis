@@ -1,9 +1,9 @@
 package it.neptis.gopoleis.adapters;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,18 +13,16 @@ import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 
-import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
@@ -36,15 +34,16 @@ import it.neptis.gopoleis.model.Review;
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHolder> {
 
-    private static final String TAG = "ReviewAdapter";
+    //private static final String TAG = "ReviewAdapter";
 
     private List<Review> reviewsList;
     private Context context;
     private FirebaseAuth mAuth;
+    private ProgressDialog progressDialog;
 
     class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView review, upvotes, downvotes;
-        public ImageButton thumbUpButton, thumbDownButton;
+        TextView review, upvotes, downvotes;
+        ImageButton thumbUpButton, thumbDownButton;
 
         MyViewHolder(View view) {
             super(view);
@@ -76,11 +75,11 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
         holder.review.setText(review.getPlayer().toUpperCase() + ": " + review.getReview());
         holder.upvotes.setText(String.valueOf(review.getLikes()));
         holder.downvotes.setText(String.valueOf(review.getDislikes()));
-        if (review.isWasVoted() && review.isWasVotedPositively()) {
+        if (review.wasVoted() && review.wasVotedPositively()) {
             holder.thumbUpButton.setImageResource(R.drawable.ic_thumb_up_green_24dp);
             holder.thumbUpButton.setClickable(false);
             holder.thumbDownButton.setClickable(false);
-        } else if (review.isWasVoted() && !review.isWasVotedPositively()) {
+        } else if (review.wasVoted() && !review.wasVotedPositively()) {
             holder.thumbDownButton.setImageResource(R.drawable.ic_thumb_down_red_24dp);
             holder.thumbUpButton.setClickable(false);
             holder.thumbDownButton.setClickable(false);
@@ -88,9 +87,9 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
             holder.thumbUpButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    //noinspection ConstantConditions
                     voteReview(mAuth.getCurrentUser().getEmail(), review.getCode(), true);
                     holder.upvotes.setText(String.valueOf(Integer.parseInt(holder.upvotes.getText().toString()) + 1));
-                    Toast.makeText(context, "Voto registrato!", Toast.LENGTH_SHORT).show();
                     holder.thumbUpButton.setImageResource(R.drawable.ic_thumb_up_green_24dp);
                     holder.thumbUpButton.setClickable(false);
                     holder.thumbDownButton.setClickable(false);
@@ -99,9 +98,9 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
             holder.thumbDownButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    //noinspection ConstantConditions
                     voteReview(mAuth.getCurrentUser().getEmail(), review.getCode(), false);
                     holder.downvotes.setText(String.valueOf(Integer.parseInt(holder.downvotes.getText().toString()) + 1));
-                    Toast.makeText(context, "Voto registrato!", Toast.LENGTH_SHORT).show();
                     holder.thumbDownButton.setImageResource(R.drawable.ic_thumb_down_red_24dp);
                     holder.thumbUpButton.setClickable(false);
                     holder.thumbDownButton.setClickable(false);
@@ -111,8 +110,14 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
     }
 
     private void voteReview(final String email, final String code, final boolean thumbUp) {
+        progressDialog = new ProgressDialog(context);
+        progressDialog.setCancelable(false);
+        progressDialog.setMessage(context.getString(R.string.loading));
+        progressDialog.show();
+
         final String[] idToken = new String[1];
         FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        assert mUser != null;
         mUser.getIdToken(true)
                 .addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
                     public void onComplete(@NonNull Task<GetTokenResult> task) {
@@ -120,18 +125,22 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
                             String url = "https://neptis-poleis.diag.uniroma1.it:8000/player/voteReview/" + code + "/" + email + "/" + thumbUp;
-                            final JsonArrayRequest jsReviews = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+                            final JsonObjectRequest jsReviews = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                                 @Override
-                                public void onResponse(JSONArray response) {
+                                public void onResponse(JSONObject response) {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(context, "Voto registrato!", Toast.LENGTH_SHORT).show();
                                 }
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
+                                    progressDialog.dismiss();
+                                    Toast.makeText(context, "There was an error with your request", Toast.LENGTH_SHORT).show();
                                 }
                             }) {
                                 @Override
                                 public Map<String, String> getHeaders() throws AuthFailureError {
-                                    Map<String, String> params = new HashMap<String, String>();
+                                    Map<String, String> params = new HashMap<>();
                                     params.put("MyToken", idToken[0]);
                                     return params;
                                 }
@@ -140,6 +149,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
                             RequestQueueSingleton.getInstance(context).addToRequestQueue(jsReviews);
                         } else {
                             // Handle error -> task.getException();
+                            progressDialog.dismiss();
                             Toast.makeText(context, "There was an error with your request", Toast.LENGTH_SHORT).show();
                         }
                     }

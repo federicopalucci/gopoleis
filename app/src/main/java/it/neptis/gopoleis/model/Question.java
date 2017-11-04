@@ -25,32 +25,16 @@ public class Question {
         return question;
     }
 
-    public void setQuestion(String question) {
-        this.question = question;
-    }
-
     public String getHintOnSite() {
         return hintOnSite;
-    }
-
-    public void setHintOnSite(String hintOnSite) {
-        this.hintOnSite = hintOnSite;
     }
 
     public String getHintByPaying() {
         return hintByPaying;
     }
 
-    public void setHintByPaying(String hintByPaying) {
-        this.hintByPaying = hintByPaying;
-    }
-
     public String getAnswer() {
         return answer;
-    }
-
-    public void setAnswer(String answer) {
-        this.answer = answer;
     }
 
 }

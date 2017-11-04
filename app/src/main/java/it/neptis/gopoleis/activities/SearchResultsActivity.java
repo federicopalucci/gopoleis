@@ -6,17 +6,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,7 +30,7 @@ import it.neptis.gopoleis.model.SearchResult;
 
 public class SearchResultsActivity extends AppCompatActivity {
 
-    private static final String TAG = "SearchResults";
+    //private static final String TAG = "SearchResults";
 
     private ListView listView;
     private List<Integer> codes;
@@ -50,7 +48,6 @@ public class SearchResultsActivity extends AppCompatActivity {
         progressDialog.show();
 
         listView = (ListView) findViewById(R.id.search_results_listview);
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -65,7 +62,6 @@ public class SearchResultsActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -89,9 +85,8 @@ public class SearchResultsActivity extends AppCompatActivity {
     public void search(String query) {
         query = query.trim().replaceAll("\\s+", " ").replace(" ", "%20").toLowerCase();
         query = query.substring(0, 1).toUpperCase() + query.substring(1);
-        //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "search/" + query + "/";
-        JsonObjectRequest jsTotal = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+        JsonObjectRequest searchRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 try {
@@ -112,18 +107,27 @@ public class SearchResultsActivity extends AppCompatActivity {
                     SearchResult[] searchResultsArray = searchResults.toArray(new SearchResult[searchResults.size()]);
                     SearchResultAdapter adapter = new SearchResultAdapter(SearchResultsActivity.this, searchResultsArray);
                     listView.setAdapter(adapter);
-                    progressDialog.dismiss();
+
+                    if (searchResults.isEmpty()) {
+                        finish();
+                        Toast.makeText(SearchResultsActivity.this, getString(R.string.no_result), Toast.LENGTH_SHORT).show();
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                progressDialog.dismiss();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(SearchResultsActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
 
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsTotal);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(searchRequest);
     }
 
 }

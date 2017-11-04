@@ -17,6 +17,7 @@ public class GopoleisApp extends MultiDexApplication {
 
         Twitter.initialize(this);
 
+        // TODO facebook developer account has been disabled
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
     }

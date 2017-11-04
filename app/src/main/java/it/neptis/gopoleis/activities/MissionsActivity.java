@@ -1,18 +1,16 @@
 package it.neptis.gopoleis.activities;
 
 import android.app.ProgressDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONArray;
@@ -25,7 +23,7 @@ import it.neptis.gopoleis.adapters.MissionAdapter;
 
 public class MissionsActivity extends AppCompatActivity {
 
-    private static final String TAG = "MissionsActivity";
+    //private static final String TAG = "MissionsActivity";
 
     private MissionAdapter adapter;
     private String[] missions;
@@ -46,7 +44,6 @@ public class MissionsActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         //noinspection ConstantConditions
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -60,8 +57,9 @@ public class MissionsActivity extends AppCompatActivity {
     }
 
     private void getMissions() {
+        //noinspection ConstantConditions
         String url = getString(R.string.server_url) + "getMissions/" + mAuth.getCurrentUser().getEmail() + "/";
-        JsonArrayRequest jsHeritageInfo = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        JsonArrayRequest missionsRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
@@ -74,18 +72,22 @@ public class MissionsActivity extends AppCompatActivity {
                     }
                     adapter = new MissionAdapter(MissionsActivity.this, missions, completed);
                     listview.setAdapter(adapter);
-                    progressDialog.dismiss();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                progressDialog.dismiss();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(MissionsActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
 
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsHeritageInfo);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(missionsRequest);
     }
 
 }

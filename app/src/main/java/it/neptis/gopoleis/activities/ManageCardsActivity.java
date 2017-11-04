@@ -2,30 +2,21 @@ package it.neptis.gopoleis.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
-
-import it.neptis.gopoleis.RequestQueueSingleton;
-import it.neptis.gopoleis.adapters.CardAdapter;
-import it.neptis.gopoleis.adapters.ClickListener;
-import it.neptis.gopoleis.adapters.RecyclerTouchListener;
-import it.neptis.gopoleis.model.Card;
-import it.neptis.gopoleis.R;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONArray;
@@ -35,39 +26,44 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.neptis.gopoleis.R;
+import it.neptis.gopoleis.RequestQueueSingleton;
+import it.neptis.gopoleis.adapters.CardAdapter;
+import it.neptis.gopoleis.adapters.ClickListener;
+import it.neptis.gopoleis.adapters.RecyclerTouchListener;
+import it.neptis.gopoleis.model.Card;
+
 public class ManageCardsActivity extends AppCompatActivity {
 
-    private static final String TAG = "ManageCards";
-
+    //private static final String TAG = "ManageCards";
     public static final int ALL_CARDS_REQUEST_CODE = 100;
     public static final int MY_CARDS_REQUEST_CODE = 200;
-    List<Card> all_cards;
-    String url;
-    RecyclerView recyclerView;
-    String code, rarity, name, description;
 
-    CardAdapter cardAdapter;
-
-    private FirebaseAuth mAuth;
+    private List<Card> all_cards;
+    private String url;
+    private String code, rarity, name, description;
+    private CardAdapter cardAdapter;
     private LinearLayout cardsContainerLayout;
     private TextView noCardsText;
+    private ProgressDialog progressDialog;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage_cards);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setTitle(R.string.cards);
-
-        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
         progressDialog.setMessage(getString(R.string.loading));
         progressDialog.show();
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        //noinspection ConstantConditions
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setTitle(R.string.cards);
 
         cardsContainerLayout = (LinearLayout) findViewById(R.id.cards_container_layout);
         noCardsText = new TextView(ManageCardsActivity.this);
@@ -76,18 +72,22 @@ public class ManageCardsActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        recyclerView = (RecyclerView)  findViewById(R.id.recyclerView);
+        setRecyclerView();
 
+        getCards();
+    }
+
+    private void setRecyclerView() {
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         all_cards = new ArrayList<>();
 
-        // ------------------------------------------------------------------------
         cardAdapter = new CardAdapter(ManageCardsActivity.this, all_cards);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(cardAdapter);
         recyclerView.setNestedScrollingEnabled(true);
-        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView, new ClickListener() {
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), new ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 Card card = all_cards.get(position);
@@ -99,8 +99,9 @@ public class ManageCardsActivity extends AppCompatActivity {
                 startActivity(openCardDetails);
             }
         }));
-        // ------------------------------------------------------------------------
+    }
 
+    private void getCards() {
         int button_code = getIntent().getExtras().getInt("codice");
 
         // Retrieve cards
@@ -111,13 +112,15 @@ public class ManageCardsActivity extends AppCompatActivity {
                 requestMethod = Request.Method.POST;
                 break;
             case MY_CARDS_REQUEST_CODE:
+                //noinspection ConstantConditions
                 url = getString(R.string.server_url) + "getMyCards/" + mAuth.getCurrentUser().getEmail() + "/";
                 requestMethod = Request.Method.GET;
                 break;
             default:
                 break;
         }
-        final JsonArrayRequest jsCardCodes = new JsonArrayRequest(requestMethod, url, null, new Response.Listener<JSONArray>() {
+
+        final JsonArrayRequest cardsRequest = new JsonArrayRequest(requestMethod, url, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
@@ -132,7 +135,6 @@ public class ManageCardsActivity extends AppCompatActivity {
                         all_cards.add(new Card(code, rarity, name, description, getString(R.string.server_url) + "images/cards/" + filename));
                     }
                     cardAdapter.notifyDataSetChanged();
-                    progressDialog.dismiss();
 
                     if (all_cards.isEmpty()) {
                         cardsContainerLayout.addView(noCardsText, 0);
@@ -142,14 +144,19 @@ public class ManageCardsActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+
+                progressDialog.dismiss();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                Toast.makeText(ManageCardsActivity.this, "Network error", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
 
-        RequestQueueSingleton.getInstance(this).addToRequestQueue(jsCardCodes);
+        RequestQueueSingleton.getInstance(this).addToRequestQueue(cardsRequest);
     }
 
 }

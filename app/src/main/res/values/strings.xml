@@ -102,5 +102,9 @@
     <string name="no_cards">Non ci sono carte nella tua collezione! Apri i pacchetti per trovarle!</string>
     <string name="ne_coordinates" translatable="false">%1$s N, %2$s E</string>
     <string name="heritage_province_region" translatable="false">%1$s, %2$s</string>
+    <string name="no_result">Nessun risultato</string>
+    <string name="heritage_already_reviewed">Hai già recensito questo bene culturale</string>
+    <string name="review_submitted">Recensione registrata!</string>
+    <string name="hint_will_cost">Questo indizio ti costerà 1 coin, vuoi sbloccarlo?</string>
 
 </resources>

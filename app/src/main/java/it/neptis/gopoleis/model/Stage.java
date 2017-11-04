@@ -8,27 +8,15 @@ public class Stage {
     private String title, curiosity;
     private LatLng coordinates;
     private Question question;
-    private Path path;
     private boolean isFinal;
     private boolean hintUnlocked;
 
-    public Stage(int code, String title, String curiosity, LatLng coordinates, Question question, Path path, boolean isFinal) {
+    public Stage(int code, String title, String curiosity, LatLng coordinates, Question question, boolean isFinal, boolean hintUnlocked) {
         this.code = code;
         this.title = title;
         this.curiosity = curiosity;
         this.coordinates = coordinates;
         this.question = question;
-        this.path = path;
-        this.isFinal = isFinal;
-    }
-
-    public Stage(int code, String title, String curiosity, LatLng coordinates, Question question, Path path, boolean isFinal, boolean hintUnlocked) {
-        this.code = code;
-        this.title = title;
-        this.curiosity = curiosity;
-        this.coordinates = coordinates;
-        this.question = question;
-        this.path = path;
         this.isFinal = isFinal;
         this.hintUnlocked = hintUnlocked;
     }
@@ -53,32 +41,8 @@ public class Stage {
         return curiosity;
     }
 
-    public void setCuriosity(String curiosity) {
-        this.curiosity = curiosity;
-    }
-
-    public LatLng getCoordinates() {
-        return coordinates;
-    }
-
-    public void setCoordinates(LatLng coordinates) {
-        this.coordinates = coordinates;
-    }
-
     public Question getQuestion() {
         return question;
-    }
-
-    public void setQuestion(Question question) {
-        this.question = question;
-    }
-
-    public Path getPath() {
-        return path;
-    }
-
-    public void setPath(Path path) {
-        this.path = path;
     }
 
     public boolean isFinal() {
@@ -96,4 +60,5 @@ public class Stage {
     public void setHintUnlocked(boolean hintUnlocked) {
         this.hintUnlocked = hintUnlocked;
     }
+
 }
