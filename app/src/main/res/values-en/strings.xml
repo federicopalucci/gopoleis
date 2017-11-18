@@ -32,7 +32,7 @@
     <string name="region">Region: %1$s</string>
     <string name="structuretype">Structure type: %1$s</string>
     <string name="historicalperiod">Historical period: %1$s</string>
-    <string name="about_gopoleis">About GoPoleis</string>
+    <string name="about_gopoleis">About Neptis Poleis</string>
     <string name="all">All</string>
     <string name="all_cards">All cards</string>
     <string name="booster_pack">Booster pack</string>
@@ -42,12 +42,12 @@
     <string name="congratulations_medal2">You have unlocked a medal!</string>
     <string name="congratulations_mission">You have completed a mission!</string>
     <string name="cultural_heritages">Cultural heritages</string>
-    <string name="gopoleis_info">GoPoleis was developed in the University of Rome \"La Sapienza\" within the \"Neptis\" project.</string>
+    <string name="gopoleis_info">Neptis Poleis was developed in the University of Rome \"La Sapienza\" within the \"Neptis\" project.</string>
     <string name="heritage">Cultural heritage</string>
     <string name="info">Info</string>
     <string name="input_answer">Insert your answer</string>
     <string name="input_review">Write your review</string>
-    <string name="loading">Loading...</string>
+    <string name="loading">Loading…</string>
     <string name="medal_details">Medal details</string>
     <string name="medal_details_category">Category: %1$s</string>
     <string name="medal_details_heritages">Cultural heritages involved: %1$s</string>

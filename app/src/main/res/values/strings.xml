@@ -1,5 +1,5 @@
 <resources xmlns:android="http://schemas.android.com/tools">
-    <string name="app_name" translatable="false">GoPoleis</string>
+    <string name="app_name" translatable="false">Neptis Poleis</string>
     //
     <string name="cards_list">LISTA DELLE CARTE</string>
     <string name="achievement_list">LISTA DEGLI ACHIEVEMENT</string>
@@ -22,7 +22,7 @@
 
     <!--<string name="server_url">http://10.0.2.2:8000/</string>-->
     <string name="server_url" translatable="false">https://neptis-poleis.diag.uniroma1.it:8000/</string>
-    <string name="gopoleis" translatable="false">GoPoleis</string>
+    <string name="gopoleis" translatable="false">Neptis Poleis</string>
 
     <string name="available_puzzles">Enigmi disponibili:</string>
 
@@ -85,8 +85,8 @@
     <string name="my_cards">Le mie carte</string>
     <string name="all_cards">Tutte le carte</string>
     <string name="info">Informazioni</string>
-    <string name="gopoleis_info">Lasciati guidare alla scoperta del nostro patrimonio artistico e culturale.\n\nCon quest\'applicazione potrai collezionare figurine, risolvere enigmi e collezionare medaglie visitando quanti più beni culturali possibile.\n\nGoPoleis è stata sviluppata presso l\'Università degli Studi di Roma \"La Sapienza\" nell\'ambito del progetto \"Neptis\".</string>
-    <string name="about_gopoleis">Informazioni su GoPoleis</string>
+    <string name="gopoleis_info">Lasciati guidare alla scoperta del nostro patrimonio artistico e culturale.\n\nCon quest\'applicazione potrai collezionare figurine, risolvere enigmi e collezionare medaglie visitando quanti più beni culturali possibile.\n\nNeptis Poleis è stata sviluppata presso l\'Università degli Studi di Roma \"La Sapienza\" nell\'ambito del progetto \"Neptis\".</string>
+    <string name="about_gopoleis">Informazioni su Neptis Poleis</string>
     <string name="close">Chiudi</string>
     <string name="input_review">Scrivi la tua recensione</string>
     <string name="reviews">Recensioni</string>
