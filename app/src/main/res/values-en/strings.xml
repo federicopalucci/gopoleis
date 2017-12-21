@@ -65,7 +65,7 @@
     <string name="rankings">Rankings</string>
     <string name="results">Results</string>
     <string name="reviews">Reviews</string>
-    <string name="search_hint">Search...</string>
+    <string name="search_hint">Search…</string>
     <string name="search_title">Search</string>
     <string name="stage">Stage</string>
     <string name="stage_already_completed">You have already completed this stage!</string>
@@ -76,4 +76,5 @@
     <string name="heritage_already_reviewed">You have already reviewed this cultural heritage</string>
     <string name="review_submitted">Review submitted!</string>
     <string name="hint_will_cost">This hint will cost you 1 coin, do you want to unlock it?</string>
+    <string name="next">Next</string>
 </resources>

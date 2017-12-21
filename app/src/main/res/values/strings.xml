@@ -21,7 +21,7 @@
     <string name="empty_inc_puzz_list">Non ci sono puzzle in programmazione!</string>
 
     <!--<string name="server_url">http://10.0.2.2:8000/</string>-->
-    <string name="server_url" translatable="false">https://neptis-poleis.diag.uniroma1.it:8000/</string>
+    <string name="server_url" translatable="false">https://neptis-poleis.diag.uniroma1.it/</string>
     <string name="gopoleis" translatable="false">Neptis Poleis</string>
 
     <string name="available_puzzles">Enigmi disponibili:</string>
@@ -106,5 +106,7 @@
     <string name="heritage_already_reviewed">Hai già recensito questo bene culturale</string>
     <string name="review_submitted">Recensione registrata!</string>
     <string name="hint_will_cost">Questo indizio ti costerà 1 coin, vuoi sbloccarlo?</string>
+    <string name="tutorial" translatable="false">Tutorial</string>
+    <string name="next">Avanti</string>
 
 </resources>

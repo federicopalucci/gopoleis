@@ -124,7 +124,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.MyViewHold
                         if (task.isSuccessful()) {
                             idToken[0] = task.getResult().getToken();
                             // Send token to your backend via HTTPS
-                            String url = "https://neptis-poleis.diag.uniroma1.it:8000/player/voteReview/" + code + "/" + email + "/" + thumbUp;
+                            String url = "https://neptis-poleis.diag.uniroma1.it/player/voteReview/" + code + "/" + email + "/" + thumbUp;
                             final JsonObjectRequest jsReviews = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                                 @Override
                                 public void onResponse(JSONObject response) {

@@ -15,10 +15,10 @@ android {
         applicationId "it.neptis.gopoleis"
         minSdkVersion 19
         targetSdkVersion 24
-        versionName '4'
+        versionName '6'
         multiDexEnabled true
         signingConfig signingConfigs.config
-        versionCode 4
+        versionCode 6
     }
     buildTypes {
         release {

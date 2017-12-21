@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,6 +28,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -421,6 +424,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(this, RankingActivity.class));
         } else if (id == R.id.nav_info) {
             showDialog("info");
+        } else if (id == R.id.nav_tutorial) {
+            showTutorial();
         } else if (id == R.id.nav_logout) {
             signOutUser();
         }
@@ -995,6 +1000,62 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         }
+    }
+
+    public void showTutorial() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setMessage("Benvenuto in Neptis Poleis! Con quest'applicazione potrai esplorare il nostro patrimonio culturale divertendoti.")
+                .setPositiveButton(R.string.next, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        LayoutInflater factory = LayoutInflater.from(MainActivity.this);
+                        final View view1 = factory.inflate(R.layout.tutorial_1, null);
+                        builder.setView(view1)
+                                .setIcon(R.drawable.ic_tutorial_question_mark)
+                                .setCancelable(false);
+
+                        final AlertDialog dialog1 = builder.show();
+                        dialog1.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                        dialog1.findViewById(R.id.tutorial_layout1).setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                dialog1.dismiss();
+
+                                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                LayoutInflater factory = LayoutInflater.from(MainActivity.this);
+                                final View view2 = factory.inflate(R.layout.tutorial_2, null);
+                                builder.setView(view2)
+                                        .setIcon(R.drawable.ic_tutorial_question_mark)
+                                        .setCancelable(false);
+
+                                final AlertDialog dialog2 = builder.show();
+                                dialog2.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                                dialog2.findViewById(R.id.tutorial_layout2).setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        dialog2.dismiss();
+
+                                        final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                        builder.setMessage("Con queste ed altre azioni guadagnerai coin che ti permetteranno di scalare posizioni nella classifica generale! Buon divertimento!")
+                                                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        dialog.dismiss();
+                                                    }
+                                                })
+                                                .setIcon(R.drawable.ic_tutorial_question_mark)
+                                                .setCancelable(false)
+                                                .show();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                })
+                .setIcon(R.drawable.ic_tutorial_question_mark)
+                .setCancelable(false)
+                .show();
     }
 
 }
