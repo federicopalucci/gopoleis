@@ -108,5 +108,6 @@
     <string name="hint_will_cost">Questo indizio ti costerà 1 coin, vuoi sbloccarlo?</string>
     <string name="tutorial" translatable="false">Tutorial</string>
     <string name="next">Avanti</string>
+    <string name="hint">Indizio</string>
 
 </resources>

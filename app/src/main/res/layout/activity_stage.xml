@@ -25,16 +25,16 @@
             <TextView
                 android:id="@+id/stage_title"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
                 android:text="Stage title"
                 android:textAlignment="center"
                 android:textSize="@dimen/title_size" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -47,23 +47,22 @@
                 <TextView
                     android:id="@+id/stage_curiosity"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="@string/stage_curiosity" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/stage_question"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
                 android:text="Question"
                 android:textAlignment="center"
                 android:textSize="30sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <ImageButton

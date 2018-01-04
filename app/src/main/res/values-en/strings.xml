@@ -77,4 +77,5 @@
     <string name="review_submitted">Review submitted!</string>
     <string name="hint_will_cost">This hint will cost you 1 coin, do you want to unlock it?</string>
     <string name="next">Next</string>
+    <string name="hint">Hint</string>
 </resources>

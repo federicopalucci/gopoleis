@@ -168,7 +168,8 @@ public class StageActivity extends AppCompatActivity {
         hintOnSiteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(StageActivity.this, stage.getQuestion().getHintOnSite(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(StageActivity.this, stage.getQuestion().getHintOnSite(), Toast.LENGTH_SHORT).show();
+                showHint(stage.getQuestion().getHintOnSite());
             }
         });
 
@@ -176,7 +177,8 @@ public class StageActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (stage.isHintUnlocked()) {
-                    Toast.makeText(StageActivity.this, stage.getQuestion().getHintByPaying(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(StageActivity.this, stage.getQuestion().getHintByPaying(), Toast.LENGTH_SHORT).show();
+                    showHint(stage.getQuestion().getHintByPaying());
                     return;
                 }
 
@@ -206,7 +208,8 @@ public class StageActivity extends AppCompatActivity {
                                                             progressDialog.dismiss();
 
                                                             if (response.length() == 0) {
-                                                                Toast.makeText(StageActivity.this, stage.getQuestion().getHintByPaying(), Toast.LENGTH_SHORT).show();
+                                                                //Toast.makeText(StageActivity.this, stage.getQuestion().getHintByPaying(), Toast.LENGTH_SHORT).show();
+                                                                showHint(stage.getQuestion().getHintByPaying());
                                                                 stage.setHintUnlocked(true);
                                                             } else
                                                                 Toast.makeText(StageActivity.this, R.string.not_enough_coins, Toast.LENGTH_SHORT).show();
@@ -327,6 +330,20 @@ public class StageActivity extends AppCompatActivity {
                     }
                 })
                 .setIcon(android.R.drawable.star_off)
+                .show();
+    }
+
+    private void showHint(final String hint) {
+        AlertDialog.Builder builder;
+        builder = new AlertDialog.Builder(StageActivity.this);
+        builder.setTitle(R.string.hint)
+                .setMessage(hint)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setIcon(R.drawable.ic_info)
                 .show();
     }
 

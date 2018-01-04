@@ -112,7 +112,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int RC_STAGE = 4;
     private static final int RC_SIGN_IN = 9001;
     private static final int RC_HERITAGE = 5;
+
     private static final double RANGE_METERS = 50;
+
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 30;
 
     private FirebaseAuth mAuth;
